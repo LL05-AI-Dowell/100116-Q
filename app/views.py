@@ -693,7 +693,7 @@ class qrcode_services(APIView):
         if not data["is_active"]:
             return CustomResponse(False,"The seat is not active for today",None,status.HTTP_400_BAD_REQUEST)
 
-        return CustomResponse(True,"Successfully retrieved data",data[0]["is_active"],status.HTTP_200_OK)
+        return CustomResponse(True,"Successfully retrieved data",data["qrcode_id"],status.HTTP_200_OK)
     
     def activate_seat(self, request):
         """
