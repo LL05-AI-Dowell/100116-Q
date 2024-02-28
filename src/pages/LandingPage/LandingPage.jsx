@@ -7,10 +7,12 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import { useState } from 'react';
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
+import { useNavigate } from 'react-router-dom';
 
 const LandingPage = () => {
     const [cardPagination, setCardPagination] = useState(0);
     const [cardIndex, setCardIndex] = useState(0);
+    const navigate = useNavigate();
 
     function createData(name, calories, fat, carbs, protein) {
         return { name, calories, fat, carbs, protein };
@@ -86,6 +88,7 @@ const LandingPage = () => {
                             src="https://i.pinimg.com/736x/f8/66/8e/f8668e5328cfb4938903406948383cf6.jpg"
                             alt="Profile Photo"
                             className="h-10 w-10 rounded-full shadow-2xl mx-10"
+                            onClick={() => navigate('/profile')}
                         />
                     </div>
                     <div className="flex h-[50%] items-center sm:h-[325px]">
