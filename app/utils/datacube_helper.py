@@ -75,7 +75,8 @@ def datacube_data_update(api_key, db_name, coll_name, query, update_data):
         "coll_name": coll_name,
         "operation": "update",
         "query": query,
-        "update_data": update_data
+        "update_data": update_data,
+        "payment": False
     }
 
     response = requests.put(url, json=payload)

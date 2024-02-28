@@ -195,8 +195,8 @@ class user_details_services(APIView):
     def get(self, request): 
         type_request = request.GET.get('type')
 
-        if type_request == "retrive_user_details":
-            return self.retrive_user_details(request)
+        if type_request == "retrieve_user_details":
+            return self.retrieve_user_details(request)
         else: 
             return self.handle_error(request)
 
@@ -249,7 +249,7 @@ class user_details_services(APIView):
         
         return CustomResponse(True, "User details saved successfully",user_data, status.HTTP_201_CREATED)
 
-    def retrive_user_details(self, request):
+    def retrieve_user_details(self, request):
         """
         Retrieve user details.
 
@@ -356,8 +356,8 @@ class store_services(APIView):
     def get(self, request): 
         type_request = request.GET.get('type')
 
-        if type_request == "retrive_store_details":
-            return self.retrive_store_details(request)
+        if type_request == "retrieve_store_details":
+            return self.retrieve_store_details(request)
         else: 
             return self.handle_error(request)
         
@@ -413,7 +413,7 @@ class store_services(APIView):
         
         return CustomResponse(True,"Store created successfully",store_data,status.HTTP_201_CREATED)
 
-    def retrive_store_details(self, request):
+    def retrieve_store_details(self, request):
         """
         Retrieve store details.
 
@@ -433,7 +433,7 @@ class store_services(APIView):
         except InvalidTokenException as e:
             return CustomResponse(False, str(e), None, status.HTTP_401_UNAUTHORIZED)
         
-        serializer = RetriveStoreSerializer(data=request.GET)
+        serializer = RetrieveStoreSerializer(data=request.GET)
         if not serializer.is_valid():
             return CustomResponse(False, "Posting wrong data to API",serializer.errors, status.HTTP_400_BAD_REQUEST)
         
@@ -508,6 +508,14 @@ class store_services(APIView):
     
 @method_decorator(csrf_exempt, name='dispatch')
 class qrcode_services(APIView):
+    """
+    QRCode services for managing Qrcode information.
+
+    This class provides endpoints for creating, updating, and retrieving qrcode details.
+
+    :post to create qrcode
+    :get to retrieve qrcode details
+    """
     def post(self, request):
         type_request = request.GET.get('type')
 
@@ -521,6 +529,10 @@ class qrcode_services(APIView):
 
         if type_request == "retrieve_qrcoderecode_details":
             return self.retrieve_qrcoderecode_details(request)
+        elif type_request == "retrieve_seat_details":
+            return self.retrieve_seat_details(request)
+        elif type_request == "activate_seat":
+            return self.activate_seat(request)
         else: 
             return self.handle_error(request)
         
@@ -623,7 +635,7 @@ class qrcode_services(APIView):
         except InvalidTokenException as e:
             return CustomResponse(False, str(e), None, status.HTTP_401_UNAUTHORIZED)
         
-        serializer = RetriveQRcodeRecordSerializer(data={"workspace_id": workspace_id,"user_id": user_id,"limit": limit,"offset": offset})
+        serializer = RetrieveQRcodeRecordSerializer(data={"workspace_id": workspace_id,"user_id": user_id,"limit": limit,"offset": offset})
 
         if not serializer.is_valid():
             return CustomResponse(False, "Posting wrong data to API",serializer.errors, status.HTTP_400_BAD_REQUEST)
@@ -646,10 +658,128 @@ class qrcode_services(APIView):
         
         return CustomResponse(True, "Successfully retrieved data from QRCode Record",response["data"],status.HTTP_200_OK)
 
+    def retrieve_seat_details(self, request):
+        """
+        Retrieve details about a specific seat within a workspace.
+        :param workspace_id 
+        :param seat_number
+        """
+        workspace_id = request.GET.get("workspace_id")
+        seat_number = request.GET.get("seat_number")
+
+        try:
+            api_key = authorization_check(request.headers.get('Authorization'))
+        except InvalidTokenException as e:
+            return CustomResponse(False, str(e), None, status.HTTP_401_UNAUTHORIZED)
+        
+        if workspace_id is None and seat_number is None:
+            return CustomResponse(False, "Posting wrong data to API",None, status.HTTP_400_BAD_REQUEST)
+         
+        response = json.loads(datacube_data_retrieval(
+            api_key,
+            f'{workspace_id}_meta_data_q',
+            f'{workspace_id}_qrcode_record',
+            {
+                "workspace_id":workspace_id,
+                "seat_number":f'seat_number_{seat_number}'
+            },
+            1,0,False
+        ))
+
+        if not response["success"]:
+           return CustomResponse(False,"Failed to retrieve data",None,status.HTTP_400_BAD_REQUEST)
+        data = response.get("data",[])[0]
+        
+        if not data["is_active"]:
+            return CustomResponse(False,"The seat is not active for today",None,status.HTTP_400_BAD_REQUEST)
+
+        return CustomResponse(True,"Successfully retrieved data",data[0]["is_active"],status.HTTP_200_OK)
     
+    def activate_seat(self, request):
+        """
+        Activate or deactivate a seat.
+
+        :param workspace_id: The ID of the workspace.
+        :param document_id: The MongoDB ID of the document representing the seat.
+        :param seat_status: A boolean indicating whether to activate (True) or deactivate (False) the seat.
+        """
+        workspace_id = request.GET.get("workspace_id")
+        document_id = request.GET.get("document_id")
+        seat_status = request.GET.get("seat_status")
+        
+        try:
+            api_key = authorization_check(request.headers.get('Authorization'))
+        except InvalidTokenException as e:
+            return CustomResponse(False, str(e), None, status.HTTP_401_UNAUTHORIZED)
+        
+        if workspace_id is None or document_id is None or seat_status is None:
+            return CustomResponse(False, "Posting wrong data to API",None, status.HTTP_400_BAD_REQUEST)
+        
+        seat_status = seat_status.lower() == 'true'
+        
+        response= json.loads(datacube_data_update(
+            api_key,
+            f'{workspace_id}_meta_data_q',
+            f'{workspace_id}_qrcode_record',
+            {
+                "_id": document_id,
+            },
+            {
+                "is_active": seat_status
+            }           
+        ))
+
+        if not response["success"]:
+            return CustomResponse(False,"Failed to perform the activate operation",None, status.HTTP_400_BAD_REQUEST)
+        seat_status_msg = "activated" if seat_status else "deactivated"
+
+        return CustomResponse(True,f"Seat {seat_status_msg} successfully",None, status_code=status.HTTP_200_OK)
+
     def handle_error(self, request): 
             return Response({
                 "success": False,
                 "message": "Invalid request type"
             }, status=status.HTTP_400_BAD_REQUEST)
+
+@method_decorator(csrf_exempt, name='dispatch')
+class payment_services(APIView):
+    def post(self, request):
+        type_request = request.GET.get('type')
+
+        if type_request == "create_payment":
+            return self.create_payment(request)
+        else:
+            return self.handle_error(request)
         
+    def get(self, request): 
+        type_request = request.GET.get('type')
+
+        if type_request == "check_metedata_database_status":
+            return self.check_metedata_database_status(request)
+        elif type_request == "check_data_database_status":
+            return self.check_data_database_status(request)
+        else: 
+            return self.handle_error(request)
+    
+    def create_payment(self,request):
+        seat_number = request.data.get('seat_number')
+        qrcode_id = request.data.get('qrcode_id')
+        workspace_id = request.data.get('workspace_id')
+        timezone = request.data.get('timezone')
+
+        try:
+            api_key = authorization_check(request.headers.get('Authorization'))
+        except InvalidTokenException as e:
+            return CustomResponse(False, str(e), None, status.HTTP_401_UNAUTHORIZED)
+        
+        serializer = SaveSeatDetailsSerializer(data={"workspace_id": workspace_id,"qrcode_id": qrcode_id,"timezone": timezone,"seat_number":seat_number})
+
+        if not serializer.is_valid():
+            return CustomResponse(False, "Posting wrong data to API",serializer.errors, status.HTTP_400_BAD_REQUEST)
+         
+        return CustomResponse(True,"all ok",None, status.HTTP_200_OK)
+    def handle_error(self, request): 
+            return Response({
+                "success": False,
+                "message": "Invalid request type"
+            }, status=status.HTTP_400_BAD_REQUEST)

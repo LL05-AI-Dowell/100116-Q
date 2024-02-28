@@ -38,7 +38,7 @@ class CreateStoreSerializer(serializers.Serializer):
     workspace_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
     user_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
 
-class RetriveStoreSerializer(serializers.Serializer):
+class RetrieveStoreSerializer(serializers.Serializer):
     workspace_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
     limit = serializers.IntegerField()
     offset = serializers.IntegerField()
@@ -70,7 +70,7 @@ class CreateQrCodeSerializer(serializers.Serializer):
     seat_number = serializers.IntegerField()
     link = serializers.URLField()
 
-class RetriveQRcodeRecordSerializer(serializers.Serializer):
+class RetrieveQRcodeRecordSerializer(serializers.Serializer):
     workspace_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
     user_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
     limit = serializers.IntegerField()
@@ -84,3 +84,9 @@ class CreateCollectionSerializer(serializers.Serializer):
     workspace_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
     collection_name = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
     database_type = serializers.ChoiceField(choices=DATABASE_CHOICES)
+
+class SaveSeatDetailsSerializer(serializers.Serializer):
+    workspace_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
+    qrcode_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
+    seat_number = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
+    timezone = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
