@@ -62,11 +62,14 @@ class kitchen_sink_services(APIView):
         data_database = f'{workspace_id}_data_q'
 
         response_meta_data = json.loads(datacube_collection_retrieval(api_key, meta_data_database))
+        print(response_meta_data)
 
         if not response_meta_data["success"]:
             return CustomResponse(False,"Meta Data Database is not yet available, kindly contact the administrator.", None, status.HTTP_501_NOT_IMPLEMENTED )
 
         response_data = json.loads(datacube_collection_retrieval(api_key, data_database))
+
+        print(response_data)
         if not response_data["success"]:
             return CustomResponse(False,"Data Database is not yet available, kindly contact the administrator.", None, status.HTTP_501_NOT_IMPLEMENTED )
 
