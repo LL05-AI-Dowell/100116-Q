@@ -89,3 +89,16 @@ def dowell_time(timezone):
     response = requests.request("POST", url, headers=headers, data=payload)
     res= json.loads(response.text)
     return res
+
+
+def generate_data_collection_list(workspace_id, num_seats):
+    """
+    Generate a list of data collection names based on the workspace ID and the number of seats.
+    
+    :param workspace_id: The ID of the workspace.
+    :param num_seats: The number of seats.
+    :return: A list of data collection names.
+    """
+    list_of_data_collection = [f'{workspace_id}_seat_{i}' for i in range(1, num_seats + 1)]
+    return list_of_data_collection
+

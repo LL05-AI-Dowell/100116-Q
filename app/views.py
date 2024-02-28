@@ -37,14 +37,57 @@ class kitchen_sink_services(APIView):
     def get(self, request): 
         type_request = request.GET.get('type')
 
-        if type_request == "check_database_status":
-            return self.check_database_status(request)
+        if type_request == "check_metedata_database_status":
+            return self.check_metedata_database_status(request)
+        elif type_request == "check_data_database_status":
+            return self.check_data_database_status(request)
         else: 
             return self.handle_error(request)
-
-    def check_database_status(self, request):
+    
+    def create_collection(self,request):
         """
-        Check the existence of the database.
+        Create a new collection from the given database
+
+        This method helps to create a new collection in the specified database.
+
+        :param database_type: The type of the database, which can be META DATA or DATA.
+        :param workspace_id: The ID of the workspace where the collection will be created.
+        :param collection_name: The name of the collection to be created.
+        """
+        database_type = request.data.get('database_type')
+        workspace_id = request.data.get('workspace_id')
+        collection_name = request.data.get('collection_name')
+
+        try:
+            api_key = authorization_check(request.headers.get('Authorization'))
+        except InvalidTokenException as e:
+            return CustomResponse(False, str(e), None, status.HTTP_401_UNAUTHORIZED)
+        
+        serializer = CreateCollectionSerializer(data= request.data)
+
+        if not serializer.is_valid():
+            return CustomResponse(False, "Posting wrong data to API",serializer.errors, status.HTTP_400_BAD_REQUEST)
+        
+        if database_type == 'META DATA':
+            database = f'{workspace_id}_meta_data_q' 
+        if database_type == 'DATA':
+            database = f'{workspace_id}_data_q'   
+
+        response = json.loads(datacube_create_collection(
+            api_key,
+            database,
+            collection_name
+        ))
+
+        if not response["success"]:
+            return CustomResponse(False, "Falied to create collection",None, status.HTTP_400_BAD_REQUEST)
+
+        return CustomResponse(True,"Collection has been created successfully", None, status.HTTP_200_OK)
+
+
+    def check_metedata_database_status(self, request):
+        """
+        Check the existence of the metadata database.
 
         This method checks if the specified databases (meta data and data) are available for a given workspace.
         
@@ -59,7 +102,6 @@ class kitchen_sink_services(APIView):
             
         workspace_id = request.GET.get('workspace_id')
         meta_data_database = f'{workspace_id}_meta_data_q'
-        data_database = f'{workspace_id}_data_q'
 
         response_meta_data = json.loads(datacube_collection_retrieval(api_key, meta_data_database))
         print(response_meta_data)
@@ -67,13 +109,61 @@ class kitchen_sink_services(APIView):
         if not response_meta_data["success"]:
             return CustomResponse(False,"Meta Data Database is not yet available, kindly contact the administrator.", None, status.HTTP_501_NOT_IMPLEMENTED )
 
+        list_of_meta_data_collection = [
+            f'{workspace_id}_user_details',
+            f'{workspace_id}_qrcode_record',
+            f'{workspace_id}_store_details',
+            f'{workspace_id}_seat_details',
+        ]
+
+        missing_collections = []
+        for collection in list_of_meta_data_collection:
+            if collection not in response_meta_data["data"][0]:
+                missing_collections.append(collection)
+
+        if missing_collections:
+            missing_collections_str = ', '.join(missing_collections)
+            return CustomResponse(False, f"The following collections are missing: {missing_collections_str}", missing_collections, status.HTTP_404_NOT_FOUND)
+
+        return CustomResponse(True,"Metadata databases are available to be used", None, status.HTTP_200_OK )
+    
+    def check_data_database_status(self, request):
+        """
+        Check the existence of the data database.
+
+        This method checks if the specified databases (meta data and data) are available for a given workspace.
+        
+        :param request: The HTTP request object.
+        :param api_key: The API key for authorization.
+        :param workspace_id: The ID of the workspace.
+        """
+        try:
+            api_key = authorization_check(request.headers.get('Authorization'))
+        except InvalidTokenException as e:
+            return CustomResponse(False, str(e), None, status.HTTP_401_UNAUTHORIZED)
+            
+        workspace_id = request.GET.get('workspace_id')
+
+        data_database = f'{workspace_id}_data_q'
+
         response_data = json.loads(datacube_collection_retrieval(api_key, data_database))
 
         print(response_data)
         if not response_data["success"]:
             return CustomResponse(False,"Data Database is not yet available, kindly contact the administrator.", None, status.HTTP_501_NOT_IMPLEMENTED )
 
-        return CustomResponse(True,"Both databases are available to be used", None, status.HTTP_200_OK )
+        list_of_data_collection = generate_data_collection_list(workspace_id, 5)
+
+        missing_collections = []
+        for collection in list_of_data_collection:
+            if collection not in response_data["data"][0]:
+                missing_collections.append(collection)
+
+        if missing_collections:
+            missing_collections_str = ', '.join(missing_collections)
+            return CustomResponse(False, f"The following collections are missing: {missing_collections_str}", missing_collections, status.HTTP_404_NOT_FOUND)
+
+        return CustomResponse(True,"Data databases are available to be used", None, status.HTTP_200_OK )
         
     def handle_error(self, request): 
         return Response({

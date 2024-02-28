@@ -75,3 +75,12 @@ class RetriveQRcodeRecordSerializer(serializers.Serializer):
     user_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
     limit = serializers.IntegerField()
     offset = serializers.IntegerField()
+
+class CreateCollectionSerializer(serializers.Serializer):
+    DATABASE_CHOICES = (
+        ("META DATA","META DATA"),
+        ("DATA","DATA"),
+    )
+    workspace_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
+    collection_name = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
+    database_type = serializers.ChoiceField(choices=DATABASE_CHOICES)
