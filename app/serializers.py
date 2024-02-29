@@ -88,5 +88,16 @@ class CreateCollectionSerializer(serializers.Serializer):
 class SaveSeatDetailsSerializer(serializers.Serializer):
     workspace_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
     qrcode_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
-    seat_number = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
+    seat_number = serializers.IntegerField()
     timezone = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
+    store_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
+    date = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
+
+class GetCustomerStatusSerializer(serializers.Serializer):
+    workspace_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
+    seat_number = serializers.IntegerField()
+    timezone = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
+    store_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
+    date = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
+    limit = serializers.IntegerField()
+    offset = serializers.IntegerField()

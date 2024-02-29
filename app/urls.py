@@ -7,5 +7,5 @@ urlpatterns = [
     path('user-services/',user_details_services.as_view()),
     path('store-services/',store_services.as_view()),
     path('qrcode-services/',qrcode_services.as_view()),
-    path('payment-services/',payment_services.as_view()),
+    path('customer-services/',customer_services.as_view()),
 ]

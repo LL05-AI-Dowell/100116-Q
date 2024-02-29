@@ -13,7 +13,8 @@ from .utils.linkshortener_helper import *
 @method_decorator(csrf_exempt, name='dispatch')
 class health_check(APIView):
     def get(self, request ):
-        return Response("if your are seeing this then , Q server is !down",status=status.HTTP_200_OK)
+        
+        return Response("if your are seeing this then , server is !down",status=status.HTTP_200_OK)
 
 @method_decorator(csrf_exempt, name='dispatch')
 class kitchen_sink_services(APIView):
@@ -80,10 +81,9 @@ class kitchen_sink_services(APIView):
         ))
 
         if not response["success"]:
-            return CustomResponse(False, "Falied to create collection",None, status.HTTP_400_BAD_REQUEST)
+            return CustomResponse(False, "Falied to create collection, kindly contact the administrator.",None, status.HTTP_400_BAD_REQUEST)
 
         return CustomResponse(True,"Collection has been created successfully", None, status.HTTP_200_OK)
-
 
     def check_metedata_database_status(self, request):
         """
@@ -143,6 +143,7 @@ class kitchen_sink_services(APIView):
             return CustomResponse(False, str(e), None, status.HTTP_401_UNAUTHORIZED)
             
         workspace_id = request.GET.get('workspace_id')
+        date = request.GET.get('date')
 
         data_database = f'{workspace_id}_data_q'
 
@@ -152,7 +153,7 @@ class kitchen_sink_services(APIView):
         if not response_data["success"]:
             return CustomResponse(False,"Data Database is not yet available, kindly contact the administrator.", None, status.HTTP_501_NOT_IMPLEMENTED )
 
-        list_of_data_collection = generate_data_collection_list(workspace_id, 5)
+        list_of_data_collection = [f'{workspace_id}_{date}_q']
 
         missing_collections = []
         for collection in list_of_data_collection:
@@ -166,6 +167,17 @@ class kitchen_sink_services(APIView):
         return CustomResponse(True,"Data databases are available to be used", None, status.HTTP_200_OK )
         
     def handle_error(self, request): 
+        """
+        Handle invalid request type.
+
+        This method is called when the requested type is not recognized or supported.
+
+        :param request: The HTTP request object.
+        :type request: HttpRequest
+
+        :return: Response indicating failure due to an invalid request type.
+        :rtype: Response
+        """
         return Response({
             "success": False,
             "message": "Invalid request type"
@@ -327,6 +339,17 @@ class user_details_services(APIView):
         return CustomResponse(True,"User details updated successfully",None,status.HTTP_200_OK)
     
     def handle_error(self, request): 
+        """
+        Handle invalid request type.
+
+        This method is called when the requested type is not recognized or supported.
+
+        :param request: The HTTP request object.
+        :type request: HttpRequest
+
+        :return: Response indicating failure due to an invalid request type.
+        :rtype: Response
+        """
         return Response({
             "success": False,
             "message": "Invalid request type"
@@ -501,6 +524,17 @@ class store_services(APIView):
 
 
     def handle_error(self, request): 
+        """
+        Handle invalid request type.
+
+        This method is called when the requested type is not recognized or supported.
+
+        :param request: The HTTP request object.
+        :type request: HttpRequest
+
+        :return: Response indicating failure due to an invalid request type.
+        :rtype: Response
+        """
         return Response({
             "success": False,
             "message": "Invalid request type"
@@ -567,9 +601,15 @@ class qrcode_services(APIView):
 
         if not serializer.is_valid():
             return CustomResponse(False, "Posting wrong data to API",serializer.errors, status.HTTP_400_BAD_REQUEST)
-        qrcode = json.loads(generate_qrcode(workspace_id, user_id,link))
+        qrcode = json.loads(generate_qrcode(
+            workspace_id, 
+            user_id,
+            link,
+            f'Qrcode_seat_{seat_number}'
+        ))
 
         generate_qrcode_data = qrcode.get('qrcode',[])
+        
 
         if not generate_qrcode_data:
             return CustomResponse(False, "Failed to update the create qrcode in qrcode server", None, status.HTTP_400_BAD_REQUEST)
@@ -577,12 +617,14 @@ class qrcode_services(APIView):
         update_qr_code_data = json.loads(update_qr_code(
             generate_qrcode_data["qrcode_id"],
             link,
+            f'Qrcode_seat_{seat_number}',
             workspace_id,
             username,
             f'seat_number_{seat_number}',
         ))
 
         generate_updated_qr_code_data = update_qr_code_data.get('response',[])
+        print(generate_updated_qr_code_data)
 
         if not generate_updated_qr_code_data:
             return CustomResponse(False, "Failed to update the links in qrcode server", None, status.HTTP_400_BAD_REQUEST)
@@ -736,50 +778,162 @@ class qrcode_services(APIView):
         return CustomResponse(True,f"Seat {seat_status_msg} successfully",None, status_code=status.HTTP_200_OK)
 
     def handle_error(self, request): 
-            return Response({
-                "success": False,
-                "message": "Invalid request type"
-            }, status=status.HTTP_400_BAD_REQUEST)
+        """
+        Handle invalid request type.
+
+        This method is called when the requested type is not recognized or supported.
+
+        :param request: The HTTP request object.
+        :type request: HttpRequest
+
+        :return: Response indicating failure due to an invalid request type.
+        :rtype: Response
+        """
+        return Response({
+            "success": False,
+            "message": "Invalid request type"
+        }, status=status.HTTP_400_BAD_REQUEST)
 
 @method_decorator(csrf_exempt, name='dispatch')
-class payment_services(APIView):
+class customer_services(APIView):
+    """
+    Customer services to manage customers and activate QR codes.
+
+    :type request: POST to create customer payment.
+    :type request: POST to retrieve customer payment information by seat number.
+    """
     def post(self, request):
         type_request = request.GET.get('type')
 
-        if type_request == "create_payment":
-            return self.create_payment(request)
+        if type_request == "create_customer_payment":
+            return self.create_customer_payment(request)
+        elif type_request =="retrieve_seat_customers":
+            return self.retrieve_seat_customers(request)
         else:
             return self.handle_error(request)
-        
-    def get(self, request): 
-        type_request = request.GET.get('type')
-
-        if type_request == "check_metedata_database_status":
-            return self.check_metedata_database_status(request)
-        elif type_request == "check_data_database_status":
-            return self.check_data_database_status(request)
-        else: 
-            return self.handle_error(request)
     
-    def create_payment(self,request):
+    
+    def create_customer_payment(self,request):
+        """
+        Create a new customer payment record and generate a payment link for the QR code.
+
+        :param request: The HTTP request containing data for creating the customer payment.
+        :type request: HttpRequest
+
+        :return: Response indicating the success or failure of the payment creation process.
+        :rtype: CustomResponse
+        """
         seat_number = request.data.get('seat_number')
         qrcode_id = request.data.get('qrcode_id')
         workspace_id = request.data.get('workspace_id')
         timezone = request.data.get('timezone')
+        date= request.data.get('date')
+        store_id= request.data.get('store_id')
 
         try:
             api_key = authorization_check(request.headers.get('Authorization'))
         except InvalidTokenException as e:
             return CustomResponse(False, str(e), None, status.HTTP_401_UNAUTHORIZED)
         
-        serializer = SaveSeatDetailsSerializer(data={"workspace_id": workspace_id,"qrcode_id": qrcode_id,"timezone": timezone,"seat_number":seat_number})
+        serializer = SaveSeatDetailsSerializer(data={"workspace_id": workspace_id,"qrcode_id": qrcode_id,"timezone": timezone,"seat_number":seat_number,"date":date,"store_id":store_id})
+       
+        if not serializer.is_valid():
+            return CustomResponse(False, "Posting wrong data to API",serializer.errors, status.HTTP_400_BAD_REQUEST)
+        
+        payment_link = "https://checkout.stripe.com/c/pay/cs_live_a1vEW9n2OWLjuVFL8gB5BBLJHvvFd0RtA6NRXuI4bGItTv3Dx7LCHcaRgw#fidkdWxOYHwnPyd1blppbHNgWjA0SWtiNT1Jck91bE9PZF9GVURXbkdmaGhTX2JHcUFmZE1XQUtTMEh1VlE0MWY3al9Td3JNa2xsYGxrRFdhbD1CakRrX3RJXTRqcUdPUTF0N1FtbDRcTjxpNTU1VUhiRkRJdCcpJ2N3amhWYHdzYHcnP3F3cGApJ2lkfGpwcVF8dWAnPyd2bGtiaWBabHFgaCcpJ2BrZGdpYFVpZGZgbWppYWB3dic%2FcXdwYHgl"
+
+        database_name = f'{workspace_id}_data_q'
+        collection_name = f'{workspace_id}_{date}_q'
+        
+        qrcode_updation_response = update_qr_code_link(
+            qrcode_id,
+            payment_link,
+            f'seat_number_{seat_number}'
+        )
+       
+        if not qrcode_updation_response:
+            return CustomResponse(False, "Failed to update payment link to qr code server",None, status.HTTP_400_BAD_REQUEST)
+        
+        data_to_insert = {
+            "seat_number":f'seat_number_{seat_number}',
+            "qrcode_id": qrcode_id,
+            "is_paid": False,
+            "payment_status": "not_paid",
+            "store_id": store_id,
+            "payment_link": payment_link,
+            "date_customer_visited": date,
+            "created_at": dowell_time(timezone)["current_time"],
+            "records": [{"record": "1", "type": "overall"}]
+        }
+      
+        response= json.loads(datacube_data_insertion(
+            api_key,
+            database_name,
+            collection_name,
+            data_to_insert
+        ))
+    
+        if not response["success"]:
+            return CustomResponse(False, "Failed to create a customer",None, status.HTTP_400_BAD_REQUEST)
+         
+        return CustomResponse(True,"The payment process has started, QRCode is ready to scan by customer",None, status.HTTP_200_OK)
+    
+    def retrieve_seat_customers(self, request):
+        """
+        Retrieve customer data for a specific seat.
+
+        :param request: The HTTP request containing parameters for retrieving customer data.
+        :type request: HttpRequest
+
+        :return: Response containing customer data for the specified seat.
+        :rtype: CustomResponse
+        """
+        seat_number = request.GET.get('seat_number')
+        workspace_id = request.GET.get('workspace_id')
+        date= request.GET.get('date')
+        store_id= request.GET.get('store_id')
+        timezone = request.data.get('timezone')
+        limit = request.GET.get('limit')
+        offset = request.GET.get('offset')
+
+
+        try:
+            api_key = authorization_check(request.headers.get('Authorization'))
+        except InvalidTokenException as e:
+            return CustomResponse(False, str(e), None, status.HTTP_401_UNAUTHORIZED)
+        
+        serializer = GetCustomerStatusSerializer(data={"workspace_id": workspace_id,"timezone": timezone,"seat_number":seat_number,"date":date,"store_id":store_id,"limit":limit,"offset": offset})
 
         if not serializer.is_valid():
             return CustomResponse(False, "Posting wrong data to API",serializer.errors, status.HTTP_400_BAD_REQUEST)
-         
-        return CustomResponse(True,"all ok",None, status.HTTP_200_OK)
+        
+        response = json.loads(datacube_data_retrieval(
+            api_key,
+            f'{workspace_id}_data_q',
+            f'{workspace_id}_{date}_q',
+            {
+                "seat_number":f'seat_number_{seat_number}',
+                "store_id": store_id,
+                "date_customer_visited": date
+            },
+            limit,offset,False
+        ))
+        
+        return CustomResponse(True, f"Retrieved data for seat number {seat_number}",response["data"], status.HTTP_200_OK)
+
     def handle_error(self, request): 
-            return Response({
-                "success": False,
-                "message": "Invalid request type"
-            }, status=status.HTTP_400_BAD_REQUEST)
+        """
+        Handle invalid request type.
+
+        This method is called when the requested type is not recognized or supported.
+
+        :param request: The HTTP request object.
+        :type request: HttpRequest
+
+        :return: Response indicating failure due to an invalid request type.
+        :rtype: Response
+        """
+        return Response({
+            "success": False,
+            "message": "Invalid request type"
+        }, status=status.HTTP_400_BAD_REQUEST)
