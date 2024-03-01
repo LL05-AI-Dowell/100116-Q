@@ -6,9 +6,10 @@ const UserContext = createContext({});
 export const useCurrentUserContext = () => useContext(UserContext);
 
 const UserContextProvider = ({ children }) => {
-    const [ currentUser, setCurrentUser ] = useState(null);
-    const [ currentUserDetailLoading, setCurrentUserDetailLoading ] = useState(false);
-
+    const [currentUser, setCurrentUser] = useState(null);
+    const [currentUserDetailLoading, setCurrentUserDetailLoading] = useState(false);
+    const [currentUserApiKey, setCurrentUserApiKey] = useState(null);
+    const [qUserDetails, setQUserDetails] = useState(null);
 
     return <>
         <UserContext.Provider
@@ -17,9 +18,13 @@ const UserContextProvider = ({ children }) => {
                 setCurrentUser,
                 currentUserDetailLoading,
                 setCurrentUserDetailLoading,
+                currentUserApiKey,
+                setCurrentUserApiKey,
+                qUserDetails,
+                setQUserDetails,
             }}
         >
-            { children }
+            {children}
         </UserContext.Provider>
     </>
 }

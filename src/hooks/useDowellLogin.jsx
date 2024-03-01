@@ -1,36 +1,57 @@
 import { useSearchParams } from "react-router-dom";
 import { useCurrentUserContext } from "../contexts/CurrentUserContext";
 import { useEffect } from "react";
-import { getUserInfoFromClientAdmin, getUserInfoFromLogin } from "../../services/loginServices";
+import { getUserInfoFromClientAdmin, getUserInfoFromLogin, getApiKeyInfoFromClientAdmin } from "../../services/loginServices";
 
 const PRODUCT_LOGIN_URL = "https://100014.pythonanywhere.com/?redirect_url=" + window.location.origin + "/100116-q/%23";
 const USER_KEY_IN_SESSION_STORAGE = 'q-user-detail';
+const API_KEY_IN_SESSION_STORAGE = 'q-api-key';
 
 const getSavedLoggedInUser = () => {
     let userDetails;
-  
+
     try {
-      userDetails = JSON.parse(
-        sessionStorage.getItem(USER_KEY_IN_SESSION_STORAGE)
-      );
+        userDetails = JSON.parse(
+            sessionStorage.getItem(USER_KEY_IN_SESSION_STORAGE)
+        );
     } catch (error) {
-      console.log("no saved user");
+        console.log("no saved user");
     }
-  
+
     return userDetails;
 };
+
+export const getSavedApiKey = () => {
+    let savedApiKey;
+
+    savedApiKey = sessionStorage.getItem(API_KEY_IN_SESSION_STORAGE);
+
+    return savedApiKey;
+}
 
 export default function useDowellLogin() {
     const {
         setCurrentUser,
         setCurrentUserDetailLoading,
+        setCurrentUserApiKey
     } = useCurrentUserContext();
-    const [ searchParams, setSearchParams ] = useSearchParams();
+    const [searchParams, setSearchParams] = useSearchParams();
 
     useEffect(() => {
         const session_id = searchParams.get("session_id");
         const id = searchParams.get("id");
         const localUserDetails = getSavedLoggedInUser();
+        const localAPIKey = getSavedApiKey();
+
+        if (localAPIKey) {
+            setCurrentUserApiKey(localAPIKey);
+        } else {
+            getApiKeyInfoFromClientAdmin(localUserDetails?.userinfo?.client_admin_id).then(res => {
+                setCurrentUserApiKey(res?.data?.data?.api_key);
+            }).catch(err => {
+                console.log('err while fetching api key', err);
+            })
+        }
 
         if (localUserDetails) {
             setCurrentUser(localUserDetails);
@@ -42,7 +63,49 @@ export default function useDowellLogin() {
 
             if (id) {
                 getUserInfoFromClientAdmin(session_id)
-                .then((res) => {
+                    .then(async (res) => {
+                        try {
+                            const apiKeyRes = (await getApiKeyInfoFromClientAdmin(res.data?.userinfo?.client_admin_id)).data;
+                            setCurrentUserApiKey(apiKeyRes?.data?.api_key);
+
+                            sessionStorage.setItem(
+                                API_KEY_IN_SESSION_STORAGE, // define and store it in session also
+                                apiKeyRes?.data?.api_key, // no stringifying because it's a string
+                            );
+                        } catch (error) {
+                            console.log('err while fetching api key', error);
+                        }
+
+                        setCurrentUser(res.data);
+                        setCurrentUserDetailLoading(false);
+
+                        sessionStorage.setItem(
+                            USER_KEY_IN_SESSION_STORAGE,
+                            JSON.stringify(res.data)
+                        );
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                        setCurrentUserDetailLoading(false);
+                    });
+
+                return;
+            }
+
+            getUserInfoFromLogin(session_id)
+                .then(async (res) => {
+                    try {
+                        const apiKeyRes = (await getApiKeyInfoFromClientAdmin(res.data?.userinfo?.client_admin_id)).data;
+                        setCurrentUserApiKey(apiKeyRes?.data?.api_key);
+
+                        sessionStorage.setItem(
+                            API_KEY_IN_SESSION_STORAGE, // define and store it in session also
+                            apiKeyRes?.data?.api_key, // no stringifying because it's a string
+                        );
+                    } catch (error) {
+                        console.log('err while fetching api key', error);
+                    }
+
                     setCurrentUser(res.data);
                     setCurrentUserDetailLoading(false);
 
@@ -55,25 +118,7 @@ export default function useDowellLogin() {
                     console.log(err);
                     setCurrentUserDetailLoading(false);
                 });
-        
-                return;
-            }
-        
-            getUserInfoFromLogin(session_id)
-            .then((res) => {
-                setCurrentUser(res.data);
-                setCurrentUserDetailLoading(false);
 
-                sessionStorage.setItem(
-                    USER_KEY_IN_SESSION_STORAGE,
-                    JSON.stringify(res.data)
-                );
-            })
-            .catch((err) => {
-                console.log(err);
-                setCurrentUserDetailLoading(false);
-            });
-        
 
             return
         }
