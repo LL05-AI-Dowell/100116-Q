@@ -113,7 +113,6 @@ class kitchen_sink_services(APIView):
             f'{workspace_id}_user_details',
             f'{workspace_id}_qrcode_record',
             f'{workspace_id}_store_details',
-            f'{workspace_id}_seat_details',
         ]
 
         missing_collections = []
@@ -829,13 +828,14 @@ class customer_services(APIView):
         timezone = request.data.get('timezone')
         date= request.data.get('date')
         store_id= request.data.get('store_id')
+        amount = request.data.get('amount')
 
         try:
             api_key = authorization_check(request.headers.get('Authorization'))
         except InvalidTokenException as e:
             return CustomResponse(False, str(e), None, status.HTTP_401_UNAUTHORIZED)
         
-        serializer = SaveSeatDetailsSerializer(data={"workspace_id": workspace_id,"qrcode_id": qrcode_id,"timezone": timezone,"seat_number":seat_number,"date":date,"store_id":store_id})
+        serializer = SaveSeatDetailsSerializer(data={"workspace_id": workspace_id,"qrcode_id": qrcode_id,"timezone": timezone,"seat_number":seat_number,"date":date,"store_id":store_id,"amount":amount})
        
         if not serializer.is_valid():
             return CustomResponse(False, "Posting wrong data to API",serializer.errors, status.HTTP_400_BAD_REQUEST)
@@ -862,6 +862,7 @@ class customer_services(APIView):
             "store_id": store_id,
             "payment_link": payment_link,
             "date_customer_visited": date,
+            "amount":amount,
             "created_at": dowell_time(timezone)["current_time"],
             "records": [{"record": "1", "type": "overall"}]
         }
@@ -876,7 +877,7 @@ class customer_services(APIView):
         if not response["success"]:
             return CustomResponse(False, "Failed to create a customer",None, status.HTTP_400_BAD_REQUEST)
          
-        return CustomResponse(True,"The payment process has started, QRCode is ready to scan by customer",None, status.HTTP_200_OK)
+        return CustomResponse(True,"The payment process has started, QRCode is ready to scan by customer",None, status.HTTP_201_CREATED)
     
     def retrieve_seat_customers(self, request):
         """

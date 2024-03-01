@@ -89,6 +89,7 @@ class SaveSeatDetailsSerializer(serializers.Serializer):
     workspace_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
     qrcode_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
     seat_number = serializers.IntegerField()
+    amount = serializers.IntegerField()
     timezone = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
     store_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
     date = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
