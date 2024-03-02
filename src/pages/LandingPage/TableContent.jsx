@@ -22,7 +22,7 @@ const SeatRow = ({ seatNumber, pagination }) => {
         ["seatData", seatNumber],
         () => getPaymentDetailForSeat(currentUser?.userinfo?.client_admin_id, seatNumber + pagination + 1, formatDateForAPI(currentDate), getSavedNewUserDetails()[0]?.store_ids[0], dataToPost),
         {
-            refetchInterval: 60000, // Refresh every 5 seconds
+            refetchInterval: 15000, // Refresh every 5 seconds
         }
     );
 
@@ -76,7 +76,11 @@ const SeatRow = ({ seatNumber, pagination }) => {
             <TableCell component="th" scope="row" align="center">
                 {seatNumber + pagination + 1}
             </TableCell >
-            {data?.data?.response?.length === 0 ? <></> :
+            {data?.data?.response?.length === 0 ?
+                <>
+                    <TableCell align="center">No Record Found</TableCell>
+                    <TableCell sx={{ display: 'flex' }} align="left">No Record Found</TableCell>
+                </> :
                 <>
                     <TableCell align="center">{amount}</TableCell>
                     <TableCell sx={{ display: 'flex' }} align="left">

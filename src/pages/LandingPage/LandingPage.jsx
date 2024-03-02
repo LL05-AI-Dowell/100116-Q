@@ -489,8 +489,8 @@ const LandingPage = () => {
                                                         <Table sx={{ minWidth: 650 }} aria-label="simple table">
                                                             <TableHead>
                                                                 <TableRow>
-                                                                    <TableCell sx={{ width: 'max-content' }} align="center" >Seat No.</TableCell>
-                                                                    <TableCell sx={{ width: 'max-content' }} align="center">Payment</TableCell>
+                                                                    <TableCell sx={{ width: 'max-content' }} align="center" >Seat Number</TableCell>
+                                                                    <TableCell sx={{ width: 'max-content' }} align="center">Create Payment Requests</TableCell>
                                                                     <TableCell sx={{ width: 'max-content' }} align="left">Payment Requests</TableCell>
                                                                 </TableRow>
                                                             </TableHead>
