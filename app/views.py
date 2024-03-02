@@ -1005,32 +1005,34 @@ class customer_services(APIView):
         payment_receipt_id = request.GET.get('payment_receipt_id')
         date = request.GET.get('date')
         workspace_id = request.GET.get('workspace_id')
-        payment_details = request.GET.get('payment_details')
+        qrcode_id = request.GET.get('qrcode_id')
+        seat_number = request.GET.get('seat_number')
 
-        try:
-            api_key = authorization_check(request.headers.get('Authorization'))
-        except InvalidTokenException as e:
-            return CustomResponse(False, str(e), None, status.HTTP_401_UNAUTHORIZED)
         
-        if not payment_details and not payment_receipt_id and not workspace_id and not date:
+        if not qrcode_id and not payment_receipt_id and not workspace_id and not date:
             return CustomResponse(False, "Payment Details are missing",None, status.HTTP_400_BAD_REQUEST)
         
-        payment_details= jwt.decode(payment_details, "secret", algorithms=["HS256"])
+        update_qr_code = update_qr_code_link(
+            qrcode_id,
+            "https://xvr8nq-5173.csb.app/",
+            f'seat_number_{seat_number}'
+        )
 
-
-        print(f'{workspace_id}_data_q')
+        if not update_qr_code:
+            return CustomResponse(False, "Failed to update the qrcode link contact to administrator",None, status.HTTP_400_BAD_REQUEST)
+        
         response = json.loads(datacube_data_update(
-            api_key,
+            "1b834e07-c68b-4bf6-96dd-ab7cdc62f07f",
             f'{workspace_id}_data_q',
             f'{workspace_id}_{date}_q',
             {
                 "payment_receipt_id": payment_receipt_id,
-                "date_customer_visited": date
+                "date_customer_visited": date,
+                "qrcode_id": qrcode_id,
             },
             {
                 "is_paid": True,
-                "payment_status": "paid",
-                "payment_details": payment_details
+                "payment_status": "paid"
             }
         ))
 
