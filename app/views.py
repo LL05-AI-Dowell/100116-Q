@@ -848,7 +848,7 @@ class customer_services(APIView):
             return CustomResponse(False, "Posting wrong data to API",serializer.errors, status.HTTP_400_BAD_REQUEST)
         
         payment_link = "https://checkout.stripe.com/c/pay/cs_live_a1vEW9n2OWLjuVFL8gB5BBLJHvvFd0RtA6NRXuI4bGItTv3Dx7LCHcaRgw#fidkdWxOYHwnPyd1blppbHNgWjA0SWtiNT1Jck91bE9PZF9GVURXbkdmaGhTX2JHcUFmZE1XQUtTMEh1VlE0MWY3al9Td3JNa2xsYGxrRFdhbD1CakRrX3RJXTRqcUdPUTF0N1FtbDRcTjxpNTU1VUhiRkRJdCcpJ2N3amhWYHdzYHcnP3F3cGApJ2lkfGpwcVF8dWAnPyd2bGtiaWBabHFgaCcpJ2BrZGdpYFVpZGZgbWppYWB3dic%2FcXdwYHgl"
-
+        payment_receipt_id = generate_store_id()
         database_name = f'{workspace_id}_data_q'
         collection_name = f'{workspace_id}_{date}_q'
         
@@ -870,6 +870,7 @@ class customer_services(APIView):
             "payment_link": payment_link,
             "date_customer_visited": date,
             "amount":amount,
+            "payment_receipt_id":payment_receipt_id,
             "payment_details": None,
             "created_at": dowell_time(timezone)["current_time"],
             "records": [{"record": "1", "type": "overall"}]
@@ -954,6 +955,9 @@ class customer_services(APIView):
             f'{workspace_id}_{date}_q',
             {
                 "_id": payment_id,
+            },
+            {
+
             }
         ))
         return CustomResponse(True, "Payment successfully updated",payment_details, status.HTTP_200_OK)
