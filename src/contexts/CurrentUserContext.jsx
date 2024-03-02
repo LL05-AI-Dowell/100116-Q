@@ -10,6 +10,8 @@ const UserContextProvider = ({ children }) => {
     const [currentUserDetailLoading, setCurrentUserDetailLoading] = useState(false);
     const [currentUserApiKey, setCurrentUserApiKey] = useState(null);
     const [qUserDetails, setQUserDetails] = useState(null);
+    const [intialConfigurationLoaded, setIntialConfigurationLoaded] = useState(false);
+    const [qrCodeResponse, setQrCodeResponse] = useState(null);
 
     return <>
         <UserContext.Provider
@@ -22,6 +24,10 @@ const UserContextProvider = ({ children }) => {
                 setCurrentUserApiKey,
                 qUserDetails,
                 setQUserDetails,
+                intialConfigurationLoaded,
+                setIntialConfigurationLoaded,
+                qrCodeResponse,
+                setQrCodeResponse
             }}
         >
             {children}

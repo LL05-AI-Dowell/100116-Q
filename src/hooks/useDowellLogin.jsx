@@ -1,4 +1,4 @@
-import { useSearchParams } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
 import { useCurrentUserContext } from "../contexts/CurrentUserContext";
 import { useEffect } from "react";
 import { getUserInfoFromClientAdmin, getUserInfoFromLogin, getApiKeyInfoFromClientAdmin } from "../../services/loginServices";
@@ -6,6 +6,7 @@ import { getUserInfoFromClientAdmin, getUserInfoFromLogin, getApiKeyInfoFromClie
 const PRODUCT_LOGIN_URL = "https://100014.pythonanywhere.com/?redirect_url=" + window.location.origin + "/100116-q/%23";
 const USER_KEY_IN_SESSION_STORAGE = 'q-user-detail';
 const API_KEY_IN_SESSION_STORAGE = 'q-api-key';
+export const NEW_USER_DETAILS_KEY_IN_SESSION_STORAGE = 'q-new-user-details';
 
 const getSavedLoggedInUser = () => {
     let userDetails;
@@ -13,6 +14,20 @@ const getSavedLoggedInUser = () => {
     try {
         userDetails = JSON.parse(
             sessionStorage.getItem(USER_KEY_IN_SESSION_STORAGE)
+        );
+    } catch (error) {
+        console.log("no saved user");
+    }
+
+    return userDetails;
+};
+
+export const getSavedNewUserDetails = () => {
+    let userDetails;
+
+    try {
+        userDetails = JSON.parse(
+            sessionStorage.getItem(NEW_USER_DETAILS_KEY_IN_SESSION_STORAGE)
         );
     } catch (error) {
         console.log("no saved user");
@@ -36,12 +51,15 @@ export default function useDowellLogin() {
         setCurrentUserApiKey
     } = useCurrentUserContext();
     const [searchParams, setSearchParams] = useSearchParams();
+    const { pathname } = useLocation()
 
     useEffect(() => {
         const session_id = searchParams.get("session_id");
         const id = searchParams.get("id");
+        const view = searchParams.get("view");
         const localUserDetails = getSavedLoggedInUser();
         const localAPIKey = getSavedApiKey();
+        const isSuccessScreen = view === 'success'
 
         if (localAPIKey) {
             setCurrentUserApiKey(localAPIKey);
@@ -122,7 +140,7 @@ export default function useDowellLogin() {
 
             return
         }
-
+        if (isSuccessScreen) return
         // redirecting to login
         sessionStorage.clear();
         window.location.replace(PRODUCT_LOGIN_URL);

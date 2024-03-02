@@ -27,10 +27,12 @@ const Profile = () => {
                                     <TabList onChange={handleChange} aria-label="lab API tabs example">
                                         <Tab label="USER DETAILS" value="1" />
                                         <Tab label="STORE DETAILS" value="2" />
+                                        <Tab label="SEAT INFORMATION" value="3" />
                                     </TabList>
                                 </Box>
                                 <TabPanel value="1">User's Details</TabPanel>
                                 <TabPanel value="2">Store's Details</TabPanel>
+                                <TabPanel value="3">Seat's Details</TabPanel>
                             </TabContext>
                         </Box>
                         <img
