@@ -8,7 +8,7 @@ from .utils.helper import *
 from .utils.datacube_helper import * 
 from .utils.authorization import *
 from .utils.linkshortener_helper import *
-
+import jwt
 
 @method_decorator(csrf_exempt, name='dispatch')
 class health_check(APIView):
@@ -811,6 +811,13 @@ class customer_services(APIView):
         else:
             return self.handle_error(request)
     
+    def get(self, request):
+        type_request = request.GET.get('type')
+
+        if type_request == "update_payment_status":
+            return self.update_payment_status(request)
+        else:
+            return self.handle_error(request)   
     
     def create_customer_payment(self,request):
         """
@@ -863,6 +870,7 @@ class customer_services(APIView):
             "payment_link": payment_link,
             "date_customer_visited": date,
             "amount":amount,
+            "payment_details": None,
             "created_at": dowell_time(timezone)["current_time"],
             "records": [{"record": "1", "type": "overall"}]
         }
@@ -922,6 +930,33 @@ class customer_services(APIView):
         
         return CustomResponse(True, f"Retrieved data for seat number {seat_number}",response["data"], status.HTTP_200_OK)
 
+    def update_payment_status(self,request):
+        payment_id = request.GET.get('payment_id')
+        date = request.GET.get('date')
+        workspace_id = request.GET.get('workspace_id')
+        payment_details = request.GET.get('payment_details')
+
+        try:
+            api_key = authorization_check(request.headers.get('Authorization'))
+        except InvalidTokenException as e:
+            return CustomResponse(False, str(e), None, status.HTTP_401_UNAUTHORIZED)
+        
+        if not payment_details:
+            return CustomResponse(False, "Payment Details are missing",None, status.HTTP_400_BAD_REQUEST)
+        
+        payment_details= jwt.decode(payment_details, "secret", algorithms=["HS256"])
+
+        # https://github.com/?paymet_id={}&workspace_id={}&payment_details={}
+
+        response = json.loads(datacube_data_update(
+            api_key,
+            f'{workspace_id}_data_q',
+            f'{workspace_id}_{date}_q',
+        ))
+        return CustomResponse(True, "Payment successfully updated",payment_details, status.HTTP_200_OK)
+
+
+        
     def handle_error(self, request): 
         """
         Handle invalid request type.
