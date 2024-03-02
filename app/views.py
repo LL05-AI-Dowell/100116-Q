@@ -796,12 +796,27 @@ class qrcode_services(APIView):
 @method_decorator(csrf_exempt, name='dispatch')
 class customer_services(APIView):
     """
-    Customer services to manage customers and activate QR codes.
+    API view to handle various customer service operations.
 
-    :type request: POST to create customer payment.
-    :type request: POST to retrieve customer payment information by seat number.
+    This class defines API endpoints to handle different types of customer service operations.
+    It includes methods to create customer payments, retrieve seat customers, and update payment statuses.
     """
     def post(self, request):
+        """
+        Handle POST requests.
+
+        This method is called to handle POST requests.
+        It determines the type of request and routes it to the appropriate method.
+        Supported request types:
+            - create_customer_payment
+            - retrieve_seat_customers
+
+        :param request: The HTTP request object.
+        :type request: HttpRequest
+
+        :return: Response based on the type of request.
+        :rtype: Response
+        """
         type_request = request.GET.get('type')
 
         if type_request == "create_customer_payment":
@@ -812,6 +827,20 @@ class customer_services(APIView):
             return self.handle_error(request)
     
     def get(self, request):
+        """
+        Handle GET requests.
+
+        This method is called to handle GET requests.
+        It determines the type of request and routes it to the appropriate method.
+        Supported request type:
+            - update_payment_status
+
+        :param request: The HTTP request object.
+        :type request: HttpRequest
+
+        :return: Response based on the type of request.
+        :rtype: Response
+        """
         type_request = request.GET.get('type')
 
         if type_request == "update_payment_status":
@@ -821,13 +850,24 @@ class customer_services(APIView):
     
     def create_customer_payment(self,request):
         """
-        Create a new customer payment record and generate a payment link for the QR code.
+        Create a payment entry for a customer.
 
-        :param request: The HTTP request containing data for creating the customer payment.
+        This method creates a payment entry for a customer based on the provided seat number, QR code ID,
+        workspace ID, timezone, date, store ID, and amount. It first checks the authorization using the API key
+        provided in the request headers. If the authorization fails, it returns a custom response indicating
+        unauthorized access.
+        It then validates the request parameters using the SaveSeatDetailsSerializer. If the parameters are invalid,
+        it returns a custom response indicating the validation errors.
+        It generates a payment link for the customer and a payment receipt ID.
+        It updates the QR code link with the generated payment link.
+        It inserts the payment details into the datacube.
+        If the insertion is successful, it returns a custom response indicating success.
+
+        :param request: The HTTP request object.
         :type request: HttpRequest
 
-        :return: Response indicating the success or failure of the payment creation process.
-        :rtype: CustomResponse
+        :return: Response indicating success or failure of the payment creation process.
+        :rtype: Response
         """
         seat_number = request.data.get('seat_number')
         qrcode_id = request.data.get('qrcode_id')
@@ -848,7 +888,10 @@ class customer_services(APIView):
             return CustomResponse(False, "Posting wrong data to API",serializer.errors, status.HTTP_400_BAD_REQUEST)
         
         payment_link = "https://checkout.stripe.com/c/pay/cs_live_a1vEW9n2OWLjuVFL8gB5BBLJHvvFd0RtA6NRXuI4bGItTv3Dx7LCHcaRgw#fidkdWxOYHwnPyd1blppbHNgWjA0SWtiNT1Jck91bE9PZF9GVURXbkdmaGhTX2JHcUFmZE1XQUtTMEh1VlE0MWY3al9Td3JNa2xsYGxrRFdhbD1CakRrX3RJXTRqcUdPUTF0N1FtbDRcTjxpNTU1VUhiRkRJdCcpJ2N3amhWYHdzYHcnP3F3cGApJ2lkfGpwcVF8dWAnPyd2bGtiaWBabHFgaCcpJ2BrZGdpYFVpZGZgbWppYWB3dic%2FcXdwYHgl"
+        
+        # payment information will be changed later
         payment_receipt_id = generate_store_id()
+
         database_name = f'{workspace_id}_data_q'
         collection_name = f'{workspace_id}_{date}_q'
         
@@ -890,13 +933,21 @@ class customer_services(APIView):
     
     def retrieve_seat_customers(self, request):
         """
-        Retrieve customer data for a specific seat.
+        Retrieve customers seated at a specific seat for a given workspace and date.
 
-        :param request: The HTTP request containing parameters for retrieving customer data.
+        This method retrieves customer data based on the provided seat number, workspace ID, date, store ID,
+        timezone, limit, and offset. It first checks the authorization using the API key provided in the request headers.
+        If the authorization fails, it returns a custom response indicating unauthorized access.
+        It then validates the request parameters using the GetCustomerStatusSerializer. If the parameters are invalid,
+        it returns a custom response indicating the validation errors.
+        It calls the datacube_data_retrieval function to retrieve customer data based on the provided parameters.
+        If the retrieval is successful, it returns a custom response containing the retrieved data.
+        
+        :param request: The HTTP request object.
         :type request: HttpRequest
 
-        :return: Response containing customer data for the specified seat.
-        :rtype: CustomResponse
+        :return: Response containing the retrieved customer data or an error message.
+        :rtype: Response
         """
         seat_number = request.GET.get('seat_number')
         workspace_id = request.GET.get('workspace_id')
@@ -932,7 +983,26 @@ class customer_services(APIView):
         return CustomResponse(True, f"Retrieved data for seat number {seat_number}",response["data"], status.HTTP_200_OK)
 
     def update_payment_status(self,request):
-        payment_id = request.GET.get('payment_id')
+        """
+        Update payment status based on provided parameters.
+
+        This method updates the payment status based on the payment receipt ID, date, workspace ID, and payment details
+        provided in the request. It first checks the authorization using the API key provided in the request headers.
+        If the authorization fails, it returns a custom response indicating unauthorized access.
+        If any of the required parameters are missing in the request, it returns a custom response indicating the
+        missing parameters.
+        It decodes the payment details using JWT for further processing.
+        It then calls the datacube_data_update function to update the payment status in the datacube.
+        If the update is successful, it returns a custom response indicating success. If the update fails, it returns
+        a custom response indicating failure.
+
+        :param request: The HTTP request object.
+        :type request: HttpRequest
+
+        :return: Response indicating success or failure of the payment status update.
+        :rtype: Response
+        """
+        payment_receipt_id = request.GET.get('payment_receipt_id')
         date = request.GET.get('date')
         workspace_id = request.GET.get('workspace_id')
         payment_details = request.GET.get('payment_details')
@@ -942,25 +1012,32 @@ class customer_services(APIView):
         except InvalidTokenException as e:
             return CustomResponse(False, str(e), None, status.HTTP_401_UNAUTHORIZED)
         
-        if not payment_details:
+        if not payment_details and not payment_receipt_id and not workspace_id and not date:
             return CustomResponse(False, "Payment Details are missing",None, status.HTTP_400_BAD_REQUEST)
         
         payment_details= jwt.decode(payment_details, "secret", algorithms=["HS256"])
 
-        # https://github.com/?paymet_id={}&workspace_id={}&payment_details={}
 
+        print(f'{workspace_id}_data_q')
         response = json.loads(datacube_data_update(
             api_key,
             f'{workspace_id}_data_q',
             f'{workspace_id}_{date}_q',
             {
-                "_id": payment_id,
+                "payment_receipt_id": payment_receipt_id,
+                "date_customer_visited": date
             },
             {
-
+                "is_paid": True,
+                "payment_status": "paid",
+                "payment_details": payment_details
             }
         ))
-        return CustomResponse(True, "Payment successfully updated",payment_details, status.HTTP_200_OK)
+
+        if not response["success"]:
+            return CustomResponse(False,"Failed to update the payment status",None, status.HTTP_400_BAD_REQUEST)
+        
+        return CustomResponse(True, "Payment successfully updated",None, status.HTTP_200_OK)
 
 
         
