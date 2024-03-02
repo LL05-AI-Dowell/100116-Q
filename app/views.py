@@ -952,6 +952,9 @@ class customer_services(APIView):
             api_key,
             f'{workspace_id}_data_q',
             f'{workspace_id}_{date}_q',
+            {
+                "_id": payment_id,
+            }
         ))
         return CustomResponse(True, "Payment successfully updated",payment_details, status.HTTP_200_OK)
 
