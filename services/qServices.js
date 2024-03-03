@@ -103,3 +103,10 @@ export const updatePaymentRecord = async (paymentReceiptId, date, qrcode_id, wor
     };
     return await qServicesAxiosInstance.get(`/api/v1/customer-services/?type=update_payment_status&payment_receipt_id=${paymentReceiptId}&date=${date}&workspace_id=${workspace_id}&qrcode_id=${qrcode_id}&seat_number=${seat_no}`, { headers });
 };
+
+export const qrCodeActivationDeactivation = async (workspace_id, document_id, seat_status) => {
+    const headers = {
+        'Authorization': `Bearer ${getSavedApiKey()}`
+    };
+    return await qServicesAxiosInstance.get(`/api/v1/qrcode-services/?type=activate_seat&workspace_id=${workspace_id}&document_id=${document_id}&seat_status=${seat_status}`, { headers });
+}

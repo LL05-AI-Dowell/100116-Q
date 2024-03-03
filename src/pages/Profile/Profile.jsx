@@ -27,14 +27,14 @@ const Profile = () => {
                             <TabContext value={value}>
                                 <Box sx={{ borderBottom: 1, borderColor: 'divider', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                                     <TabList onChange={handleChange} aria-label="lab API tabs example">
-                                        <Tab label="USER DETAILS" value="1" />
+                                        <Tab label="USER DETAILS" value="3" />
                                         <Tab label="STORE DETAILS" value="2" />
-                                        <Tab label="SEAT INFORMATION" value="3" />
+                                        <Tab label="SEAT INFORMATION" value="1" />
                                     </TabList>
                                 </Box>
-                                <TabPanel value="1">{<UserDetailsScreen />}</TabPanel>
+                                <TabPanel value="3">{<UserDetailsScreen />}</TabPanel>
                                 <TabPanel value="2">Store Details</TabPanel>
-                                <TabPanel value="3">{<SeatDetails />}</TabPanel>
+                                <TabPanel value="1">{<SeatDetails />}</TabPanel>
                             </TabContext>
                         </Box>
                         <img

@@ -490,13 +490,13 @@ const LandingPage = () => {
                                         <div className="flex h-[50%] items-center sm:h-[325px]">
                                             <div className=" flex flex-col h-full w-full py-8 shadow-2xl sm:flex-row">
                                                 <QueryClientProvider client={queryClient}>
-                                                    <TableContainer component={Paper} sx={{ width: '80%' }}>
+                                                    <TableContainer component={Paper} sx={{ width: '98%', height: 'max-content' }}>
                                                         <Table sx={{ minWidth: 650 }} aria-label="simple table">
                                                             <TableHead>
                                                                 <TableRow>
-                                                                    <TableCell sx={{ width: 'max-content' }} align="center" >Seat Number</TableCell>
-                                                                    <TableCell sx={{ width: 'max-content' }} align="center">Create Payment Requests</TableCell>
-                                                                    <TableCell sx={{ width: 'max-content' }} align="left">Payment Requests</TableCell>
+                                                                    <TableCell sx={{ width: 'max-content', padding: '10px', fontWeight: '600' }} align="center" >Seat Number</TableCell>
+                                                                    <TableCell sx={{ width: 'max-content', padding: '10px', fontWeight: '600' }} align="center">Payment Requested</TableCell>
+                                                                    <TableCell sx={{ width: 'max-content', padding: '10px', fontWeight: '600' }} align="left">Payment Status</TableCell>
                                                                 </TableRow>
                                                             </TableHead>
                                                             <TableBody>

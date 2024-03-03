@@ -45,22 +45,22 @@ const SeatRow = ({ seatNumber, pagination }) => {
     if (isLoading)
         return (
             <>
-                <TableCell component="th" scope="row" align="center">
+                <TableCell component="th" scope="row" align="center" sx={{ padding: '5px', margin: '6px' }}>
                     {seatNumber + pagination + 1}
                 </TableCell>
-                <TableCell align="center">loading...</TableCell>
-                <TableCell align="left">loading...</TableCell>
+                <TableCell align="center" sx={{ padding: '5px', margin: '6px' }}>loading...</TableCell>
+                <TableCell align="left" sx={{ padding: '5px', margin: '6px' }}>loading...</TableCell>
             </>
         );
     if (isError || !data)
         // console.log(`Error fetching data seat number ${seatNumber + pagination + 1}`, !isError, data?.data?.response[0]);
         return (
             <>
-                <TableCell component="th" scope="row" align="center">
+                <TableCell component="th" scope="row" align="center" sx={{ padding: '5px', margin: '6px' }}>
                     {seatNumber + pagination + 1}
                 </TableCell>
-                <TableCell align="center">No Customer</TableCell>
-                <TableCell align="left">No Customer</TableCell>
+                <TableCell align='center' sx={{ padding: '5px', margin: '6px' }}>No Customer for today...</TableCell>
+                <TableCell align='left' sx={{ padding: '5px', margin: '6px' }}>No Customer for today...</TableCell>
             </>
         );
 
@@ -73,17 +73,17 @@ const SeatRow = ({ seatNumber, pagination }) => {
     const amount = reversedArray[0]?.amount;
     return (
         <>
-            <TableCell component="th" scope="row" align="center">
+            <TableCell component="th" scope="row" align="center" sx={{ padding: '5px', margin: '6px' }}>
                 {seatNumber + pagination + 1}
             </TableCell >
             {data?.data?.response?.length === 0 ?
                 <>
-                    <TableCell align="center">No Record Found</TableCell>
-                    <TableCell sx={{ display: 'flex' }} align="left">No Record Found</TableCell>
+                    <TableCell align='center' sx={{ padding: '5px', margin: '6px' }}>No Record Found</TableCell>
+                    <TableCell align='left' sx={{ padding: '5px', margin: '6px' }}>No Record Found</TableCell>
                 </> :
                 <>
-                    <TableCell align="center">{amount}</TableCell>
-                    <TableCell sx={{ display: 'flex' }} align="left">
+                    <TableCell align='center' sx={{ padding: '5px', margin: '6px' }}>{amount}</TableCell>
+                    <TableCell align='left' sx={{ padding: '5px', margin: '6px' }}>
                         {reversedArray.map((item, index) => {
                             const isPaid = item.is_paid;
                             const paymentStatus = item.payment_status;
