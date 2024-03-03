@@ -21,8 +21,8 @@ const SeatDetails = () => {
                     <CircularProgress />
                 </div>
             ) : (
-                <div className="flex flex-row gap-0.5">
-                    {qrCodeResponse.map(qrCode=> (
+                <div className="flex flex-wrap overflow-y-scroll">
+                    {qrCodeResponse.map(qrCode => (
                         <Card qrCodeResponse={qrCode} />
                     ))}
                 </div>

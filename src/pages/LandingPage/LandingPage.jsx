@@ -5,7 +5,7 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { useNavigate } from 'react-router-dom';
 import { CiLogout } from "react-icons/ci";
@@ -91,20 +91,19 @@ const LandingPage = () => {
         amount: null,
     });
     const [enterPaymentRecordLoading, setEnterPaymentRecordLoading] = useState(false);
+    const [seatNumber, setSeatNumber] = useState(null);
+    const [amountEntered, setAmountEntered] = useState(null);
+    const seatNumberRef = useRef(null);
 
-    function createData(name, calories, fat, carbs, protein) {
-        return { name, calories, fat, carbs, protein };
-    }
-
-    const rows = [
-        createData(1, 159, 6.0, 24, 4.0),
-        createData(2, 237, 9.0, 37, 4.3),
-        createData(3, 262, 16.0, 24, 6.0),
-        createData(4, 305, 3.7, 67, 4.3),
-        createData(5, 356, 16.0, 49, 3.9),
-    ];
-
-
+    // useEffect to focus on the input field when the component mounts
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            if (seatNumberRef.current) {
+                seatNumberRef.current.focus();
+            }
+        }, 1000);
+        return () => clearTimeout(timeoutId);
+    }, [qrCodeResponse]);
 
     const incrementStepPagination = (steps, length) => {
         console.log(currentUser);
@@ -132,9 +131,10 @@ const LandingPage = () => {
             value = 1;
         } else {
             const newValue = event.key === 'ArrowUp' ? value + 1 : event.key === 'ArrowDown' ? Math.max(0, value - 1) : value;
-            event.target.value = newValue;
+            // event.target.value = newValue;
+            setSeatNumber(newValue);
         }
-
+        setSeatNumber(value);
         event.target.value = value;
 
         await getQrCodeIdBySeatNumber(currentUser?.userinfo?.client_admin_id, value).then(res => {
@@ -154,11 +154,14 @@ const LandingPage = () => {
         if (event.nativeEvent.inputType === 'insertText') {
             const newValue = currentValue < 0 ? 0 : currentValue;
             event.target.value = newValue;
+            setAmountEntered(newValue);
         } else if (currentValue <= 0) {
             event.target.value = 0;
+            setAmountEntered(0);
         } else {
             const newValue = event.key === 'ArrowUp' ? currentValue + 1 : event.key === 'ArrowDown' ? Math.max(0, currentValue - 1) : currentValue;
             event.target.value = newValue;
+            setAmountEntered(newValue);
         }
         setQrCodeIdForSeatNumber(prevVal => ({ ...prevVal, amount: Number(event.target.value) }));
     }
@@ -380,6 +383,8 @@ const LandingPage = () => {
         await createCustomerPayment(dataToPost).then(res => {
             setEnterPaymentRecordLoading(false);
             console.log('createCustomerPayment resss', res);
+            setSeatNumber('');
+            setAmountEntered('');
         }).catch(err => {
             setEnterPaymentRecordLoading(false);
             console.log('err createCustomerPayment', err);
@@ -498,11 +503,6 @@ const LandingPage = () => {
                                                                 {qrCodeResponse.slice(cardPagination, cardPagination + 5).map((row, index) => (
                                                                     <TableRow key={index + '_'}>
                                                                         <SeatRow key={index} seatNumber={index} pagination={cardPagination} />
-                                                                        {/* <TableCell sx={{ width: 'max-content' }} component="th" scope="row" align="center">
-                                                                            {index + cardPagination + 1}
-                                                                        </TableCell>
-                                                                        <TableCell sx={{ width: 'max-content' }} align="center">{row.fat}</TableCell>
-                                                                        <TableCell sx={{ width: 'max-content' }} align="left">{row.carbs}</TableCell> */}
                                                                     </TableRow>
                                                                 ))}
                                                             </TableBody>
@@ -558,13 +558,16 @@ const LandingPage = () => {
                                                 className="cursor-pointer p-0 text-4xl bg-inherit m-0 border-solid border border-sky-500 rounded w-20 focus:outline-none sm:text-5xl sm:border-none sm:m-2 sm:p-1 sm:w-28"
                                                 min="1"
                                                 max="99"
-                                                onInput={handleInputChange}
+                                                value={seatNumber}
+                                                onChange={(event) => handleInputChange(event)}
+                                                ref={seatNumberRef}
                                             ></input>
                                             <p className="text-sm mx-1 sm:text-lg sm:mx-4">Amount:</p>
                                             <input
+                                                value={amountEntered}
                                                 type='number'
                                                 className="cursor-pointer p-0 bg-inherit text-4xl border-solid border border-sky-500 m-0 rounded w-20 focus:outline-none sm:text-5xl sm:w-44 sm:border-none sm:m-2 sm:p1 sm:w-28"
-                                                onChange={handleAmountInputChange}
+                                                onChange={(event) => handleAmountInputChange(event)}
                                             ></input>
                                             <button class="cursor-pointer flex items-center justify-center bg-white hover:bg-green-100 text-gray-800 font-semibold py-2 px-4 border border-green-400 rounded shadow m-2"
                                                 onClick={handleEnterDataClick}
