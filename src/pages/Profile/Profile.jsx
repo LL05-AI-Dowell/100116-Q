@@ -6,6 +6,7 @@ import Tab from '@mui/material/Tab';
 import TabContext from '@mui/lab/TabContext';
 import TabList from '@mui/lab/TabList';
 import TabPanel from '@mui/lab/TabPanel';
+import SeatDetails from "./SeatDetails";
 
 const Profile = () => {
     const navigate = useNavigate();
@@ -30,9 +31,9 @@ const Profile = () => {
                                         <Tab label="SEAT INFORMATION" value="3" />
                                     </TabList>
                                 </Box>
-                                <TabPanel value="1">User's Details</TabPanel>
-                                <TabPanel value="2">Store's Details</TabPanel>
-                                <TabPanel value="3">Seat's Details</TabPanel>
+                                <TabPanel value="1">User Details</TabPanel>
+                                <TabPanel value="2">Store Details</TabPanel>
+                                <TabPanel value="3">{<SeatDetails />}</TabPanel>
                             </TabContext>
                         </Box>
                         <img
