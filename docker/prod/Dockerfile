@@ -10,11 +10,9 @@ ENV VITE_BACKEND_URL=$VITE_BACKEND_URL
 
 WORKDIR /usr/src/app
 COPY package*.json ./
-# RUN yarn install --production
-RUN npm install --only=production
+RUN yarn install --production
 COPY . .
-# RUN yarn build
-RUN npm run build
+RUN yarn build
 
 # Step 2: Set up the Nginx server for serving the built application
 FROM nginx:stable-alpine
@@ -35,8 +33,3 @@ COPY nginx/prod/nginx.prod.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80 443
 CMD ["nginx", "-g", "daemon off;"]
 
-# q.uxlivinglab.online
-# vps IP ---> 67.217.58.6
-# userid ---> root
-# password ---> Newserver@2024
-# DoWellChatServer@2023
