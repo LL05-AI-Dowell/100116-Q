@@ -3,7 +3,7 @@ import { useCurrentUserContext } from "../contexts/CurrentUserContext";
 import { useEffect } from "react";
 import { getUserInfoFromClientAdmin, getUserInfoFromLogin, getApiKeyInfoFromClientAdmin } from "../../services/loginServices";
 
-const PRODUCT_LOGIN_URL = "https://100014.pythonanywhere.com/?redirect_url=" + window.location.origin + "/100116-q/%23";
+const PRODUCT_LOGIN_URL = "https://100014.pythonanywhere.com/?redirect_url=" + window.location.origin
 const USER_KEY_IN_SESSION_STORAGE = 'q-user-detail';
 const API_KEY_IN_SESSION_STORAGE = 'q-api-key';
 export const NEW_USER_DETAILS_KEY_IN_SESSION_STORAGE = 'q-new-user-details';
