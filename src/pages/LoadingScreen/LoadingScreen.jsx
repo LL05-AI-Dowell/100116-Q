@@ -2,7 +2,7 @@ const LoadingScreen = () => {
     return (
         <>
             <div className="h-screen flex flex-row items-center justify-evenly">
-                <div class="border border-sky-300 shadow rounded-md p-4 max-w-sm w-2/4 h-max mx-auto item-center margin_">
+                <div class="border border-sky-300 shadow rounded-md p-4 max-w-sm w-full sm:w-2/4 h-max mx-auto item-center margin_">
                     <div class="animate-pulse flex space-x-4">
                         <div class="rounded-full bg-slate-700 h-10 w-10"></div>
                         <div class="flex-1 space-y-6 py-1">

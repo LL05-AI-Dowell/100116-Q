@@ -6,6 +6,7 @@ import Card from "../../Components/Card";
 import { IoAddCircleSharp } from "react-icons/io5";
 import { createQrCode } from "../../../services/qServices";
 import { getSavedNewUserDetails } from "../../hooks/useDowellLogin";
+import { MdOutlineErrorOutline } from "react-icons/md";
 
 const SeatDetails = () => {
     const user = getSavedNewUserDetails();
@@ -68,18 +69,21 @@ const SeatDetails = () => {
             ) : (
                 <>
                     {showBanner ?
-                        <p className="text-rose-700 text-base font-light">Upgrade your account!...<a
-                            href='https://www.uxlivinglab.org/'
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-700"
-                        ><u>Click Here</u></a></p> : <></>}
+                        <div className="border border-orange-400 bg-orange-50 w-max rounded margin_ flex items-center justify-center p-2">
+                            <MdOutlineErrorOutline color='#fb923c' fontSize={22} />
+                            <p className="text-rose-700 text-base font-light mx-2">Upgrade your account!...<a
+                                href='https://www.uxlivinglab.org/'
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-700"
+                            ><u>Click Here</u></a></p></div> : <></>}
                     <div className="flex items-center justify-between border border-sky-400 rounded w-max px-3 py-0.5 cursor-pointer" onClick={handleAddQrCode}>
                         {
                             isQrCodeLoading ? <CircularProgress size={20} /> :
                                 <><p className="text-lg font-light px-2">Add</p>
                                     <IoAddCircleSharp fontSize='1.7rem' color="#38bdf9" position='relative' />
-                                </>}
+                                </>
+                        }
                     </div>
                     <div className="flex flex-wrap overflow-y-scroll">
                         {qrCodeResponse.map(qrCode => (

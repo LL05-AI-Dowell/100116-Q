@@ -92,7 +92,7 @@ const CardDetails = ({ qrCodeResponse }) => {
             color="secondary"
             onClick={() => handleActivateDeactivateClick(false)}
           >
-            {isLoading ? <CircularProgress size={20} /> : 'Deactivate'}
+            {isLoading ? <CircularProgress size={20} /> : 'Close'}
           </Button>
         ) : (
 
@@ -101,7 +101,7 @@ const CardDetails = ({ qrCodeResponse }) => {
             color="primary"
             onClick={() => handleActivateDeactivateClick(true)}
           >
-            {isLoading ? <CircularProgress size={20} /> : 'Activate'}
+            {isLoading ? <CircularProgress size={20} /> : 'Open'}
           </Button>
         )}
       </CardContent>

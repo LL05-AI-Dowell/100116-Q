@@ -19,7 +19,7 @@ const Profile = () => {
 
     return (
         <>
-            <div className="h-screen m-0 p-0 gradient_ flex items-baseline">
+            <div className="h-screen m-0 p-0 gradient_ flex items-baseline overflow-scroll">
                 <div className="w-full h-full bg-white margin_ shadow-black mt-3.5 p-4 pt-2 pb-6 rounded-md md:w-11/12 md:h-max">
                     <div className="w-full flex items-start justify-between x">
                         <MdArrowBackIos onClick={() => navigate(-1)} className="text-2xl cursor-pointer my-4 mx-3" />
@@ -38,7 +38,7 @@ const Profile = () => {
                             </TabContext>
                         </Box>
                         <img
-                            src="https://i.pinimg.com/736x/f8/66/8e/f8668e5328cfb4938903406948383cf6.jpg"
+                            src="https://t4.ftcdn.net/jpg/05/89/93/27/360_F_589932782_vQAEAZhHnq1QCGu5ikwrYaQD0Mmurm0N.jpg"
                             alt="Profile Photo"
                             className="h-10 w-10 rounded-full shadow-2xl mx-10 cursor-pointer"
                         // onClick={() => navigate('/profile')}

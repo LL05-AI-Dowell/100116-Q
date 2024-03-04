@@ -41,6 +41,7 @@ import { QueryClient, QueryClientProvider, useQuery } from "react-query";
 import SeatRow from './TableContent';
 import { data } from 'autoprefixer';
 import ErrorScreen from '../ErrorScreen/ErrorScreen';
+import { IoWarningOutline } from "react-icons/io5";
 
 const API_URLS = [
     "You're almost ready to use the app!",
@@ -93,6 +94,7 @@ const LandingPage = () => {
     const [enterPaymentRecordLoading, setEnterPaymentRecordLoading] = useState(false);
     const [seatNumber, setSeatNumber] = useState(null);
     const [amountEntered, setAmountEntered] = useState(null);
+    const [showActivateSeat, setShowActivateSeat] = useState(false);
     const seatNumberRef = useRef(null);
 
     // useEffect to focus on the input field when the component mounts
@@ -123,6 +125,7 @@ const LandingPage = () => {
     };
 
     const handleInputChange = async (event) => {
+        setShowActivateSeat(false);
         let value = parseInt(event.target.value, 10);
 
         if (value > 99) {
@@ -143,7 +146,7 @@ const LandingPage = () => {
         }).catch(err => {
             console.log('err get qr code id by seat no', err);
             if (err?.response?.status === 400) {
-                navigate('/error');
+                setShowActivateSeat(true);
             }
         })
     };
@@ -413,7 +416,7 @@ const LandingPage = () => {
                                         justifyContent: "center",
                                     }}
                                 >
-                                    <div className="border border-sky-300 shadow rounded-md p-4 max-w-sm w-2/4 h-max mx-auto item-center margin_ bg-white">
+                                    <div className="border border-sky-300 shadow rounded-md p-4 max-w-sm w-full sm:w-2/4 h-max mx-auto item-center margin_ bg-white">
                                         <h2 className="text-2xl font-bold text-center flex">
                                             <img
                                                 src="https://media.licdn.com/dms/image/C510BAQF1CjF_d3HRlQ/company-logo_200_200/0/1630588309422/dowell_true_moments_living_lab_logo?e=2147483647&v=beta&t=ogSePm-Hfzu6Ng_21HyCOYUmaIZAJEdo83AKsUnQQVY"
@@ -425,7 +428,7 @@ const LandingPage = () => {
                                         {
                                             showContactAdministration.show ?
                                                 <>
-                                                    <p>{showContactAdministration.message}</p>
+                                                    <p className='text-center text-base font-semibold'>{showContactAdministration.message}</p>
                                                 </>
                                                 :
                                                 <ul style={{ listStyleType: "none", padding: 0 }}>
@@ -476,27 +479,37 @@ const LandingPage = () => {
                                         <div className="h-24 border-b-2 border-zinc-400 m-2 flex items-center justify-between">
                                             <img
                                                 src="https://media.licdn.com/dms/image/C510BAQF1CjF_d3HRlQ/company-logo_200_200/0/1630588309422/dowell_true_moments_living_lab_logo?e=2147483647&v=beta&t=ogSePm-Hfzu6Ng_21HyCOYUmaIZAJEdo83AKsUnQQVY"
+                                                // src=''
                                                 alt="Dowell Logo"
                                                 className="h-5/6 shadow-2xl mx-8"
                                             />
                                             <p className="text-5xl font-bold">Q</p>
-                                            <img
-                                                src="https://i.pinimg.com/736x/f8/66/8e/f8668e5328cfb4938903406948383cf6.jpg"
-                                                alt="Profile Photo"
-                                                className="h-10 w-10 rounded-full shadow-2xl mx-10 cursor-pointer"
-                                                onClick={() => navigate('/profile')}
-                                            />
+                                            <div className="flex items-center justify-center">
+                                                <img
+                                                    src="https://t4.ftcdn.net/jpg/05/89/93/27/360_F_589932782_vQAEAZhHnq1QCGu5ikwrYaQD0Mmurm0N.jpg"
+                                                    alt="Profile Photo"
+                                                    className="h-10 w-10 rounded-full shadow-2xl cursor-pointer"
+                                                    onClick={() => navigate('/profile')}
+                                                />
+                                                <button class="cursor-pointer flex items-center justify-between bg-white hover:bg-rose-100 text-gray-800 font-semibold py-2 px-2 border border-rose-600 rounded shadow mx-4"><CiLogout className="mx-1 text-xl" />Logout</button>
+                                            </div>
                                         </div>
-                                        <div className="flex h-[50%] items-center sm:h-[325px]">
-                                            <div className=" flex flex-col h-full w-full py-8 shadow-2xl sm:flex-row">
+                                        {
+                                            showActivateSeat ? <div className="border border-orange-400 bg-orange-50 w-max rounded margin_ flex items-center justify-center p-2">
+                                                <IoWarningOutline color='#fb923c' fontSize={'1.3rem'} />
+                                                <p className="text-stone-600 text-lg text-center mx-2">Selected seat is not active...</p>
+                                            </div> : null
+                                        }
+                                        <div className="flex h-[50%] items-center sm:h-[325px] my-4">
+                                            <div className="flex flex-col items-center justify-between h-full w-full py-8 shadow-2xl sm:flex-row">
                                                 <QueryClientProvider client={queryClient}>
                                                     <TableContainer component={Paper} sx={{ width: '98%', height: 'max-content' }}>
-                                                        <Table sx={{ minWidth: 650 }} aria-label="simple table">
+                                                        <Table sx={{ minWidth: '100%' }} aria-label="simple table">
                                                             <TableHead>
                                                                 <TableRow>
-                                                                    <TableCell sx={{ width: 'max-content', padding: '10px', fontWeight: '600' }} align="center" >Seat Number</TableCell>
-                                                                    <TableCell sx={{ width: 'max-content', padding: '10px', fontWeight: '600' }} align="center">Payment Requested</TableCell>
-                                                                    <TableCell sx={{ width: 'max-content', padding: '10px', fontWeight: '600' }} align="left">Payment Status</TableCell>
+                                                                    <TableCell sx={{ width: 'max-content', padding: '1%', fontWeight: '600' }} align="center" >Seat Number</TableCell>
+                                                                    <TableCell sx={{ width: 'max-content', padding: '1%', fontWeight: '600' }} align="center">Payment Requested</TableCell>
+                                                                    <TableCell sx={{ width: 'max-content', padding: '1%', fontWeight: '600' }} align="left">Payment Status</TableCell>
                                                                 </TableRow>
                                                             </TableHead>
                                                             <TableBody>
@@ -551,7 +564,7 @@ const LandingPage = () => {
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="w-full h-20 flex items-center justify-center py-6 m-6">
+                                        <div className="w-full h-20 flex items-center justify-center py-6 my-12">
                                             <p className="text-sm mx-1 sm:text-lg sm:mx-4">Seat Number:</p>
                                             <input
                                                 type='number'
@@ -582,11 +595,10 @@ const LandingPage = () => {
 
                                             </button>
                                         </div>
-                                        <div className="flex flex-col m-1 items-center justify-center m-4 sm:flex-row sm:m-6">
+                                        {/* <div className="flex flex-col m-1 items-center justify-center m-4 sm:flex-row sm:m-6">
                                             <button class="cursor-pointer bg-white hover:bg-orange-100 text-gray-800 font-semibold py-2 px-4 border border-orange-400 rounded shadow m-2">Close Seat/Service Desk</button>
                                             <button class="cursor-pointer bg-white hover:bg-sky-100 text-gray-800 font-semibold py-2 px-4 border border-sky-400 rounded shadow m-2">Start Service to Selected Seat/Desk</button>
-                                            <button class="cursor-pointer flex items-center justify-between bg-white hover:bg-rose-100 text-gray-800 font-semibold py-2 px-4 border border-rose-600 rounded shadow m-2"><CiLogout className="mx-2 text-xl" />Logout</button>
-                                        </div>
+                                        </div> */}
                                     </div>
                                 </div >
                             )

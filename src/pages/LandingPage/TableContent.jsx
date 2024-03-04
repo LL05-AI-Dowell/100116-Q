@@ -45,7 +45,7 @@ const SeatRow = ({ seatNumber, pagination }) => {
     if (isLoading)
         return (
             <>
-                <TableCell component="th" scope="row" align="center" sx={{ padding: '5px', margin: '6px' }}>
+                <TableCell component="th" scope="row" align="center" sx={{ padding: '1', margin: '6px' }}>
                     {seatNumber + pagination + 1}
                 </TableCell>
                 <TableCell align="center" sx={{ padding: '5px', margin: '6px' }}>loading...</TableCell>
@@ -56,7 +56,7 @@ const SeatRow = ({ seatNumber, pagination }) => {
         // console.log(`Error fetching data seat number ${seatNumber + pagination + 1}`, !isError, data?.data?.response[0]);
         return (
             <>
-                <TableCell component="th" scope="row" align="center" sx={{ padding: '5px', margin: '6px' }}>
+                <TableCell component="th" scope="row" align="center" sx={{ padding: '1%', margin: '6px' }}>
                     {seatNumber + pagination + 1}
                 </TableCell>
                 <TableCell align='center' sx={{ padding: '5px', margin: '6px' }}>No Customer for today...</TableCell>
@@ -73,7 +73,7 @@ const SeatRow = ({ seatNumber, pagination }) => {
     const amount = reversedArray[0]?.amount;
     return (
         <>
-            <TableCell component="th" scope="row" align="center" sx={{ padding: '5px', margin: '6px' }}>
+            <TableCell component="th" scope="row" align="center" sx={{ padding: '1%', margin: '6px' }}>
                 {seatNumber + pagination + 1}
             </TableCell >
             {data?.data?.response?.length === 0 ?
@@ -91,8 +91,8 @@ const SeatRow = ({ seatNumber, pagination }) => {
                                 <div
                                     key={index}
                                     style={{
-                                        width: "25px",
-                                        height: "25px",
+                                        width: "80%",
+                                        height: "20%",
                                         backgroundColor: getColor(isPaid, paymentStatus),
                                         borderRadius: "30%",
                                         margin: "3px",
