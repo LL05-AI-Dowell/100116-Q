@@ -10,9 +10,11 @@ ENV VITE_BACKEND_URL=$VITE_BACKEND_URL
 
 WORKDIR /usr/src/app
 COPY package*.json ./
-RUN yarn install --production
+# RUN yarn install --production
+RUN npm install --only=production
 COPY . .
-RUN yarn build
+# RUN yarn build
+RUN npm run build
 
 # Step 2: Set up the Nginx server for serving the built application
 FROM nginx:stable-alpine
