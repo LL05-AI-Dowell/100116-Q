@@ -2,7 +2,7 @@ import { data } from "autoprefixer";
 import axios from "axios";
 import { getSavedApiKey } from "../src/hooks/useDowellLogin";
 
-const Q_SERVICES_URL = 'http://127.0.0.1:8000/';
+const Q_SERVICES_URL = import.meta.env.VITE_BACKED_URL;
 
 const qServicesAxiosInstance = axios.create({
     baseURL: Q_SERVICES_URL,
