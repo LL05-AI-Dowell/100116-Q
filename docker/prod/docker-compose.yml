@@ -7,7 +7,7 @@ services:
       context: ../../
       dockerfile: docker/prod/Dockerfile
       args:
-        VITE_BACKEND_URL: https://www.q.uxlivinglab.online
+        VITE_BACKEND_URL: http://100116q-backend:8000
     container_name: 100116q-frontend
     ports:
       - 80:80
@@ -18,7 +18,7 @@ services:
       - /etc/letsencrypt/live/www.q.uxlivinglab.online/fullchain.pem:/etc/letsencrypt/live/www.q.uxlivinglab.online/fullchain.pem:ro
       - /etc/letsencrypt/live/www.q.uxlivinglab.online/privkey.pem:/etc/letsencrypt/live/www.q.uxlivinglab.online/privkey.pem:ro
     environment:
-      VITE_BACKEND_URL: https://www.q.uxlivinglab.online
+      VITE_BACKEND_URL: http://100116q-backend:8000
     restart: always
     networks:
       - queue-net
