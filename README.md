@@ -1,5 +1,3 @@
-Certainly! Here's the complete guide with the addition of creating the `.env` file under the "Frontend Services" section:
-
 ## Welcome to Q - DoWell Platform
 
 Welcome to the Q -> DoWell platform, a cutting-edge system meticulously crafted for streamlined queue management in restaurants, ensuring optimal customer satisfaction and operational efficiency.
