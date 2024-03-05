@@ -91,8 +91,8 @@ const SeatRow = ({ seatNumber, pagination }) => {
                                 <div
                                     key={index}
                                     style={{
-                                        width: "80%",
-                                        height: "20%",
+                                        width: "35px",
+                                        height: "35px",
                                         backgroundColor: getColor(isPaid, paymentStatus),
                                         borderRadius: "30%",
                                         margin: "3px",
