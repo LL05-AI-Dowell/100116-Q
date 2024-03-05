@@ -73,17 +73,17 @@ const SeatRow = ({ seatNumber, pagination }) => {
     const amount = reversedArray[0]?.amount;
     return (
         <>
-            <TableCell component="th" scope="row" align="center" sx={{ padding: '1%', margin: '6px' }}>
+            <TableCell component="th" scope="row" align="center" sx={{ padding: '5px' }}>
                 {seatNumber + pagination + 1}
             </TableCell >
             {data?.data?.response?.length === 0 ?
                 <>
-                    <TableCell align='center' sx={{ padding: '5px', margin: '6px' }}>No Record Found</TableCell>
-                    <TableCell align='left' sx={{ padding: '5px', margin: '6px' }}>No Record Found</TableCell>
+                    <TableCell align='center' sx={{ padding: '5px' }}>No Record Found</TableCell>
+                    <TableCell align='left' sx={{ padding: '5px' }}>No Record Found</TableCell>
                 </> :
                 <>
-                    <TableCell align='center' sx={{ padding: '5px', margin: '6px' }}>{amount}</TableCell>
-                    <TableCell align='left' sx={{ padding: '5px', margin: '6px', display:"flex"  }}>
+                    <TableCell align='center' sx={{ padding: '5px' }}>{amount}</TableCell>
+                    <TableCell align='left' sx={{ display: "flex", padding: '5px' }}>
                         {reversedArray.map((item, index) => {
                             const isPaid = item.is_paid;
                             const paymentStatus = item.payment_status;
@@ -91,8 +91,8 @@ const SeatRow = ({ seatNumber, pagination }) => {
                                 <div
                                     key={index}
                                     style={{
-                                        width: "35px",
-                                        height: "35px",
+                                        width: "30px",
+                                        height: "30px",
                                         backgroundColor: getColor(isPaid, paymentStatus),
                                         borderRadius: "30%",
                                         margin: "3px",
