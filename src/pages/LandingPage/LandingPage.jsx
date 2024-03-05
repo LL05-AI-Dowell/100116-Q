@@ -42,6 +42,7 @@ import SeatRow from './TableContent';
 import { data } from 'autoprefixer';
 import ErrorScreen from '../ErrorScreen/ErrorScreen';
 import { IoWarningOutline } from "react-icons/io5";
+import DigitalQLogo from '../../assets/Digital_Q.svg'
 
 const API_URLS = [
     "You're almost ready to use the app!",
@@ -473,12 +474,12 @@ const LandingPage = () => {
                                 <div className="h-screen m-0 p-0 gradient_ flex items-baseline">
                                     <div className="w-full h-full bg-white margin_ shadow-black mt-3.5 p-4 pt-2 pb-6 rounded-md md:w-11/12 md:h-max">
                                         {
-                                            showBanner ? <p className="text-rose-900 text-2xl text-center">No qr code created <button className='cursor-pointer bg-white text-xl hover:bg-orange-100 text-gray-800 font-semibold py-2 px-4 border border-orange-400 rounded shadow m-2'
+                                            showBanner ? <p className="text-rose-900 text-2xl text-center">Have you created a seat yet, No? <button className='cursor-pointer bg-white text-xl hover:bg-orange-100 text-gray-800 font-semibold py-2 px-4 border border-orange-400 rounded shadow m-2'
                                                 onClick={() => navigate('/profile')}>Create One</button></p> : null
                                         }
                                         <div className="h-24 border-b-2 border-zinc-400 m-2 flex items-center justify-between">
                                             <img
-                                                src="https://media.licdn.com/dms/image/C510BAQF1CjF_d3HRlQ/company-logo_200_200/0/1630588309422/dowell_true_moments_living_lab_logo?e=2147483647&v=beta&t=ogSePm-Hfzu6Ng_21HyCOYUmaIZAJEdo83AKsUnQQVY"
+                                                src={DigitalQLogo}
                                                 // src=''
                                                 alt="Dowell Logo"
                                                 className="h-5/6 shadow-2xl mx-8"
