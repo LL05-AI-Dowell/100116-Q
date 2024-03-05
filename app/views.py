@@ -107,7 +107,7 @@ class kitchen_sink_services(APIView):
         print(response_meta_data)
 
         if not response_meta_data["success"]:
-            return CustomResponse(False,"Meta Data Database is not yet available, kindly contact the administrator.", None, status.HTTP_501_NOT_IMPLEMENTED )
+            return CustomResponse(False,"Meta Data is not yet available, kindly contact the administrator.", None, status.HTTP_501_NOT_IMPLEMENTED )
 
         list_of_meta_data_collection = [
             f'{workspace_id}_user_details',
@@ -124,7 +124,7 @@ class kitchen_sink_services(APIView):
             missing_collections_str = ', '.join(missing_collections)
             return CustomResponse(False, f"The following collections are missing: {missing_collections_str}", missing_collections, status.HTTP_404_NOT_FOUND)
 
-        return CustomResponse(True,"Metadata databases are available to be used", None, status.HTTP_200_OK )
+        return CustomResponse(True,"Meta Data are available to be used", None, status.HTTP_200_OK )
     
     def check_data_database_status(self, request):
         """
@@ -150,7 +150,7 @@ class kitchen_sink_services(APIView):
 
         print(response_data)
         if not response_data["success"]:
-            return CustomResponse(False,"Data Database is not yet available, kindly contact the administrator.", None, status.HTTP_501_NOT_IMPLEMENTED )
+            return CustomResponse(False,"Database is not yet available, kindly contact the administrator", None, status.HTTP_501_NOT_IMPLEMENTED )
 
         list_of_data_collection = [f'{workspace_id}_{date}_q']
 
@@ -163,7 +163,7 @@ class kitchen_sink_services(APIView):
             missing_collections_str = ', '.join(missing_collections)
             return CustomResponse(False, f"The following collections are missing: {missing_collections_str}", missing_collections, status.HTTP_404_NOT_FOUND)
 
-        return CustomResponse(True,"Data databases are available to be used", None, status.HTTP_200_OK )
+        return CustomResponse(True,"Databases are available to be used", None, status.HTTP_200_OK )
         
     def handle_error(self, request): 
         """
