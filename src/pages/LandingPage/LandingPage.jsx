@@ -97,8 +97,8 @@ const LandingPage = () => {
     const [amountEntered, setAmountEntered] = useState(null);
     const [showActivateSeat, setShowActivateSeat] = useState(false);
     const seatNumberRef = useRef(null);
+    const amountRef = useRef(null);
 
-    // useEffect to focus on the input field when the component mounts
     useEffect(() => {
         const timeoutId = setTimeout(() => {
             if (seatNumberRef.current) {
@@ -129,13 +129,18 @@ const LandingPage = () => {
         setShowActivateSeat(false);
         let value = parseInt(event.target.value, 10);
 
+        // if (event.key === 'Enter') {
+        //     amountRef.current.focus();
+        //     return;
+        // }
+
         if (value > 99) {
             value = 99;
         } else if (value <= 0) {
             value = 1;
         } else {
             const newValue = event.key === 'ArrowUp' ? value + 1 : event.key === 'ArrowDown' ? Math.max(0, value - 1) : value;
-            // event.target.value = newValue;
+            event.target.value = newValue;
             setSeatNumber(newValue);
         }
         setSeatNumber(value);
@@ -329,22 +334,6 @@ const LandingPage = () => {
             console.log('qr code resssss', res);
             if (res?.data?.response?.length === 0) {
                 setShowBanner(true);
-                // const seatNumbers = [1, 2, 3, 4, 5];
-                // const dataToPost = {
-                //     "link": "https://xvr8nq-5173.csb.app/",
-                //     "timezone": currentUser?.userinfo?.timezone,
-                //     "username": currentUser?.userinfo?.username,
-                // }
-                // const promises = seatNumbers.map((index) => {
-                //     return createQrCode(currentUser?.userinfo?.client_admin_id, passed_user_details[0]?._id, index, dataToPost)
-                // })
-                // console.log('createqr code', promises);
-                // await Promise.all(promises);
-                // await createQrCode(currentUser?.userinfo?.client_admin_id, passed_user_details[0]?._id, 1, dataToPost).then(res => {
-                //     console.log('qr code created', res)
-                // }).catch(err => {
-                //     console.log('errrr qr code created', err)
-                // })
             }
             setLoadingData(prevLoadingData => ({ ...prevLoadingData, isQrCodeLoading: false }));
             setShowModal(false);
@@ -474,7 +463,7 @@ const LandingPage = () => {
                                 <div className="h-screen m-0 p-0 gradient_ flex items-baseline">
                                     <div className="w-full h-full bg-white margin_ shadow-black mt-3.5 p-4 pt-2 pb-6 rounded-md md:w-11/12 md:h-max">
                                         {
-                                            showBanner ? <p className="text-rose-900 text-2xl text-center">Have you created a seat yet, No? <button className='cursor-pointer bg-white text-xl hover:bg-orange-100 text-gray-800 font-semibold py-2 px-4 border border-orange-400 rounded shadow m-2'
+                                            showBanner ? <p className="text-rose-900 text-2xl text-center">Have you created a seat yet, No? <button className='cursor-pointer bg-white text-xl hover:bg-orange-100 text-gray-800 font-semibold py-1 px-2 border border-orange-400 rounded shadow m-2'
                                                 onClick={() => navigate('/profile')}>Create One</button></p> : null
                                         }
                                         <div className="h-24 border-b-2 border-zinc-400 m-2 flex items-center justify-between">
@@ -484,7 +473,7 @@ const LandingPage = () => {
                                                 alt="Dowell Logo"
                                                 className="h-5/6 shadow-2xl mx-8"
                                             />
-                                            <p className="text-5xl font-bold">Q</p>
+                                            {/* <p className="text-5xl font-bold">Q</p> */}
                                             <div className="flex items-center justify-center">
                                                 <img
                                                     src="https://t4.ftcdn.net/jpg/05/89/93/27/360_F_589932782_vQAEAZhHnq1QCGu5ikwrYaQD0Mmurm0N.jpg"
@@ -502,7 +491,7 @@ const LandingPage = () => {
                                             </div> : null
                                         }
                                         <div className="flex h-[50%] items-center sm:h-[325px] my-4">
-                                            <div className="flex flex-col items-center justify-between h-full w-full py-8 shadow-2xl sm:flex-row">
+                                            <div className="flex flex-col justify-between h-full w-full py-8 shadow-2xl sm:flex-row">
                                                 <QueryClientProvider client={queryClient}>
                                                     <TableContainer component={Paper} sx={{ width: '98%', height: 'max-content' }}>
                                                         <Table sx={{ minWidth: '100%' }} aria-label="simple table">
@@ -569,19 +558,34 @@ const LandingPage = () => {
                                             <p className="text-sm mx-1 sm:text-lg sm:mx-4">Seat Number:</p>
                                             <input
                                                 type='number'
-                                                className="cursor-pointer p-0 text-4xl bg-inherit m-0 border-solid border border-sky-500 rounded w-20 focus:outline-none sm:text-5xl sm:border-none sm:m-2 sm:p-1 sm:w-28"
+                                                className="cursor-pointer p-0 text-4xl bg-inherit m-0 border-solid border border-sky-500 rounded w-20 focus:outline-none sm:text-6xl sm:border-none sm:m-2 sm:p-1 sm:w-28"
                                                 min="1"
                                                 max="99"
                                                 value={seatNumber}
                                                 onChange={(event) => handleInputChange(event)}
                                                 ref={seatNumberRef}
+                                                onKeyDown={(event) => {
+                                                    if (event.key === 'Enter') {
+                                                        if (seatNumber) {
+                                                            amountRef.current.focus();
+                                                        }
+                                                    }
+                                                }}
                                             ></input>
                                             <p className="text-sm mx-1 sm:text-lg sm:mx-4">Amount:</p>
                                             <input
+                                                ref={amountRef}
                                                 value={amountEntered}
                                                 type='number'
-                                                className="cursor-pointer p-0 bg-inherit text-4xl border-solid border border-sky-500 m-0 rounded w-20 focus:outline-none sm:text-5xl sm:w-44 sm:border-none sm:m-2 sm:p1 sm:w-28"
+                                                className="cursor-pointer p-0 bg-inherit text-4xl border-solid border border-sky-500 m-0 rounded w-20 focus:outline-none sm:text-6xl sm:w-44 sm:border-none sm:m-2 sm:p1 sm:w-28"
                                                 onChange={(event) => handleAmountInputChange(event)}
+                                                onKeyDown={(event) => {
+                                                    if (event.key === 'Enter') {
+                                                        if (amountEntered) {
+                                                            handleEnterDataClick();
+                                                        }
+                                                    }
+                                                }}
                                             ></input>
                                             <button class="cursor-pointer flex items-center justify-center bg-white hover:bg-green-100 text-gray-800 font-semibold py-2 px-4 border border-green-400 rounded shadow m-2"
                                                 onClick={handleEnterDataClick}

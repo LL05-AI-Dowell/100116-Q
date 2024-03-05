@@ -9,8 +9,12 @@ import { useNavigate } from 'react-router-dom';
 import {
   CircularProgress
 } from "@mui/material";
+import { getQrCode } from "../../services/qServices";
+import { getSavedNewUserDetails } from "../hooks/useDowellLogin";
+import { useCurrentUserContext } from "../contexts/CurrentUserContext";
 
 const CardDetails = ({ qrCodeResponse }) => {
+  const { currentUser, setQrCodeResponse } = useCurrentUserContext()
   const [isImageClicked, setIsImageClicked] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -18,6 +22,18 @@ const CardDetails = ({ qrCodeResponse }) => {
   const handleImageClick = () => {
     setIsImageClicked(!isImageClicked);
   };
+
+  const handleGetQrCode = async () => {
+    await getQrCode(currentUser?.userinfo?.client_admin_id, getSavedNewUserDetails()[0]?._id).then(async (res) => {
+      setQrCodeResponse(res?.data?.response);
+    }).catch(err => {
+      console.log('error qr code retrieval', err);
+      if (err?.response?.status === 400) {
+        navigate('/error');
+      }
+    })
+  }
+
   const formattedCreatedAt = format(
     new Date(qrCodeResponse?.created_at),
     "yyyy-MM-dd HH:mm:ss"
@@ -28,6 +44,7 @@ const CardDetails = ({ qrCodeResponse }) => {
     console.log('>>>>>>>>>>', qrCodeResponse.workspace_id, qrCodeResponse._id, status);
     await qrCodeActivationDeactivation(qrCodeResponse.workspace_id, qrCodeResponse._id, status).then(res => {
       console.log('res qr activateion de activation', res);
+      handleGetQrCode();
       setIsLoading(false);
     }).catch(err => {
       console.log('err qr activateion de activation', err);

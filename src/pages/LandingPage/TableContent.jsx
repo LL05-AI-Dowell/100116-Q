@@ -45,22 +45,22 @@ const SeatRow = ({ seatNumber, pagination }) => {
     if (isLoading)
         return (
             <>
-                <TableCell component="th" scope="row" align="center" sx={{ padding: '1', margin: '6px' }}>
+                <TableCell component="th" scope="row" align="center" sx={{ padding: '5px' }}>
                     {seatNumber + pagination + 1}
                 </TableCell>
-                <TableCell align="center" sx={{ padding: '5px', margin: '6px' }}>loading...</TableCell>
-                <TableCell align="left" sx={{ padding: '5px', margin: '6px' }}>loading...</TableCell>
+                <TableCell align="center" sx={{ padding: '5px' }}>loading...</TableCell>
+                <TableCell align="left" sx={{ padding: '5px' }}>loading...</TableCell>
             </>
         );
     if (isError || !data)
         // console.log(`Error fetching data seat number ${seatNumber + pagination + 1}`, !isError, data?.data?.response[0]);
         return (
             <>
-                <TableCell component="th" scope="row" align="center" sx={{ padding: '1%', margin: '6px' }}>
+                <TableCell component="th" scope="row" align="center" sx={{ padding: '5px' }}>
                     {seatNumber + pagination + 1}
                 </TableCell>
-                <TableCell align='center' sx={{ padding: '5px', margin: '6px' }}>No Customer for today...</TableCell>
-                <TableCell align='left' sx={{ padding: '5px', margin: '6px' }}>No Customer for today...</TableCell>
+                <TableCell align='center' sx={{ padding: '5px' }}>No Customer for today...</TableCell>
+                <TableCell align='left' sx={{ padding: '5px' }}>No Customer for today...</TableCell>
             </>
         );
 
