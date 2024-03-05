@@ -887,17 +887,26 @@ class customer_services(APIView):
         if not serializer.is_valid():
             return CustomResponse(False, "Posting wrong data to API",serializer.errors, status.HTTP_400_BAD_REQUEST)
         
-        payment_link = "https://checkout.stripe.com/c/pay/cs_live_a1vEW9n2OWLjuVFL8gB5BBLJHvvFd0RtA6NRXuI4bGItTv3Dx7LCHcaRgw#fidkdWxOYHwnPyd1blppbHNgWjA0SWtiNT1Jck91bE9PZF9GVURXbkdmaGhTX2JHcUFmZE1XQUtTMEh1VlE0MWY3al9Td3JNa2xsYGxrRFdhbD1CakRrX3RJXTRqcUdPUTF0N1FtbDRcTjxpNTU1VUhiRkRJdCcpJ2N3amhWYHdzYHcnP3F3cGApJ2lkfGpwcVF8dWAnPyd2bGtiaWBabHFgaCcpJ2BrZGdpYFVpZGZgbWppYWB3dic%2FcXdwYHgl"
+        # payment_link = "https://checkout.stripe.com/c/pay/cs_live_a1vEW9n2OWLjuVFL8gB5BBLJHvvFd0RtA6NRXuI4bGItTv3Dx7LCHcaRgw#fidkdWxOYHwnPyd1blppbHNgWjA0SWtiNT1Jck91bE9PZF9GVURXbkdmaGhTX2JHcUFmZE1XQUtTMEh1VlE0MWY3al9Td3JNa2xsYGxrRFdhbD1CakRrX3RJXTRqcUdPUTF0N1FtbDRcTjxpNTU1VUhiRkRJdCcpJ2N3amhWYHdzYHcnP3F3cGApJ2lkfGpwcVF8dWAnPyd2bGtiaWBabHFgaCcpJ2BrZGdpYFVpZGZgbWppYWB3dic%2FcXdwYHgl"
+        payment_receipt_id = generate_store_id()
+        # callback_url =f"http://localhost:5173/success/?view=success&payment_receipt_id={payment_receipt_id}&date={date}&workspace_id={workspace_id}&qrcode_id={qrcode_id}&seat_number={seat_number}"
+        callback_url =f"https://www.q.uxlivinglab.online/success/?view=success&payment_receipt_id={payment_receipt_id}&date={date}&workspace_id={workspace_id}&qrcode_id={qrcode_id}&seat_number={seat_number}"
         
         # payment information will be changed later
-        payment_receipt_id = generate_store_id()
+        
+        payment_response = generate_payment(amount, callback_url)
+        print(callback_url)
+        if payment_response.status_code != 200:
+            return CustomResponse(False, "Failed to initiate payment for the customer", status.HTTP_401_UNAUTHORIZED)
+        
+        create_payment = payment_response.json()
 
         database_name = f'{workspace_id}_data_q'
         collection_name = f'{workspace_id}_{date}_q'
         
         qrcode_updation_response = update_qr_code_link(
             qrcode_id,
-            payment_link,
+            create_payment["approval_url"],
             f'seat_number_{seat_number}'
         )
        
@@ -910,10 +919,11 @@ class customer_services(APIView):
             "is_paid": False,
             "payment_status": "not_paid",
             "store_id": store_id,
-            "payment_link": payment_link,
+            "payment_link": create_payment["approval_url"],
             "date_customer_visited": date,
             "amount":amount,
             "payment_receipt_id":payment_receipt_id,
+            "receipt_id": create_payment["payment_id"],
             "payment_details": None,
             "created_at": dowell_time(timezone)["current_time"],
             "records": [{"record": "1", "type": "overall"}]

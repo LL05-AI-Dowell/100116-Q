@@ -62,6 +62,5 @@ def update_qr_code_link(qrcode_id, link,name):
         "name":name
     }
     response = requests.put(url, json=payload)
-    print(response.text)
     
     return response.status_code == 200

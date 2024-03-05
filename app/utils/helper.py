@@ -102,3 +102,20 @@ def generate_data_collection_list(workspace_id, num_seats):
     list_of_data_collection = [f'{workspace_id}_seat_{i}' for i in range(1, num_seats + 1)]
     return list_of_data_collection
 
+def generate_payment(price, callback_url):
+    """
+    Generate a payment request to the Stripe payment API.
+    
+    :param price: The price of the product.
+    :param callback_url: The URL to which the payment response will be sent.
+    :return: Response object containing the payment request result.
+    """
+    url = "https://100088.pythonanywhere.com/api/stripe-payment"
+    payload = {
+        "price": price,
+        "product": "Q",
+        "currency_code": "INR",
+        "callback_url": callback_url
+    }
+    response = requests.post(url, json=payload)
+    return response  
