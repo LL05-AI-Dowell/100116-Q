@@ -119,3 +119,23 @@ def generate_payment(price, callback_url):
     }
     response = requests.post(url, json=payload)
     return response  
+
+def user_login(username, password):
+    """
+    Perform user login by sending a POST request to the server with provided username and password.
+
+    :param username: The username of the user.
+    :type username: str
+    :param password: The password of the user.
+    :type password: str
+
+    :return: The response text received from the server.
+    :rtype: str
+    """
+    url = "https://100014.pythonanywhere.com/api/check_user/"
+    payload = {
+        "username":username,
+        "password":password
+    }
+    response = requests.post(url, json=payload)
+    return response.text  

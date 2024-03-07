@@ -200,6 +200,8 @@ class user_details_services(APIView):
             return self.save_user_details(request)
         elif type_request == "update_user_details":
             return self.update_user_details(request)
+        elif type_request == "user_auth":
+            return self.user_auth(request)
         else:
             return self.handle_error(request)
         
@@ -336,6 +338,25 @@ class user_details_services(APIView):
             return CustomResponse(False, "Failed to update user details", None, status.HTTP_400_BAD_REQUEST)
         
         return CustomResponse(True,"User details updated successfully",None,status.HTTP_200_OK)
+    
+    def user_auth(self, request):
+        username = request.data.get('username')
+        password = request.data.get('password')
+
+        try:
+            api_key = authorization_check(request.headers.get('Authorization'))
+        except InvalidTokenException as e:
+            return CustomResponse(False, str(e), None, status.HTTP_401_UNAUTHORIZED)
+        
+        if username and password is None:
+            return CustomResponse(False, "Provide username or password", None, status.HTTP_401_UNAUTHORIZED)
+        
+        response = json.loads(user_login(username, password))
+
+        if not response.get('success'):
+            return CustomResponse(False, "User login failed", None, status.HTTP_401_UNAUTHORIZED)
+        
+        return CustomResponse(True,"User logged in successfully",None,status.HTTP_200_OK)
     
     def handle_error(self, request): 
         """
