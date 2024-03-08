@@ -21,7 +21,7 @@ jobs:
         SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
       run: |
         sshpass -p $SSH_PASSWORD ssh -o StrictHostKeyChecking=no root@67.217.58.6 << 'EOF'
-          cd /home/100116q-frontend
+          cd /home/100116q-frontend/docker/prod
           git pull origin frontend
           docker-compose up -d --build
         EOF
