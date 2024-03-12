@@ -9,4 +9,4 @@ from django.shortcuts import redirect
 @method_decorator(csrf_exempt, name='dispatch')
 class health_check(APIView):
     def get(self, request ):
-        return redirect('https://zdf694-5173.csb.app/')
+        return Response("Server is running ... , version : 1.0.0",status=status.HTTP_200_OK)

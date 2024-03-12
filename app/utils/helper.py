@@ -138,4 +138,17 @@ def user_login(username, password):
         "password":password
     }
     response = requests.post(url, json=payload)
-    return response.text  
+    return response.text 
+
+def generate_phonepay_payment(userId,amount,redirect_url,merchantId):
+    url = "https://www.q.uxlivinglab.online/dowellpayment/phonepay/api/v1/phonepay/initiate-payment"
+
+    payload = {
+        "userId":userId,
+        "amount":amount,
+        "redirect_url": redirect_url,
+        "merchantId": merchantId
+    }
+    response = requests.post(url, json=payload)
+    return response.text
+
