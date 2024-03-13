@@ -1,0 +1,43 @@
+.construction__Page__Container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 0.4rem;
+    font-family: 'Poppins', sans-serif;
+}
+
+.construction__Page__Container img {
+    max-width: 100%;
+    width: 100%;
+    display: block;
+    margin: 3% auto;
+}
+
+.construction__Page__Container img.logo {
+    width: 90px;
+    height: 90px;
+}
+
+.construction__Page__Container h2 {
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    color: #005734;
+}
+
+.construction__Page__Container p {
+    font-weight: 300;
+}
+
+@media (min-width: 767px) and (max-width: 991.98px) {
+    .construction__Page__Container img {
+        margin: 10% auto;
+    }
+}
+
+@media screen and (min-width: 992px) {
+    .construction__Page__Container img {
+        width: 40%;
+        margin: 0 auto;
+    }
+}
