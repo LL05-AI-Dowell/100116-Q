@@ -295,7 +295,69 @@ class user_details_services(APIView):
             return CustomResponse(False,"User details not found", None,status.HTTP_404_NOT_FOUND)
         
         return CustomResponse(True,"User details retrieved successfully",response["data"], status.HTTP_302_FOUND)
+    
+    def update_user_details(self, request):
+        """
+        Update user details.
 
+        This method updates user details for the specified document ID and workspace ID.
+
+        :param request: The HTTP request object.
+        :param document_id: The ID of the document to be updated.
+        :param update_data: The data containing the updates to be applied.
+        :param workspace_id: The ID of the workspace.
+        :param timezone: The timezone to be used for updating the timestamp.
+        :param api_key: The API key for authorization.
+        """
+        document_id = request.data.get('document_id')
+        update_data = request.data.get('update_data')
+        workspace_id = request.data.get('workspace_id')
+        timezone = request.data.get('timezone')
+
+        try:
+            api_key = authorization_check(request.headers.get('Authorization'))
+        except InvalidTokenException as e:
+            return CustomResponse(False, str(e), None, status.HTTP_401_UNAUTHORIZED)
+    
+        serializer = UpdateUserDetailsSerializer(data=request.data)
+        if not serializer.is_valid():
+            return CustomResponse(False,"Posting wrong data to API",serializer.errors, status.HTTP_400_BAD_REQUEST)
+        
+        update_data["updated_at"] = dowell_time(timezone)["current_time"]
+        
+        response = json.loads(datacube_data_update(
+            api_key,
+            f'{workspace_id}_meta_data_q',
+            f'{workspace_id}_user_details',
+            {
+                "_id": document_id,
+            },
+            update_data
+        ))
+
+        if not response["success"] :
+            return CustomResponse(False, "Failed to update user details", None, status.HTTP_400_BAD_REQUEST)
+        
+        return CustomResponse(True,"User details updated successfully",None,status.HTTP_200_OK)
+    
+    def user_auth(self, request):
+        username = request.data.get('username')
+        password = request.data.get('password')
+
+        try:
+            api_key = authorization_check(request.headers.get('Authorization'))
+        except InvalidTokenException as e:
+            return CustomResponse(False, str(e), None, status.HTTP_401_UNAUTHORIZED)
+        
+        if username and password is None:
+            return CustomResponse(False, "Provide username or password", None, status.HTTP_401_UNAUTHORIZED)
+        
+        response = json.loads(user_login(username, password))
+
+        if not response.get('success'):
+            return CustomResponse(False, "User login failed", None, status.HTTP_401_UNAUTHORIZED)
+        
+        return CustomResponse(True,"User logged in successfully",None,status.HTTP_200_OK)
 @method_decorator(csrf_exempt, name='dispatch')
 class store_services(APIView):
     """
@@ -847,3 +909,400 @@ class qrcode_services(APIView):
             "message": "Invalid request type"
         }, status=status.HTTP_400_BAD_REQUEST)
     
+@method_decorator(csrf_exempt, name='dispatch')
+class customer_services(APIView):
+    """
+    API view to handle various customer service operations.
+
+    This class defines API endpoints to handle different types of customer service operations.
+    It includes methods to create customer payments, retrieve seat customers, and update payment statuses.
+    """
+    def post(self, request):
+        """
+        Handle POST requests.
+
+        This method is called to handle POST requests.
+        It determines the type of request and routes it to the appropriate method.
+        Supported request types:
+            - create_customer_payment
+            - retrieve_seat_customers
+
+        :param request: The HTTP request object.
+        :type request: HttpRequest
+
+        :return: Response based on the type of request.
+        :rtype: Response
+        """
+        type_request = request.GET.get('type')
+
+        if type_request == "create_order":
+            return self.create_order(request)
+        elif type_request == "initiate_order":
+            return self.initiate_order(request)
+        elif type_request =="old_order":
+            return self.old_order(request)
+        else:
+            return self.handle_error(request)
+    
+    def get(self, request):
+        """
+        Handle GET requests.
+
+        This method is called to handle GET requests.
+        It determines the type of request and routes it to the appropriate method.
+        Supported request type:
+            - update_payment_status
+
+        :param request: The HTTP request object.
+        :type request: HttpRequest
+
+        :return: Response based on the type of request.
+        :rtype: Response
+        """
+        type_request = request.GET.get('type')
+
+        if type_request == "update_payment_status":
+            return self.update_payment_status(request)
+        if type_request == "retrieve_orders":
+            return self.retrieve_orders(request)
+        else:
+            return self.handle_error(request)   
+        
+    def initiate_order(self,request):
+        """
+        Initiate an order for a seat in a store workspace.
+
+        :param request: The HTTP request containing data for initiating the order.
+        :type request: HttpRequest
+
+        :return: Response indicating the success or failure of the order initiation process.
+        :rtype: CustomResponse
+        """
+        seat_number = request.data.get('seat_number')
+        qrcode_id = request.data.get('qrcode_id')
+        workspace_id = request.data.get('workspace_id')
+        timezone = request.data.get('timezone')
+        date= request.data.get('date')
+        store_id= request.data.get('store_id')
+        phone_number = request.data.get('phone_number')
+
+        try:
+            api_key = authorization_check(request.headers.get('Authorization'))
+        except InvalidTokenException as e:
+            return CustomResponse(False, str(e), None, status.HTTP_401_UNAUTHORIZED)
+        
+        serializer = OrderInitiateSerializer(data={
+            "workspace_id": workspace_id,
+            "qrcode_id": qrcode_id,
+            "timezone": timezone,
+            "seat_number":seat_number,
+            "date":date,
+            "store_id":store_id,
+            "phone_number":phone_number
+        })
+       
+        if not serializer.is_valid():
+            return CustomResponse(False, "Posting wrong data to API",serializer.errors, status.HTTP_400_BAD_REQUEST)
+        seat_number = f'seat_number_{seat_number}'
+        
+        session_token = generate_jwt_token({"workspace_id":workspace_id,"store_id":store_id,"seat_number":seat_number,"date":date})
+
+        data_to_insert = {
+            "seat_number":seat_number,
+            "qrcode_id": qrcode_id,
+            "is_paid": False,
+            "payment_status": "not_paid",
+            "order_status": "order_initiated",
+            "store_id": store_id,
+            "workspace_id": workspace_id,
+            "payment_link": "",
+            "date_customer_visited": date,
+            "phone_number": phone_number,
+            "amount":None,
+            "payment_receipt_id":"",
+            "receipt_id": "",
+            "payment_details": None,
+            "session_token": session_token,
+            "created_at": dowell_time(timezone)["current_time"],
+            "updated_at": "",
+            "records": [{"record": "1", "type": "overall"}]
+        }
+
+        database_name = f'{workspace_id}_data_q'
+        collection_name = f'{workspace_id}_{date}_q'
+
+        response = json.loads(datacube_data_insertion(
+            api_key,
+            database_name,
+            collection_name,
+            data_to_insert
+        ))
+        
+        if not response["success"]:
+            return CustomResponse(False, "Failed to initiate order",None, status.HTTP_400_BAD_REQUEST)
+
+        return CustomResponse(True,"Order initiated successfully", session_token,status.HTTP_201_CREATED)
+    
+    def retrieve_orders(self,request):
+        """
+        Retrieve orders for a specific store workspace.
+
+        :param request: The HTTP request containing parameters for retrieving orders.
+        :type request: HttpRequest
+
+        :return: Response containing retrieved orders for the specified workspace.
+        :rtype: CustomResponse
+        """
+        workspace_id = request.GET.get('workspace_id')
+        date= request.GET.get('date')
+        store_id= request.GET.get('store_id')
+
+        try:
+            api_key = authorization_check(request.headers.get('Authorization'))
+        except InvalidTokenException as e:
+            return CustomResponse(False, str(e), None, status.HTTP_401_UNAUTHORIZED)
+        
+        database_name = f'{workspace_id}_data_q'
+        collection_name = f'{workspace_id}_{date}_q'
+
+        response = json.loads(datacube_data_retrieval(
+            api_key,
+            database_name,
+            collection_name,
+            {
+                "workspace_id":workspace_id,
+                "date_customer_visited":date,
+                "store_id":store_id
+            },
+            5,
+            0,
+            False
+        ))
+
+        if not response["success"]:
+            return CustomResponse(False, "Failed to initiate order",None, status.HTTP_400_BAD_REQUEST)
+
+        return CustomResponse(True,"Retrieve initiated ordered",response["data"],status.HTTP_200_OK)
+
+    def create_order(self,request):
+        """
+        Create an order for a seat in a store workspace.
+
+        :param request: The HTTP request containing data for creating the order.
+        :type request: HttpRequest
+
+        :return: Response indicating the success or failure of the order creation process.
+        :rtype: CustomResponse
+        """
+        seat_number = request.data.get('seat_number')
+        qrcode_id = request.data.get('qrcode_id')
+        workspace_id = request.data.get('workspace_id')
+        timezone = request.data.get('timezone')
+        date= request.data.get('date')
+        store_id= request.data.get('store_id')
+        amount = request.data.get('amount')
+        orderId = request.data.get('order_intiated_id')
+
+        try:
+            api_key = authorization_check(request.headers.get('Authorization'))
+        except InvalidTokenException as e:
+            return CustomResponse(False, str(e), None, status.HTTP_401_UNAUTHORIZED)
+        
+        serializer = SaveSeatDetailsSerializer(data={"workspace_id": workspace_id,"qrcode_id": qrcode_id,"timezone": timezone,"seat_number":seat_number,"date":date,"store_id":store_id,"amount":amount,"orderId":orderId})
+       
+        if not serializer.is_valid():
+            return CustomResponse(False, "Posting wrong data to API",serializer.errors, status.HTTP_400_BAD_REQUEST)
+        
+        payment_receipt_id = generate_store_id()
+        callback_url =f"http://localhost:5173/success/?view=success&payment_receipt_id={payment_receipt_id}&date={date}&workspace_id={workspace_id}&qrcode_id={qrcode_id}&seat_number={seat_number}"
+        # callback_url =f"https://www.q.uxlivinglab.online/success/?view=success&payment_receipt_id={payment_receipt_id}&date={date}&workspace_id={workspace_id}&qrcode_id={qrcode_id}&seat_number={seat_number}"
+        
+        # payment information will be changed later
+        
+        payment_response = generate_payment(amount, callback_url)
+        print(callback_url)
+        if payment_response.status_code != 200:
+            return CustomResponse(False, "Failed to initiate payment for the customer", status.HTTP_401_UNAUTHORIZED)
+        
+        create_payment = payment_response.json()
+
+        database_name = f'{workspace_id}_data_q'
+        collection_name = f'{workspace_id}_{date}_q'
+        
+        qrcode_updation_response = update_qr_code_link(
+            qrcode_id,
+            create_payment["approval_url"],
+            f'seat_number_{seat_number}'
+        )
+       
+        if not qrcode_updation_response:
+            return CustomResponse(False, "Failed to update payment link to qr code server",None, status.HTTP_400_BAD_REQUEST)
+        
+
+        data_to_update = {
+            "order_status":"payment_generated",
+            "payment_link": create_payment["approval_url"],
+            "amount":amount,
+            "payment_receipt_id":payment_receipt_id,
+            "receipt_id": create_payment["payment_id"],
+            "payment_details": None,
+            "updated_at": dowell_time(timezone)["current_time"]
+        }
+
+        response= json.loads(datacube_data_update(
+            api_key,
+            database_name,
+            collection_name,
+            {
+                "_id":orderId
+            },
+            data_to_update
+        ))
+
+        if not response["success"]:
+            return CustomResponse(False, "Failed to generate payment",None, status.HTTP_400_BAD_REQUEST)
+         
+        return CustomResponse(True,"The payment process has started, QRCode is ready to scan by customer",None, status.HTTP_201_CREATED)
+
+    def old_order(self, request):
+        """
+        Retrieve information about an old order.
+
+        :param request: The HTTP request containing data for retrieving an old order.
+        :type request: HttpRequest
+
+        :return: Response containing information about the old order.
+        :rtype: CustomResponse
+        """
+        workspace_id = request.data.get('workspace_id')
+        store_id= request.data.get('store_id')
+        phone_number = request.data.get('phone_number')
+        date = request.data.get('date')
+
+        try:
+            api_key = authorization_check(request.headers.get('Authorization'))
+        except InvalidTokenException as e:
+            return CustomResponse(False, str(e), None, status.HTTP_401_UNAUTHORIZED)
+        
+        serializer = OldOrdersSerializer(data={"workspace_id": workspace_id,"store_id": store_id,"date":date,"store_id":store_id,"phone_number":phone_number})
+       
+        if not serializer.is_valid():
+            return CustomResponse(False, "Posting wrong data to API",serializer.errors, status.HTTP_400_BAD_REQUEST)
+        
+        database_name = f'{workspace_id}_data_q'
+        collection_name = f'{workspace_id}_{date}_q'
+
+        response = json.loads(datacube_data_retrieval(
+            api_key,
+            database_name,
+            collection_name,
+            {
+                "workspace_id": workspace_id,
+                "store_id": store_id,
+                "phone_number": phone_number,
+                "date_customer_visited": date
+            },
+            1,
+            0,
+            False
+        ))
+
+        if not response["success"]:
+            return CustomResponse(False, "Failed to retrieve customer data",None, status.HTTP_400_BAD_REQUEST)
+        
+        data = response.get('data',[])[0]
+        if len(data) == 0:
+            return CustomResponse(False, "Kindly initiate a new order",None, status.HTTP_404_NOT_FOUND)
+        
+        if not data["is_paid"] and data["payment_status"] == "paid":
+            return CustomResponse(False, "Kindly initiate a new order, You have already paid the bill",None, status.HTTP_200_OK)
+
+        if data["order_status"] == "payment_generated":
+            return CustomResponse(False, "The bill is generated ,Kindly pay the bill",None, status.HTTP_402_PAYMENT_REQUIRED)
+
+        if data["order_status"] == "order_initiated":
+            return CustomResponse(False, "The bill is not yet generated ,Kindly wait for the bill",None, status.HTTP_200_OK)
+        
+        print(data["is_paid"])
+        print(data["payment_status"])
+        print(data["order_status"])
+        if data["is_paid"] and data["payment_status"] == "paid" and data["order_status"] == "order_paid":
+            return CustomResponse(True, "Thank you for dining with us, visit next time again",None, status.HTTP_200_OK)
+        
+        check_session = decode_jwt_token(data["session_token"])
+        if check_session is None:
+            return CustomResponse(False, "Session has expired, Kindly initiate new order", None, status.HTTP_401_UNAUTHORIZED)
+        
+        return CustomResponse(True, "Customer Data retrieved" ,None, status.HTTP_200_OK)
+        
+    def update_payment_status(self,request):
+        """
+        Update the payment status for a specific order.
+
+        :param request: The HTTP request containing payment details.
+        :type request: HttpRequest
+
+        :return: Response indicating the success or failure of the payment status update.
+        :rtype: CustomResponse
+        """
+        payment_receipt_id = request.GET.get('payment_receipt_id')
+        date = request.GET.get('date')
+        workspace_id = request.GET.get('workspace_id')
+        qrcode_id = request.GET.get('qrcode_id')
+        seat_number = request.GET.get('seat_number')
+
+        
+        if not qrcode_id and not payment_receipt_id and not workspace_id and not date:
+            return CustomResponse(False, "Payment Details are missing",None, status.HTTP_400_BAD_REQUEST)
+        
+        update_qr_code = update_qr_code_link(
+            qrcode_id,
+            "https://xvr8nq-5173.csb.app/",
+            f'seat_number_{seat_number}'
+        )
+
+        if not update_qr_code:
+            return CustomResponse(False, "Failed to update the qrcode link contact to administrator",None, status.HTTP_400_BAD_REQUEST)
+        
+        response = json.loads(datacube_data_update(
+            "1b834e07-c68b-4bf6-96dd-ab7cdc62f07f",
+            f'{workspace_id}_data_q',
+            f'{workspace_id}_{date}_q',
+            {
+                "payment_receipt_id": payment_receipt_id,
+                "date_customer_visited": date,
+                "qrcode_id": qrcode_id,
+            },
+            {
+                "is_paid": True,
+                "payment_status": "paid",
+                "order_status": "order_paid",
+            }
+        ))
+
+        if not response["success"]:
+            return CustomResponse(False,"Failed to update the payment status",None, status.HTTP_400_BAD_REQUEST)
+        
+        return CustomResponse(True, "Payment successfully updated",None, status.HTTP_200_OK)   
+        
+    def handle_error(self, request): 
+        """
+        Handle invalid request type.
+
+        This method is called when the requested type is not recognized or supported.
+
+        :param request: The HTTP request object.
+        :type request: HttpRequest
+
+        :return: Response indicating failure due to an invalid request type.
+        :rtype: Response
+        """
+        return Response({
+            "success": False,
+            "message": "Invalid request type"
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+

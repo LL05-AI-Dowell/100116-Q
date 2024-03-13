@@ -113,6 +113,7 @@ class SaveSeatDetailsSerializer(serializers.Serializer):
     timezone = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
     store_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
     date = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
+    orderId = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
 
 class GetCustomerStatusSerializer(serializers.Serializer):
     workspace_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
@@ -131,3 +132,17 @@ class CreateMenuSerializer(serializers.Serializer):
     menu_data = serializers.ListField(
         child=serializers.DictField()
     )
+
+class OrderInitiateSerializer(serializers.Serializer):
+    workspace_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
+    qrcode_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
+    seat_number = serializers.IntegerField()
+    phone_number = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
+    timezone = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
+    store_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
+    date = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
+
+class OldOrdersSerializer(serializers.Serializer):
+    workspace_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
+    phone_number = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
+    date = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
