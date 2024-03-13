@@ -46,25 +46,45 @@ class RetrieveStoreSerializer(serializers.Serializer):
 class UpdateStoreDataSerializer(serializers.Serializer):
     workspace_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
     store_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
+    user_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
     timezone = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
-    update_data = LimitedKeysDictField(allowed_keys=['store_name', 'image_link'])
+    update_data = LimitedKeysDictField(allowed_keys=['store_name', 'image_link','bill_genration_by','session_starts_by','PAYMENT_METHOD','tables'])
+
+    
+    PAYMENT_METHOD_CHOICES = ('PHONEPAY', 'GOOGLEPAY', 'DIRECT_BANK')
+    BILL_GENERATION_BY_CHOICES = ('MANAGER', 'CUSTOMER')
 
     def validate_update_data(self, value):
-        image_link = value.get('image_link')
-        if not image_link:
-            return value
+        errors = {}
 
-        validator = URLValidator()
-        try:
-            validator(image_link)
-        except DjangoValidationError:
-            raise serializers.ValidationError("image_link must be a valid URL")
-        
+        # Validate image_link
+        image_link = value.get('image_link')
+        if image_link:
+            validator = URLValidator()
+            try:
+                validator(image_link)
+            except DjangoValidationError:
+                errors['image_link'] = "image_link must be a valid URL"
+
+        # Validate PAYMENT_METHOD
+        payment_method = value.get('PAYMENT_METHOD')
+        if payment_method and payment_method not in self.PAYMENT_METHOD_CHOICES:
+            errors['PAYMENT_METHOD'] = "Invalid PAYMENT_METHOD"
+
+        # Validate bill_genration_by
+        bill_generation_by = value.get('bill_genration_by')
+        if bill_generation_by and bill_generation_by not in self.BILL_GENERATION_BY_CHOICES:
+            errors['bill_genration_by'] = "Invalid bill_genration_by"
+
+        if errors:
+            raise serializers.ValidationError(errors)
+
         return value
 
 class CreateQrCodeSerializer(serializers.Serializer):
     workspace_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
     user_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
+    store_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
     timezone = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
     username = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
     seat_number = serializers.IntegerField()
@@ -93,6 +113,7 @@ class SaveSeatDetailsSerializer(serializers.Serializer):
     timezone = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
     store_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
     date = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
+    orderId = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
 
 class GetCustomerStatusSerializer(serializers.Serializer):
     workspace_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
@@ -102,3 +123,26 @@ class GetCustomerStatusSerializer(serializers.Serializer):
     date = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
     limit = serializers.IntegerField()
     offset = serializers.IntegerField()
+
+class CreateMenuSerializer(serializers.Serializer):
+    workspace_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
+    user_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
+    store_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
+    timezone = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
+    menu_data = serializers.ListField(
+        child=serializers.DictField()
+    )
+
+class OrderInitiateSerializer(serializers.Serializer):
+    workspace_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
+    qrcode_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
+    seat_number = serializers.IntegerField()
+    phone_number = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
+    timezone = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
+    store_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
+    date = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
+
+class OldOrdersSerializer(serializers.Serializer):
+    workspace_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
+    phone_number = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
+    date = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)

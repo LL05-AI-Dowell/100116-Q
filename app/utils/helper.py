@@ -3,7 +3,9 @@ import requests
 from rest_framework.response import Response
 from rest_framework import status
 from bson import ObjectId
-
+from datetime import datetime, timedelta
+import jwt
+from jwt import ExpiredSignatureError
 
 def send_email(toname,toemail,subject,email_content):
     """
@@ -152,3 +154,47 @@ def generate_phonepay_payment(userId,amount,redirect_url,merchantId):
     response = requests.post(url, json=payload)
     return response.text
 
+
+def generate_jwt_token(payload):
+    """
+    Generate a JSON Web Token (JWT) with the given payload.
+
+    :param payload: The payload to be included in the JWT.
+    :type payload: dict
+
+    :return: The generated JWT token.
+    :rtype: str
+    """
+    expiration_time = datetime.utcnow() + timedelta(minutes=10)
+    payload['exp'] = expiration_time
+    jwt_token = jwt.encode(payload, 'uxlivinglabQ', algorithm='HS256')
+    return jwt_token
+
+def decode_jwt_token(token):
+    """
+    Decode a JSON Web Token (JWT) and return the decoded payload.
+
+    :param token: The JWT token to decode.
+    :type token: str
+
+    :return: The decoded payload from the JWT token.
+    :rtype: dict
+
+    :raises ValueError: If the token has expired.
+    """
+    try:
+        decoded_token = jwt.decode(token, 'uxlivinglabQ', algorithms=['HS256'])
+        print(decoded_token)
+        return decoded_token
+    except ExpiredSignatureError:
+        return None
+
+
+def format_datetime(time_string):
+    datetime_obj = datetime.strptime(time_string, "%Y-%m-%dT%H:%M:%S.%f%z")
+
+    date_part = datetime_obj.strftime("%Y_%m_%d")
+    time_part = datetime_obj.strftime("%H_%M_%S")
+    formatted_datetime = f"{date_part}_{time_part}"
+
+    return formatted_datetime
