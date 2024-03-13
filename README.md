@@ -16,6 +16,6 @@ API documentation for the Q -> DoWell platform, designed for efficient queue man
 
 ### Documentation
 - **API Documentation Links:** [Q -> DoWell Platform](https://documenter.getpostman.com/view/26372308/2sA2rGtJVn)
-- **API Documentation Links V@2.0.0:** [Q -> DoWell Platform](https://documenter.getpostman.com/view/26372308/2sA2rGtJVn)
+- **API Documentation Links V@2.0.0:** [Q -> DoWell Platform](https://apidog.com/apidoc/shared-a1f18c83-34a4-4318-a854-4ab09e13a51a)
 
 
