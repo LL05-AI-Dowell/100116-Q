@@ -31,6 +31,8 @@ const UserDetailsScreen = () => {
         setEditedBankDetails(event.target.value);
     };
 
+    
+
     return (
         <Card variant="outlined" className='mainCard' sx={{ color: 'black', width: '90%', display: 'flex', alignItems: 'center', borderRadius: '10px', border: 'none' }}>
             <CardContent>

@@ -20,6 +20,7 @@ const SeatDetails = () => {
             setLoading(false);
         }
     }, [qrCodeResponse]);
+    // {console.log('URLLLLLL',process.env.Q_APP_URL)}
 
     const handleAddQrCode = async () => {
         setIsQrCodeLoading(true);
@@ -29,6 +30,7 @@ const SeatDetails = () => {
         }
         const dataToPost = {
             "link": "https://xvr8nq-5173.csb.app/",
+            // "link": `https://www.q.uxlivinglab.online/qrlink?view=qrlinks& workspace_id=${currentUser?.userinfo?.client_admin_id}&store_id=${getSavedNewUserDetails()[0].store_ids[0]}`,
             "timezone": currentUser?.userinfo?.timezone,
             "username": currentUser?.userinfo?.username,
         }
