@@ -9,6 +9,10 @@ from .utils.datacube_helper import *
 from .utils.authorization import *
 from .utils.linkshortener_helper import *
 import jwt
+import asyncio
+import random
+
+from django.http import StreamingHttpResponse
 
 @method_decorator(csrf_exempt, name='dispatch')
 class health_check(APIView):
@@ -967,6 +971,8 @@ class customer_services(APIView):
             return self.retrieve_orders_by_seat(request)
         elif type_request == "retrive_initiated_order":
             return self.retrive_initiated_order(request)
+        elif type_request == "test_retrieve_data":
+            return self.test_retrieve_data(request)
         else:
             return self.handle_error(request)   
         
@@ -1338,7 +1344,73 @@ class customer_services(APIView):
             return CustomResponse(False,"Failed to update the payment status",None, status.HTTP_400_BAD_REQUEST)
         
         return CustomResponse(True, "Payment successfully updated",None, status.HTTP_200_OK)   
-        
+
+    def test_retrieve_data(self,request):
+        """
+        Retrieve orders for a specific store workspace.
+
+        :param request: The HTTP request containing parameters for retrieving orders.
+        :type request: HttpRequest
+
+        :return: Response containing retrieved orders for the specified workspace.
+        :rtype: StreamingHttpResponse
+        """
+        workspace_id = request.GET.get('workspace_id')
+        date = request.GET.get('date')
+        store_id = request.GET.get('store_id')
+        seat_number = request.GET.get('seat_number')
+        limit = request.GET.get('limit')
+        offset = request.GET.get('offset')
+
+        # try:
+        #     api_key = authorization_check(request.headers.get('Authorization'))
+        # except InvalidTokenException as e:
+        #     return StreamingHttpResponse(
+        #         f'data: {str(e)}\n\n',
+        #         content_type='text/event-stream',
+        #         status=401
+        #     )
+        api_key = "1b834e07-c68b-4bf6-96dd-ab7cdc62f07f"
+        database_name = f'{workspace_id}_data_q'
+        collection_name = f'{workspace_id}_{date}_q'
+
+        response = json.loads(datacube_data_retrieval(
+            api_key,
+            database_name,
+            collection_name,
+            {
+                "workspace_id": workspace_id,
+                "date_customer_visited": date,
+                "seat_number": f"seat_number_{seat_number}",
+                "store_id": store_id
+            },
+            limit,
+            offset,
+            False
+        ))
+
+        if response.get("success", False):
+            data = response.get("data", [])
+            orders = [{"order_initiated_id": entry["_id"], "qrcode_id": entry["qrcode_id"], "order_status": entry["order_status"], "phone_number": entry["phone_number"]} for entry in data if entry["order_status"] == "order_initiated"]
+            if orders:
+                return StreamingHttpResponse(
+                    '\n'.join([f'data: {json.dumps(order)}\n' for order in orders]),
+                    content_type='text/event-stream',
+                    status=200
+                )
+            else:
+                return StreamingHttpResponse(
+                    f'data: No orders initiated\n\n',
+                    content_type='text/event-stream',
+                    status=200
+                )
+        else:
+            return StreamingHttpResponse(
+                f'data: Failed to retrieve orders\n\n',
+                content_type='text/event-stream',
+                status=400
+            )
+    
     def handle_error(self, request): 
         """
         Handle invalid request type.
@@ -1357,6 +1429,13 @@ class customer_services(APIView):
         }, status=status.HTTP_400_BAD_REQUEST)
 
 
+async def sse_stream(request):
+    async def event_stream():
+        emojis = ["🚀", "🐎", "🌅", "🦾", "🍇"]
+        i = 0
+        while True:
+            yield f'data: {random.choice(emojis)} {i}\n\n'
+            i += 1
+            await asyncio.sleep(1)
 
-
-
+    return StreamingHttpResponse(event_stream(), content_type='text/event-stream')

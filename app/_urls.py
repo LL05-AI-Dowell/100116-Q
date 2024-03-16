@@ -8,4 +8,5 @@ urlpatterns = [
     path('store-services/',store_services.as_view()),
     path('qrcode-services/',qrcode_services.as_view()),
     path('customer-services/',customer_services.as_view()),
+    path('stream/', sse_stream, name='sse_stream'),
 ]
