@@ -963,8 +963,10 @@ class customer_services(APIView):
 
         if type_request == "update_payment_status":
             return self.update_payment_status(request)
-        if type_request == "retrieve_orders":
-            return self.retrieve_orders(request)
+        elif type_request == "retrieve_orders_by_seat":
+            return self.retrieve_orders_by_seat(request)
+        elif type_request == "retrive_initiated_order":
+            return self.retrive_initiated_order(request)
         else:
             return self.handle_error(request)   
         
@@ -1043,7 +1045,7 @@ class customer_services(APIView):
 
         return CustomResponse(True,"Order initiated successfully", session_token,status.HTTP_201_CREATED)
     
-    def retrieve_orders(self,request):
+    def retrieve_orders_by_seat(self,request):
         """
         Retrieve orders for a specific store workspace.
 
@@ -1056,6 +1058,9 @@ class customer_services(APIView):
         workspace_id = request.GET.get('workspace_id')
         date= request.GET.get('date')
         store_id= request.GET.get('store_id')
+        seat_number = request.GET.get('seat_number')
+        limit = request.GET.get('limit')
+        offset = request.GET.get('offset')
 
         try:
             api_key = authorization_check(request.headers.get('Authorization'))
@@ -1072,10 +1077,11 @@ class customer_services(APIView):
             {
                 "workspace_id":workspace_id,
                 "date_customer_visited":date,
+                "seat_number":f"seat_number_{seat_number}",
                 "store_id":store_id
             },
-            5,
-            0,
+            limit,
+            offset,
             False
         ))
 
@@ -1083,6 +1089,54 @@ class customer_services(APIView):
             return CustomResponse(False, "Failed to initiate order",None, status.HTTP_400_BAD_REQUEST)
 
         return CustomResponse(True,"Retrieve initiated ordered",response["data"],status.HTTP_200_OK)
+    
+    def retrive_initiated_order(self,request):
+        """
+        Retrieve orders for a specific store workspace.
+
+        :param request: The HTTP request containing parameters for retrieving orders.
+        :type request: HttpRequest
+
+        :return: Response containing retrieved orders for the specified workspace.
+        :rtype: CustomResponse
+        """
+        workspace_id = request.GET.get('workspace_id')
+        date= request.GET.get('date')
+        store_id= request.GET.get('store_id')
+        seat_number = request.GET.get('seat_number')
+        limit = request.GET.get('limit')
+        offset = request.GET.get('offset')
+
+        try:
+            api_key = authorization_check(request.headers.get('Authorization'))
+        except InvalidTokenException as e:
+            return CustomResponse(False, str(e), None, status.HTTP_401_UNAUTHORIZED)
+        
+        database_name = f'{workspace_id}_data_q'
+        collection_name = f'{workspace_id}_{date}_q'
+
+        response = json.loads(datacube_data_retrieval(
+            api_key,
+            database_name,
+            collection_name,
+            {
+                "workspace_id":workspace_id,
+                "date_customer_visited":date,
+                "seat_number":f"seat_number_{seat_number}",
+                "store_id":store_id
+            },
+            limit,
+            offset,
+            False
+        ))
+
+        if not response["success"]:
+            return CustomResponse(False, "Failed to initiate order",None, status.HTTP_400_BAD_REQUEST)
+        
+        data = response["data"]
+        response = [{"order_initiated_id": entry["_id"], "qrcode_id": entry["qrcode_id"], "order_status": entry["order_status"], "phone_number": entry["phone_number"]} for entry in data if entry["order_status"] == "order_initiated"]
+
+        return CustomResponse(True,"Retrieve initiated ordered",response,status.HTTP_200_OK)
 
     def create_order(self,request):
         """
