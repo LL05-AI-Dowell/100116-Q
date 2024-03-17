@@ -66,19 +66,19 @@ export const getQrCode = async (workspace_id, user_id) => {
 };
 
 
-export const createQrCode = async (workspace_id, user_id, seat_no, dataToPost) => {
+export const createQrCode = async (workspace_id, user_id,store_id ,seat_no, dataToPost) => {
     const headers = {
         'Authorization': `Bearer ${getSavedApiKey()}`
     };
-    return await qServicesAxiosInstance.post(`/v2/qrcode-services/?type=create_qrcode&workspace_id=${workspace_id}&user_id=${user_id}&seat_number=${seat_no}`, dataToPost, { headers });
+    return await qServicesAxiosInstance.post(`/v2/qrcode-services/?type=create_qrcode&workspace_id=${workspace_id}&user_id=${user_id}&store_id=${store_id}&seat_number=${seat_no}`, dataToPost, { headers });
 };
 
-export const getPaymentDetailForSeat = async (workspace_id, seat_no, date, store_id, dataToPost) => {
+export const getPaymentDetailForSeat = async (workspace_id, seat_no, date, store_id) => {
     const headers = {
         'Authorization': `Bearer ${getSavedApiKey()}`
     };
-    return await qServicesAxiosInstance.post(`/v2/customer-services/?type=retrieve_seat_customers&workspace_id=${workspace_id}&seat_number=${seat_no}&date=${date}&store_id=${store_id}&limit=5&offset=0`,
-        dataToPost, { headers });
+    return await qServicesAxiosInstance.get(`/v2/customer-services/?type=retrieve_orders_by_seat&workspace_id=${workspace_id}&seat_number=${seat_no}&date=${date}&store_id=${store_id}&limit=5&offset=0`,
+         { headers });
 };
 
 export const getQrCodeIdBySeatNumber = async (workspace_id, seat_no) => {
@@ -116,4 +116,25 @@ export const userAuth = async (dataToPost) => {
         'Authorization': `Bearer ${getSavedApiKey()}`
     };
     return await qServicesAxiosInstance.post(`/v2/user-services/?type=user_auth`,dataToPost, { headers });
+}
+
+export const retrieveInitiatedOrder = async (workspace_id, seat_no, date, store_id) => {
+    const headers = {
+        'Authorization': `Bearer ${getSavedApiKey()}`
+    };
+    return await qServicesAxiosInstance.get(`/v2/customer-services/?type=retrive_initiated_order&workspace_id=${workspace_id}&seat_number=${seat_no}&date=${date}&store_id=${store_id}&limit=10&offset=0`, { headers });
+}
+
+export const initiateNewOrder = async (dataToPost) => {
+    const headers = {
+        'Authorization': `Bearer ${getSavedApiKey()}`
+    };
+    return await qServicesAxiosInstance.post(`/v2/customer-services/?type=initiate_order`,dataToPost, { headers });
+}
+
+export const initiateOlderOrder = async (dataToPost) => {
+    const headers = {
+        'Authorization': `Bearer ${getSavedApiKey()}`
+    };
+    return await qServicesAxiosInstance.post(`/v2/customer-services/?type=old_order`,dataToPost, { headers });
 }

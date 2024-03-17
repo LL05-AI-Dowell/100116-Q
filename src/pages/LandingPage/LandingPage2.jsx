@@ -43,6 +43,8 @@ import { data } from 'autoprefixer';
 import ErrorScreen from '../ErrorScreen/ErrorScreen';
 import { IoWarningOutline } from "react-icons/io5";
 import DigitalQLogo from '../../assets/Digital_Q.svg'
+import { retrieveInitiatedOrder } from '../../../services/qServices';
+import { GiCancel } from "react-icons/gi";
 
 const API_URLS = [
     "You're almost ready to use the app!",
@@ -65,7 +67,9 @@ const LandingPage2 = () => {
         intialConfigurationLoaded,
         setIntialConfigurationLoaded,
         qrCodeResponse,
-        setQrCodeResponse
+        setQrCodeResponse,
+        storeDetailsResponse,
+        setStoreDetailsResponse,
     } = useCurrentUserContext();
     const [cardPagination, setCardPagination] = useState(0);
     const [tablePagination, setTablePagination] = useState(0);
@@ -100,8 +104,12 @@ const LandingPage2 = () => {
     const [amountEntered, setAmountEntered] = useState('');
     const [tableEntered, setTableEntered] = useState(null);
     const [showActivateSeat, setShowActivateSeat] = useState(false);
+    const [noOrderInititatedForSeat, setNoOrderInititatedForSeat] = useState(false);
+    const [orderInitiatedForSeat,setOrderInitiatedForSeat] = useState([]);
+    const [selectedTableNumber,setSelectedTableNumber] = useState(null);
     const seatNumberRef = useRef(null);
     const amountRef = useRef(null);
+
 
     useEffect(() => {
         const timeoutId = setTimeout(() => {
@@ -163,35 +171,32 @@ const LandingPage2 = () => {
     };
 
     const handleInputChange = async (value) => {
+        setNoOrderInititatedForSeat(false);
         setShowActivateSeat(false);
-        // let value = parseInt(event.target.value, 10);
-
-        // if (event.key === 'Enter') {
-        //     amountRef.current.focus();
-        //     return;
-        // }
-
-        // if (value > 99) {
-        //     value = 99;
-        // } else if (value <= 0) {
-        //     value = 1;
-        // } else {
-        //     const newValue = event.key === 'ArrowUp' ? value + 1 : event.key === 'ArrowDown' ? Math.max(0, value - 1) : value;
-        //     event.target.value = newValue;
-        //     setSeatNumber(newValue);
-        // }
-        // setSeatNumber(value);
-        // event.target.value = value;
-
-        await getQrCodeIdBySeatNumber(currentUser?.userinfo?.client_admin_id, value).then(res => {
-            console.log('res get qr code id by seat', res?.data?.response);
-            setQrCodeIdForSeatNumber(prevVal => ({ ...prevVal, qrCodeId: res?.data?.response, seatNumber: value }));
-        }).catch(err => {
-            console.log('err get qr code id by seat no', err);
-            if (err?.response?.status === 400) {
-                setShowActivateSeat(true);
+        console.log(currentUser?.userinfo?.client_admin_id, value, formatDateForAPI(currentDate), getSavedNewUserDetails()[0].store_ids[0]);
+        await retrieveInitiatedOrder(currentUser?.userinfo?.client_admin_id, value, formatDateForAPI(currentDate), getSavedNewUserDetails()[0].store_ids[0]).then(res => {
+            console.log('retrieved initiated order ress', res);
+            if(res?.data?.response?.length === 0){
+                setNoOrderInititatedForSeat(true);
+            }else{
+                setOrderInitiatedForSeat(res?.data?.response);
             }
-        })
+        }).catch(err => {
+            console.log('err retrieving initiated order err', err);
+            if (err?.response?.status === 400) {
+                navigate('/error');
+            }
+        });
+
+        // await getQrCodeIdBySeatNumber(currentUser?.userinfo?.client_admin_id, value).then(res => {
+        //     console.log('res get qr code id by seat', res?.data?.response);
+        //     setQrCodeIdForSeatNumber(prevVal => ({ ...prevVal, qrCodeId: res?.data?.response, seatNumber: value }));
+        // }).catch(err => {
+        //     console.log('err get qr code id by seat no', err);
+        //     if (err?.response?.status === 400) {
+        //         setShowActivateSeat(true);
+        //     }
+        // })
     };
 
     const handleAmountInputChange = (event) => {
@@ -334,7 +339,8 @@ const LandingPage2 = () => {
     const handleGetStoreData = async (passed_user_details) => {
         console.log('1', passed_user_details);
         await getStoreData(currentUser?.userinfo?.client_admin_id).then(async (res) => {
-            console.log('get store data', res);
+            console.log('get store data', res?.data?.response);
+            
             if (res?.data?.response?.length === 0) {
                 const store_ids = passed_user_details[0].store_ids;
 
@@ -353,6 +359,8 @@ const LandingPage2 = () => {
                         navigate('/error');
                     }
                 })
+            }else{
+                setStoreDetailsResponse(res?.data?.response);
             }
             setLoadingData(prevLoadingData => ({ ...prevLoadingData, isSeatDataLoading: false, isQrCodeLoading: true }));
             handleGetQrCode(passed_user_details);
@@ -409,6 +417,10 @@ const LandingPage2 = () => {
         //         navigate('/error');
         //     }
         // })
+    }
+
+    const handleCloseBanner = () => {
+        setNoOrderInititatedForSeat(false);
     }
 
     return (
@@ -508,6 +520,13 @@ const LandingPage2 = () => {
                                                 <p className="text-stone-600 text-lg text-center mx-2">Selected seat is not active...</p>
                                             </div> : null
                                         }
+                                        {
+                                            noOrderInititatedForSeat ? <div className="border border-orange-400 bg-orange-50 w-max rounded margin_ flex items-center justify-center p-2">
+                                                <IoWarningOutline color='#fb923c' fontSize={'1.3rem'} />
+                                                <p className="text-stone-600 text-lg text-center mx-2">No Order is initiated for this seat..</p>
+                                                <GiCancel color='#fb923c' fontSize={'0.8rem'} onClick={handleCloseBanner}/>
+                                            </div> : null
+                                        }
                                         <div className='flex flex-col sm:flex-row'>
                                             <div className="flex flex-col h-max sm:w-[60%] w-full items-center my-4">
                                                 <div className="flex flex-col justify-between h-full sm:h-[325px] w-full py-8 shadow-2xl sm:flex-row">
@@ -575,10 +594,10 @@ const LandingPage2 = () => {
                                                 <div className='flex flex-col sm:flex-row w-full my-2'>
                                                     <div className='sm:w-4/6 w-full'>
                                                         <p className='p-2 bg-sky-200 rounded margin_ sm:w-[90%] w-[100%]'>Tables</p>
-                                                        <div className="flex flex-wrap items-center justify-center m-2">
+                                                        <div className="flex flex-wrap flex-col items-center justify-center m-2">
                                                             <div className='flex items-center justify-center flex-wrap'>
                                                                 {
-                                                                    createArrayWithLength(100)
+                                                                    createArrayWithLength(storeDetailsResponse[0].tables.length)
                                                                         .slice(
                                                                             tablePagination,
                                                                             tablePagination + 10
@@ -588,6 +607,7 @@ const LandingPage2 = () => {
                                                                                 <button
                                                                                     className="bg-inherit text-black border-solid border border-sky-500 rounded m-0.5 w-[95px] h-8"
                                                                                     onClick={() => {
+                                                                                        setSelectedTableNumber(index + tablePagination);
                                                                                         setTableEntered(index + tablePagination + 1);
                                                                                     }}
                                                                                     key={`${s}_button`}
@@ -622,18 +642,24 @@ const LandingPage2 = () => {
                                                         <p className='p-2 bg-sky-200 rounded mx-1 margin_ w-max'>Seats</p>
                                                         <div className='flex flex-row flex-wrap items-center justify-center'>
                                                             {
-                                                                [1, 2, 3, 4].map((index, s) => (
-                                                                    <button
-                                                                        className="bg-inherit text-black border-solid border border-sky-500 rounded my-0.5 w-12 h-8"
-                                                                        onClick={() => {
-                                                                            // handleInputChange(index);
-                                                                            setSeatNumber(index);
-                                                                        }}
-                                                                        key={`${s}_button`}
-                                                                    >
-                                                                        {s + 1}
-                                                                    </button>
-                                                                ))
+                                                                storeDetailsResponse[0].tables[selectedTableNumber]?.seat_data.length === 0?<p>No Seat</p>:
+                                                                createArrayWithLength(storeDetailsResponse[0].tables[selectedTableNumber]?.seat_data.length)
+                                                                .map((seat, index) => {
+                                                                    
+                                                                    const seatNumber = parseInt(seat?.seat_number?.split('_').pop());
+                                                                    return (
+                                                                        <button
+                                                                            className="bg-inherit text-black border-solid border border-sky-500 rounded my-0.5 w-12 h-8"
+                                                                            onClick={() => {
+                                                                                handleInputChange(seatNumber);
+                                                                                setSeatNumber(seatNumber);
+                                                                            }}
+                                                                            key={`${index}_button`}
+                                                                        >
+                                                                            {seatNumber}
+                                                                        </button>
+                                                                    );
+                                                                })
                                                             }
                                                         </div>
                                                     </div>
@@ -662,23 +688,13 @@ const LandingPage2 = () => {
                                                             </button>
                                                             {
                                                                 <ul>{
-                                                                    // createArrayWithLength(999)
-                                                                    //     .slice(
-                                                                    //         seatPagination,
-                                                                    //         seatPagination + 5
-                                                                    //     )
-                                                                    [12345678998, 12345678998,
-                                                                        12345678998, 12345678998, 12345678998].map((s, index) => (
+                                                                    createArrayWithLength(orderInitiatedForSeat.length)
+                                                                        .slice(
+                                                                            seatPagination,
+                                                                            seatPagination + 5
+                                                                        )
+                                                                        .map((s, index) => (
                                                                             <div className="">
-                                                                                {/* <button
-                                                                                className="rotate-0 bg-inherit text-black border-solid border border-sky-500 rounded-full m-0.5 w-max h-max sm:rotate-180"
-                                                                                onClick={() => {
-                                                                                    setOrderNumber(s);
-                                                                                }}
-                                                                                key={`${s}_button`}
-                                                                            >
-                                                                                {s + 1}
-                                                                            </button> */}
                                                                                 <li
                                                                                     className='cursor-pointer flex flex-col justify-start bg-inherit text-black border-solid border border-sky-500 rounded m-3 p-1 w-max h-max'
                                                                                     onClick={() => {
@@ -686,7 +702,7 @@ const LandingPage2 = () => {
                                                                                     }}
                                                                                     key={`${s}_button`}
                                                                                 >
-                                                                                    {s + 1}
+                                                                                    {s?.phone_number}
                                                                                 </li>
                                                                             </div>
                                                                         ))}
@@ -711,6 +727,12 @@ const LandingPage2 = () => {
                                                                     <button
                                                                         className="bg-inherit text-black border-solid border border-sky-500 rounded w-1/5 h-[25%] m-3 text-2xl"
                                                                         onClick={() => {
+                                                                            if (index === 0 && amountEntered === '0') {
+                                                                                return;
+                                                                            }
+                                                                            if (amountEntered === '' && index === 0) {
+                                                                                return;
+                                                                            }
                                                                             if (index === '.' && amountEntered.includes('.')) {
                                                                                 return;
                                                                             }

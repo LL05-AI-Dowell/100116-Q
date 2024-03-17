@@ -22,7 +22,7 @@ const SeatRow = ({ seatNumber, pagination }) => {
         ["seatData", seatNumber],
         () => getPaymentDetailForSeat(currentUser?.userinfo?.client_admin_id, seatNumber + pagination + 1, formatDateForAPI(currentDate), getSavedNewUserDetails()[0]?.store_ids[0], dataToPost),
         {
-            refetchInterval: 150000, // Refresh every 15 seconds
+            refetchInterval: 15000, // Refresh every 15 seconds
         }
     );
 

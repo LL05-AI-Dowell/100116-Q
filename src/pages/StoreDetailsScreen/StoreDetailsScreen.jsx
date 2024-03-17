@@ -40,13 +40,14 @@ const StoreDetailsScreen = () => {
 
     return (
         <>
-            <div className="w-full h-max p-4 flex flex-wrap items-center">
+            <div className="w-full h-max p-4 flex flex-wrap items-center justify-evenly">
                 {
                     isLoading ? <CircularProgress /> :
                         (
+                            // [1,2,3,4,5,6]
                             storeData.map((index, store) => {
                                 return (
-                                    <div key={store?._id} className="w-[70%] md:w-[43%] h-full bg-[#ecf7ff] p-4 m-2 rounded shadow-xl">
+                                    <div key={store?._id} className="w-[70%] md:w-[400px] h-full bg-[#ecf7ff] p-4 m-2 rounded shadow-xl">
                                         <div className="w-full flex flex-wrap">
                                             <div className="w-[35%] h-full flex items-center justify-center">
                                                 {
@@ -170,7 +171,7 @@ const StoreDetailsScreen = () => {
                                 <div className="w-full flex flex-wrap items-center justify-center mx-16">
                                     {
                                         (
-                                            [1, 2, 3, 4].map((index, store) => {
+                                            storeData[0].tables.map((index, store) => {
                                                 return (
                                                     <div key={store} className="w-[43%] h-full bg-[#ecf7ff] p-4 m-2 rounded shadow-xl">
                                                         <div className="m-1">
