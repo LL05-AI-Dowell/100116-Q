@@ -4,227 +4,433 @@ import { useState, useEffect } from "react";
 import { CircularProgress } from "@mui/material";
 import { CiEdit } from "react-icons/ci";
 import { MdViewList } from "react-icons/md";
-import Dialog from '@mui/material/Dialog';
+import Dialog from "@mui/material/Dialog";
 import { MdCancel } from "react-icons/md";
-import TextField from '@mui/material/TextField';
-
+import { FaUserEdit } from "react-icons/fa";
+// import TextField from '@mui/material/TextField';
 
 const StoreDetailsScreen = () => {
+  const { currentUser } = useCurrentUserContext();
+  const [storeData, setStoreData] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-    const { currentUser } = useCurrentUserContext();
-    const [storeData, setStoreData] = useState([]);
-    const [isLoading, setIsLoading] = useState(false);
-    const [showEditModal, setShowEditModal] = useState(false);
-    const [isModalOpen, setIsModalOpen] = useState(false);
+  useEffect(() => {
+    setIsLoading(true);
+    getStoreData(currentUser?.userinfo?.client_admin_id)
+      .then((res) => {
+        console.log("get store data ress", res.data);
+        setStoreData(res?.data?.response);
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        console.log("get store data errrrrr", err);
+        setIsLoading(false);
+      });
+  }, []);
 
-    useEffect(() => {
-        setIsLoading(true);
-        getStoreData(currentUser?.userinfo?.client_admin_id).then(res => {
-            console.log('get store data ress', res.data);
-            setStoreData(res?.data?.response);
-            setIsLoading(false);
-        }).catch(err => {
-            console.log('get store data errrrrr', err);
-            setIsLoading(false);
-        });
-    }, [])
+  const handleCloseEditModal = () => {
+    setShowEditModal(false);
+  };
 
-    const handleCloseEditModal = () => {
-        setShowEditModal(false);
-    }
+  const handleOpenEditModal = () => {
+    setShowEditModal(true);
+    setIsModalOpen(true);
+  };
 
-    const handleOpenEditModal = () => {
-        setShowEditModal(true);
-        setIsModalOpen(true);
-    }
-
-    return (
-        <>
-            <div className="w-full h-max p-4 flex flex-wrap items-center">
-                {
-                    isLoading ? <CircularProgress /> :
-                        (
-                            storeData.map((index, store) => {
-                                return (
-                                    <div key={store?._id} className="w-[70%] md:w-[43%] h-full bg-[#ecf7ff] p-4 m-2 rounded shadow-xl">
-                                        <div className="w-full flex flex-wrap">
-                                            <div className="w-[35%] h-full flex items-center justify-center">
-                                                {
-                                                    store?.image_link ?
-                                                        <img src={store?.image_link} className="w-[100px] h-[100px] rounded" /> :
-                                                        <img src='https://nitida.co.za/wp-content/plugins/movedo-extension/assets/images/empty/full.jpg'
-                                                            className="w-[100px] h-[100px] rounded"
-                                                        />
-                                                }
-                                            </div>
-                                            <div className="w-[60%] p-2 flex flex-col items-left justify-evenly">
-                                                <p className="flex items-center justify-start text-lg font-medium">StoreName:<p className="text-sm font-normal">{store?.store_name ? store?.store_name : 'N/A'}</p></p>
-                                                <p className="flex text-lg items-center justify-start text-lg font-medium">Activity Status:<p className="text-sm font-normal">{store?.is_active === true ? 'OPEN' : 'CLOSE'}</p></p>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center p-2 w-full justify-center">
-                                            <button className="p-2 bg-orange-200 m-1 rounded px-4 flex items-center justify-center" onClick={handleOpenEditModal}><CiEdit fontSize={'1.2rem'} />Edit</button>
-                                            <button className="p-2 bg-sky-200 m-1 rounded px-4 flex items-center justify-center"><MdViewList fontSize={'1.2rem'} />View</button>
-                                        </div>
-                                    </div>
-                                )
-                            })
-                        )
-                }
-                {
-                    showEditModal ?
-                        <Dialog open={isModalOpen} onClose={false} className="w-[100%]">
-                            <div className="p-4 w-full flex flex-col items-center justify-center rounded">
-                                <div className="w-full flex items-center justify-end">
-                                    <MdCancel fontSize={'1.2rem'} onClick={handleCloseEditModal} color="red" />
-                                </div>
-                                {
-                                    <div className="flex mx-8">
-                                        <div className="w-1/5 flex items-center justify-center">
-                                            <img src="https://picsum.photos/id/1/200/300" alt="Store image" className="w-[100px] h-[100px]" />
-                                        </div>
-                                        <div className="w-4/5 flex flex-wrap">
-                                            <div className="m-1">
-                                                <label htmlFor="storeName" className="block text-sm font-medium text-gray-700">Store Name</label>
-                                                <input
-                                                    type="text"
-                                                    id="storeName"
-                                                    className="mt-1 p-2 border rounded-md block w-full"
-                                                // value={storeName}
-                                                // onChange={handleStoreNameChange}
-                                                />
-                                            </div>
-                                            <div className="m-1">
-                                                <label htmlFor="imageLink" className="block text-sm font-medium text-gray-700">Image Link</label>
-                                                <input
-                                                    type="text"
-                                                    id="imageLink"
-                                                    className="mt-1 p-2 border rounded-md block w-full"
-                                                // value={imageLink}
-                                                // onChange={handleImageLinkChange}
-                                                />
-                                            </div>
-                                            <div className="m-1">
-                                                <label htmlFor="billGeneratedBy" className="block text-sm font-medium text-gray-700">Bill Generated By</label>
-                                                <input
-                                                    type="text"
-                                                    id="billGeneratedBy"
-                                                    className="mt-1 p-2 border rounded-md block w-full"
-                                                // value={billGeneratedBy}
-                                                // onChange={handleBillGeneratedByChange}
-                                                />
-                                            </div>
-                                            <div className="m-1">
-                                                <label htmlFor="paymentMethod" className="block text-sm font-medium text-gray-700">Payment Method</label>
-                                                <input
-                                                    type="text"
-                                                    id="paymentMethod"
-                                                    className="mt-1 p-2 border rounded-md block w-full"
-                                                // value={paymentMethod}
-                                                // onChange={handlePaymentMethodChange}
-                                                />
-                                            </div>
-                                            <div className="m-1">
-                                                <label htmlFor="sessionStartsBy" className="block text-sm font-medium text-gray-700">Session Starts By</label>
-                                                <input
-                                                    type="text"
-                                                    id="sessionStartsBy"
-                                                    className="mt-1 p-2 border rounded-md block w-full"
-                                                // value={sessionStartsBy}
-                                                // onChange={handleSessionStartsByChange}
-                                                />
-                                            </div>
-                                            <div className="m-1">
-                                                <label htmlFor="createdAt" className="block text-sm font-medium text-gray-700">Created At</label>
-                                                <input
-                                                    type="text"
-                                                    id="createdAt"
-                                                    className="mt-1 p-2 border rounded-md block w-full"
-                                                // value={createdAt}
-                                                // onChange={handleCreatedAtChange}
-                                                />
-                                            </div>
-                                            <div className="m-1">
-                                                <label htmlFor="updatedAt" className="block text-sm font-medium text-gray-700">Updated At</label>
-                                                <input
-                                                    type="text"
-                                                    id="updatedAt"
-                                                    className="mt-1 p-2 border rounded-md block w-full"
-                                                // value={updatedAt}
-                                                // onChange={handleUpdatedAtChange}
-                                                />
-                                            </div>
-                                            <label className="flex items-center justify-center m-1">
-                                                <input
-                                                    type="checkbox"
-                                                    // checked={isActive}
-                                                    // onChange={handleIsActiveChange}
-                                                    className="mr-2"
-                                                />
-                                                Active
-                                            </label>
-                                        </div>
-                                    </div>
-                                }
-                                <p>Tables</p>
-                                <div className="w-full flex flex-wrap items-center justify-center mx-16">
-                                    {
-                                        (
-                                            [1, 2, 3, 4].map((index, store) => {
-                                                return (
-                                                    <div key={store} className="w-[43%] h-full bg-[#ecf7ff] p-4 m-2 rounded shadow-xl">
-                                                        <div className="m-1">
-                                                            <label htmlFor="storeName" className="block text-sm font-medium text-gray-700">Table Name:</label>
-                                                            <input
-                                                                type="text"
-                                                                id="storeName"
-                                                                className="p-1 border rounded-md block w-full"
-                                                            // value={storeName}
-                                                            // onChange={handleStoreNameChange}
-                                                            />
-                                                        </div>
-                                                        <div className="m-1">
-                                                            <label htmlFor="storeName" className="block text-sm font-medium text-gray-700">Seats</label>
-                                                            <input
-                                                                type="text"
-                                                                id="storeName"
-                                                                className="mt-1 p-1 border rounded-md block w-full"
-                                                            // value={storeName}
-                                                            // onChange={handleStoreNameChange}
-                                                            />
-                                                        </div>
-                                                        <div className="m-1">
-                                                            <label htmlFor="storeName" className="block text-sm font-medium text-gray-700">Created At</label>
-                                                            <input
-                                                                type="text"
-                                                                id="storeName"
-                                                                className="mt-1 p-1 border rounded-md block w-full"
-                                                            // value={storeName}
-                                                            // onChange={handleStoreNameChange}
-                                                            />
-                                                        </div>
-                                                        <label className="flex items-center justify-center m-1">
-                                                            <input
-                                                                type="checkbox"
-                                                                // checked={isActive}
-                                                                // onChange={handleIsActiveChange}
-                                                                className="mr-2"
-                                                            />
-                                                            Active
-                                                        </label>
-                                                    </div>
-                                                )
-                                            })
-                                        )
-                                    }
-                                </div>
-                            </div>
-                        </Dialog> : <></>
-                }
+  return (
+    <>
+      <div className='w-full h-max p-4 flex flex-wrap items-center'>
+        {isLoading ? (
+          <CircularProgress />
+        ) : (
+          storeData.map((index, store) => {
+            return (
+              <div
+                key={store?._id}
+                className='w-[70%] md:w-[43%] h-full bg-[#ecf7ff] p-4 m-2 rounded shadow-xl'
+              >
+                <div className='w-full flex flex-wrap'>
+                  <div className='w-[35%] h-full flex items-center justify-center'>
+                    {store?.image_link ? (
+                      <img
+                        src={store?.image_link}
+                        className='w-[100px] h-[100px] rounded'
+                      />
+                    ) : (
+                      <img
+                        src='https://nitida.co.za/wp-content/plugins/movedo-extension/assets/images/empty/full.jpg'
+                        className='w-[100px] h-[100px] rounded'
+                      />
+                    )}
+                  </div>
+                  <div className='w-[60%] p-2 flex flex-col items-left justify-evenly'>
+                    <p className='flex items-center justify-start text-lg font-medium'>
+                      StoreName:
+                      <p className='text-sm font-normal'>
+                        {store?.store_name ? store?.store_name : "N/A"}
+                      </p>
+                    </p>
+                    <p className='flex  items-center justify-start text-lg font-medium'>
+                      Activity Status:
+                      <p className='text-sm font-normal'>
+                        {store?.is_active === true ? "OPEN" : "CLOSE"}
+                      </p>
+                    </p>
+                  </div>
+                </div>
+                <div className='flex items-center p-2 w-full justify-center'>
+                  <button
+                    className='p-2 bg-orange-200 m-1 rounded px-4 flex items-center justify-center'
+                    onClick={handleOpenEditModal}
+                  >
+                    <CiEdit fontSize={"1.2rem"} />
+                    Edit
+                  </button>
+                  <button className='p-2 bg-sky-200 m-1 rounded px-4 flex items-center justify-center'>
+                    <MdViewList fontSize={"1.2rem"} />
+                    View
+                  </button>
+                </div>
+              </div>
+            );
+          })
+        )}
+        {showEditModal ? (
+          <Dialog open={isModalOpen} onClose={false} className=' w-[100%]'>
+            <div className='bg-gray-200 px-4 py-1'>
+              <div className='my-2 py-2  '>
+                <div className='w-full flex items-center justify-between '>
+                  <span className='text-center font-semibold'>Store 1</span>
+                  <MdCancel
+                    fontSize={"1.2rem"}
+                    onClick={handleCloseEditModal}
+                    color='red '
+                    className='cursor-pointer'
+                  />
+                </div>
+              </div>
+              <div className='w-full flex flex-col gap-3'>
+                <div className='flex justify-between items-start gap-2'>
+                  {/* first div */}
+                  <div className='mx-5 bg-white rounded-lg h-[150px] w-[170px] text-sm col-span-1'>
+                    <div className=' flex items-center justify-center'>
+                      <img
+                        src='https://picsum.photos/id/1/200/300'
+                        alt='Store img'
+                        className='h-[150px] w-[210px] overflow-hidden rounded object-fill'
+                      />
+                    </div>
+                    <div className='my-4  flex items-center justify-center'>
+                      <button className='bg-gray-400 px-2 py-1 rounded'>
+                        Edit <FaUserEdit className='inline ' />{" "}
+                      </button>
+                    </div>
+                  </div>
+                  {/* second div */}
+                  <div className='w-[320px]'>
+                    <div className='mb-1 flex items-center justify-between'>
+                      <label
+                        htmlFor='storeName'
+                        className=' block text-sm font-medium text-gray-700 '
+                      >
+                        Store Name
+                      </label>
+                      <input
+                        type='text'
+                        id='storeName'
+                        className='mt-1 p-1 border rounded-md block '
+                        // value={storeName}
+                        // onChange={handlestoreNameChange}
+                      />
+                    </div>
+                    <div className='m-1 flex items-center justify-start gap-8'>
+                      <label
+                        htmlFor='imageLink'
+                        className='block text-sm font-medium text-gray-700 '
+                      >
+                        Activity Status:
+                      </label>
+                      <span>Open</span>
+                      <input
+                        type='checkbox'
+                        // checked={isChecked}
+                        // onChange={toggleSwitch}
+                      />
+                    </div>
+                    <div className='m-1 flex items-center justify-between'>
+                      <label
+                        htmlFor='imageLink'
+                        className='block text-sm font-medium text-gray-700'
+                      >
+                        Image Link
+                      </label>
+                      <input
+                        type='text'
+                        id='imageLink'
+                        className='mt-1 p-1 border rounded-md block'
+                        // value={imageLink}
+                        // onChange={handleImageLinkChange}
+                      />
+                    </div>
+                    <div className='m-1 mt-2 flex items-center justify-between'>
+                      <label
+                        htmlFor='paymentMethod'
+                        className='block text-sm font-medium text-gray-700'
+                      >
+                        Bill Generated By
+                      </label>
+                      <select
+                        defaultValue='N/A'
+                        className='w-[190px] p-1 rounded'
+                      >
+                        <option value='N/A'>N/A</option>
+                        <option value='manager'>MANAGER</option>
+                        <option value='customer'>CUSTOMER</option>
+                      </select>
+                    </div>
+                    <div className='m-1 flex items-center justify-between'>
+                      <label
+                        htmlFor='sessionStartsBy'
+                        className='block text-sm font-medium text-gray-700'
+                      >
+                        Session Starts By
+                      </label>
+                      <input
+                        type='text'
+                        id='sessionStartsBy'
+                        className='mt-1 p-1 border rounded-md block'
+                        // value={sessionStartsBy}
+                        // onChange={handleSessionStartsByChange}
+                      />
+                    </div>
+                    <div className='m-1 flex items-center justify-between'>
+                      <label
+                        htmlFor='createdAt'
+                        className='block text-sm font-medium text-gray-700'
+                      >
+                        Payment Method
+                      </label>
+                      <select
+                        defaultValue='N/A'
+                        className='w-[190px] p-1 rounded mt-1'
+                      >
+                        <option value='N/A'>N/A</option>
+                        <option value='phonePay'>PHONEPAY</option>
+                        <option value='googlePlay'>GOOGLEPAY</option>
+                        <option value='directBank'>DIRECT_BANK</option>
+                      </select>
+                    </div>
+                    <div className='m-1 flex items-center justify-between'>
+                      <label
+                        htmlFor='createdAt'
+                        className=' block text-sm font-medium text-gray-700'
+                      >
+                        Created At
+                      </label>
+                      <input
+                        type='text'
+                        id='createdAt'
+                        className='mt-1 p-1 border rounded-md block'
+                        // value={updatedAt}
+                        // onChange={handleCreatedAtChange}
+                      />
+                    </div>
+                    <div className='m-1 flex items-center justify-between'>
+                      <label
+                        htmlFor='updatedAt'
+                        className=' block text-sm font-medium text-gray-700'
+                      >
+                        Updated At
+                      </label>
+                      <input
+                        type='text'
+                        id='updatedAt'
+                        className='mt-1 p-1 border rounded-md block'
+                        // value={updatedAt}
+                        // onChange={handleUpdatedAtChange}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div className='my-2 flex items-center justify-start'>
+                  <span>Tables:</span>
+                </div>
+                <div className='flex items-center justify-center gap-4 '>
+                  {/*third div */}
+                  <div className='bg-white rounded '>
+                    <div className='m-1 flex items-center justify-between gap-3'>
+                      <label
+                        htmlFor='tableName'
+                        className=' block text-sm font-medium text-gray-700 '
+                      >
+                        Table Name
+                      </label>
+                      <input
+                        type='text'
+                        id='imageLink'
+                        className='mt-1 p-1 border rounded-md block w-[170px] bg-gray-200'
+                        // value={tableName}
+                        // onChange={handleTableNameChange}
+                      />
+                    </div>
+                    <div className='m-1 flex items-center justify-start gap-8'>
+                      <label
+                        htmlFor='imageLink'
+                        className='block text-sm font-medium text-gray-700 '
+                      >
+                        Activity Status:
+                      </label>
+                      <span>Open</span>
+                      <input
+                        type='checkbox'
+                        className='bg-gray-200'
+                        // checked={isChecked}
+                        // onChange={toggleSwitch}
+                      />
+                    </div>
+                    <div className='m-1 flex items-center justify-between'>
+                      <label
+                        htmlFor='createdAt'
+                        className='block text-sm font-medium text-gray-700'
+                      >
+                        Seats
+                      </label>
+                      <select
+                        defaultValue='N/A'
+                        className='w-[170px] p-1 rounded mt-1 bg-gray-200'
+                      >
+                        <option value='N/A'>N/A</option>
+                        <option value='option1'>option1</option>
+                        <option value='option2'>option2</option>
+                      </select>
+                    </div>
+                    <div className='m-1 flex items-center justify-between gap-3'>
+                      <label
+                        htmlFor='createdAt'
+                        className=' block text-sm font-medium text-gray-700 '
+                      >
+                        Created At
+                      </label>
+                      <input
+                        type='date'
+                        id='createdAt'
+                        className='mt-1 p-1 border rounded-md block w-[170px] bg-gray-200'
+                        // value={createdAt}
+                        // onChange={handleCreatedAtChange}
+                      />
+                    </div>
+                    <div className='m-1 flex items-center justify-between gap-3'>
+                      <label
+                        htmlFor='updatedAt'
+                        className=' block text-sm font-medium text-gray-700 '
+                      >
+                        Updated At
+                      </label>
+                      <input
+                        type='date'
+                        id='imageLink'
+                        className='mt-1 p-1 border rounded-md block w-[170px] bg-gray-200'
+                        // value={updatedAt}
+                        // onChange={handleUpdatedAtChange}
+                      />
+                    </div>
+                  </div>
+                  {/* fourt div */}
+                  <div className='bg-white rounded '>
+                    <div className='m-1 flex items-center justify-between gap-3'>
+                      <label
+                        htmlFor='tableName'
+                        className=' block text-sm font-medium text-gray-700 '
+                      >
+                        Table Name
+                      </label>
+                      <input
+                        type='text'
+                        id='imageLink'
+                        className='mt-1 p-1 border rounded-md block w-[170px] bg-gray-200 '
+                        // value={tableName}
+                        // onChange={handleTableNameChange}
+                      />
+                    </div>
+                    <div className='m-1 flex items-center justify-start gap-8'>
+                      <label
+                        htmlFor='imageLink'
+                        className='block text-sm font-medium text-gray-700 '
+                      >
+                        Activity Status:
+                      </label>
+                      <span>Open</span>
+                      <input
+                        type='checkbox'
+                        className='bg-gray-200'
+                        // checked={isChecked}
+                        // onChange={toggleSwitch}
+                      />
+                    </div>
+                    <div className='m-1 flex items-center justify-between'>
+                      <label
+                        htmlFor='createdAt'
+                        className='block text-sm font-medium text-gray-700'
+                      >
+                        Seats
+                      </label>
+                      <select
+                        defaultValue='N/A'
+                        className='w-[170px] p-1 rounded mt-1 bg-gray-200'
+                      >
+                        <option value='N/A'>N/A</option>
+                        <option value='option1'>option1</option>
+                        <option value='option2'>option2</option>
+                      </select>
+                    </div>
+                    <div className='m-1 flex items-center justify-between gap-3'>
+                      <label
+                        htmlFor='createdAt'
+                        className=' block text-sm font-medium text-gray-700 '
+                      >
+                        Created At
+                      </label>
+                      <input
+                        type='date'
+                        id='createdAt'
+                        className='mt-1 p-1 border rounded-md block w-[170px] bg-gray-200'
+                        // value={createdAt}
+                        // onChange={handleCreatedAtChange}
+                      />
+                    </div>
+                    <div className='m-1 flex items-center justify-between gap-3'>
+                      <label
+                        htmlFor='updatedAt'
+                        className=' block text-sm font-medium text-gray-700 '
+                      >
+                        Updated At
+                      </label>
+                      <input
+                        type='date'
+                        id='imageLink'
+                        className='mt-1 p-1 border rounded-md block w-[170px] bg-gray-200'
+                        // value={updatedAt}
+                        // onChange={handleUpdatedAtChange}
+                      />
+                    </div>
+                  </div>{" "}
+                </div>
+              </div>
+              <div className='my-8  flex items-center justify-center'>
+                <button className='bg-green-600 text-white font-semibold px-2 py-1 rounded'>
+                  Submit Changes
+                </button>
+              </div>
             </div>
-        </>
-    )
-
-}
+          </Dialog>
+        ) : (
+          <></>
+        )}
+      </div>
+    </>
+  );
+};
 
 export default StoreDetailsScreen;
