@@ -135,7 +135,6 @@ class CreateMenuSerializer(serializers.Serializer):
 
 class OrderInitiateSerializer(serializers.Serializer):
     workspace_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
-    qrcode_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
     seat_number = serializers.IntegerField()
     phone_number = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
     timezone = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)

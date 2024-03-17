@@ -715,10 +715,12 @@ class qrcode_services(APIView):
 
         if not serializer.is_valid():
             return CustomResponse(False, "Posting wrong data to API",serializer.errors, status.HTTP_400_BAD_REQUEST)
+        generated_link = f'{link}&workspace_id={workspace_id}&store_id={store_id}&seat_number={seat_number}'
+        
         qrcode = json.loads(generate_qrcode(
             workspace_id, 
             user_id,
-            link,
+            generated_link,
             f'Qrcode_seat_{seat_number}'
         ))
 
@@ -730,7 +732,7 @@ class qrcode_services(APIView):
 
         update_qr_code_data = json.loads(update_qr_code(
             generate_qrcode_data["qrcode_id"],
-            link,
+            generated_link,
             f'Qrcode_seat_{seat_number}',
             workspace_id,
             username,
@@ -981,7 +983,6 @@ class customer_services(APIView):
         :rtype: CustomResponse
         """
         seat_number = request.data.get('seat_number')
-        qrcode_id = request.data.get('qrcode_id')
         workspace_id = request.data.get('workspace_id')
         timezone = request.data.get('timezone')
         date= request.data.get('date')
@@ -995,7 +996,6 @@ class customer_services(APIView):
         
         serializer = OrderInitiateSerializer(data={
             "workspace_id": workspace_id,
-            "qrcode_id": qrcode_id,
             "timezone": timezone,
             "seat_number":seat_number,
             "date":date,
@@ -1011,7 +1011,7 @@ class customer_services(APIView):
 
         data_to_insert = {
             "seat_number":seat_number,
-            "qrcode_id": qrcode_id,
+            "qrcode_id": "",
             "is_paid": False,
             "payment_status": "not_paid",
             "order_status": "order_initiated",
@@ -1195,6 +1195,7 @@ class customer_services(APIView):
 
         data_to_update = {
             "order_status":"payment_generated",
+            "qrcode_id": qrcode_id,
             "payment_link": create_payment["approval_url"],
             "amount":amount,
             "payment_receipt_id":payment_receipt_id,
