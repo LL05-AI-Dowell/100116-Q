@@ -99,7 +99,7 @@ const StoreDetailsScreen = () => {
         )}
         {showEditModal ? (
           <Dialog open={isModalOpen} onClose={false} className=' w-[100%]'>
-            <div className='bg-gray-200 px-4 py-1'>
+            <div className='bg-gray-200 px-3 py-1'>
               <div className='my-2 py-2  '>
                 <div className='w-full flex items-center justify-between '>
                   <span className='text-center font-semibold'>Store 1</span>
@@ -112,9 +112,9 @@ const StoreDetailsScreen = () => {
                 </div>
               </div>
               <div className='w-full flex flex-col gap-3'>
-                <div className='flex justify-between items-start gap-2'>
+                <div className='block gap-2 sm:flex sm:items-start sm:justify-between'>
                   {/* first div */}
-                  <div className='mx-5 bg-white rounded-lg h-[150px] w-[170px] text-sm col-span-1'>
+                  <div className='mx-5 bg-white rounded-lg h-[150px] w-[170px] text-sm mb-16 sm:mb-0'>
                     <div className=' flex items-center justify-center'>
                       <img
                         src='https://picsum.photos/id/1/200/300'
@@ -257,8 +257,8 @@ const StoreDetailsScreen = () => {
                 <div className='my-2 flex items-center justify-start'>
                   <span>Tables:</span>
                 </div>
-                <div className='flex items-center justify-center gap-4 '>
-                  {/*third div */}
+
+                <div className='block m-3 gap-2 sm:gap-4 sm:flex sm:items-center sm:justify-center sm:m-0'>
                   <div className='bg-white rounded '>
                     <div className='m-1 flex items-center justify-between gap-3'>
                       <label
@@ -270,12 +270,12 @@ const StoreDetailsScreen = () => {
                       <input
                         type='text'
                         id='imageLink'
-                        className='mt-1 p-1 border rounded-md block w-[170px] bg-gray-200'
+                        className='mt-2 p-1 border rounded-md block w-[170px] bg-gray-200'
                         // value={tableName}
                         // onChange={handleTableNameChange}
                       />
                     </div>
-                    <div className='m-1 flex items-center justify-start gap-8'>
+                    <div className='m-1 flex items-center justify-between  sm:justify-start gap-8'>
                       <label
                         htmlFor='imageLink'
                         className='block text-sm font-medium text-gray-700 '
@@ -331,14 +331,14 @@ const StoreDetailsScreen = () => {
                       <input
                         type='date'
                         id='imageLink'
-                        className='mt-1 p-1 border rounded-md block w-[170px] bg-gray-200'
+                        className='mt-1 mb-2 p-1 border rounded-md block w-[170px] bg-gray-200'
                         // value={updatedAt}
                         // onChange={handleUpdatedAtChange}
                       />
                     </div>
                   </div>
-                  {/* fourt div */}
-                  <div className='bg-white rounded '>
+
+                  <div className='bg-white rounded mt-2 sm:mt-0'>
                     <div className='m-1 flex items-center justify-between gap-3'>
                       <label
                         htmlFor='tableName'
@@ -349,12 +349,12 @@ const StoreDetailsScreen = () => {
                       <input
                         type='text'
                         id='imageLink'
-                        className='mt-1 p-1 border rounded-md block w-[170px] bg-gray-200 '
+                        className='mt-2 p-1 border rounded-md block w-[170px] bg-gray-200 '
                         // value={tableName}
                         // onChange={handleTableNameChange}
                       />
                     </div>
-                    <div className='m-1 flex items-center justify-start gap-8'>
+                    <div className='m-1 flex items-center  justify-between  sm:justify-start gap-8'>
                       <label
                         htmlFor='imageLink'
                         className='block text-sm font-medium text-gray-700 '
@@ -410,12 +410,12 @@ const StoreDetailsScreen = () => {
                       <input
                         type='date'
                         id='imageLink'
-                        className='mt-1 p-1 border rounded-md block w-[170px] bg-gray-200'
+                        className='mt-1 mb-2 p-1 border rounded-md block w-[170px] bg-gray-200'
                         // value={updatedAt}
                         // onChange={handleUpdatedAtChange}
                       />
                     </div>
-                  </div>{" "}
+                  </div>
                 </div>
               </div>
               <div className='my-8  flex items-center justify-center'>
