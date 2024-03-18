@@ -21,17 +21,10 @@ import {
     getStoreData,
     createStore,
     getQrCode,
-    createQrCode,
-    getPaymentDetailForSeat,
-    getQrCodeIdBySeatNumber,
-    createCustomerPayment
 } from '../../../services/qServices';
 import {
-    Button,
     CircularProgress,
     Modal,
-    Snackbar,
-    IconButton,
 } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { formatDateForAPI } from '../../helpers/helpers';

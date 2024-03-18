@@ -6,14 +6,26 @@ import { useLocation } from "react-router-dom";
 import { initiateNewOrder, initiateOlderOrder } from "../../../services/qServices";
 import { formatDateForAPI } from "../../helpers/helpers";
 import { CircularProgress } from "@mui/material";
+// import { QueryClient, QueryClientProvider, useQuery } from "react-query";
+import { GiTakeMyMoney } from "react-icons/gi";
+import { MdOutlinePayments } from "react-icons/md";
+import { FaPerson } from "react-icons/fa6";
+import {
+    useQuery,
+    useMutation,
+    useQueryClient,
+    QueryClient,
+    QueryClientProvider,
+} from 'react-query'
 
 const QrCodeScreen = () => {
+    const queryClient = new QueryClient();
     const currentDate = new Date();
     const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    const useQuery = () => {
+    const useQueryParams = () => {
         return new URLSearchParams(useLocation().search);
     };
-    const query = useQuery();
+    const query = useQueryParams();
     const workspaceId = query.get("workspace_id");
     const seat_number = query.get("seat_number");
     const store_id = query.get("store_id");
@@ -24,6 +36,25 @@ const QrCodeScreen = () => {
     const [isnewOrder, setIsNewOrder] = useState(false);
     const [isNewOrderLoading, setIsNewOrderLoading] = useState(false);
     const [isOlderOrderLoading, setIsOlderOrderLoading] = useState(false);
+    const [billIsNotGenerated, setBillIsNotGenerated] = useState({
+        show: false,
+        message: "",
+    });
+
+    const dataToPostForQuery = {
+        "workspace_id": workspaceId,
+        "date": formatDateForAPI(currentDate),
+        "store_id": store_id,
+        "phone_number": inputNumber,
+    }
+
+    // const { isLoading, data, isError } = useQuery(
+    //     ["seatData", ],
+    //     () => initiateOlderOrder(dataToPostForQuery).then(() =>{}).catch(() =>{}),
+    //     {
+    //         refetchInterval: 15000, // Refresh every 15 seconds
+    //     }
+    // );
 
     const handleOlderOrder = () => {
         setPhoneModal(true);
@@ -73,7 +104,14 @@ const QrCodeScreen = () => {
 
         // console.log(dataToPost);
         await initiateOlderOrder(dataToPost).then(res => {
-            console.log('initiate older order resss', res);
+            console.log('initiate older order resss', res?.data?.success);
+
+            if (res?.data?.success === false) {
+                setBillIsNotGenerated({
+                    show: true,
+                    message: res?.data?.message,
+                });
+            }
             setIsOlderOrderLoading(false);
             setShowModal(false);
         }).catch(err => {
@@ -136,35 +174,61 @@ const QrCodeScreen = () => {
                     )
                     :
                     (
-                        <div className=' flex flex-col fixed top-0 left-0 w-full h-full items-center justify-center'>
-                            <div className='flex-none h-10 w-full bg-green-400 rounded flex items-center justify-center gap-2'>
-                                <p>46L,</p>
-                                <p>French latte cafe,</p>
-                                <p>{currentDate?.toDateString()}</p>
-                            </div>
-                            <div className='flex-grow h-96 w-full bg-orange-400 rounded my-2 flex items-center justify-center '>
-                                <p className='text-4xl text-white'>Menu</p>
-                            </div>
-                            <div className='flex-none h-10 w-full bg-green-400 rounded mb-2 flex items-center justify-center '>
-                                <p>{inputNumber}</p>
-                            </div>
-                            <div className='flex-none h-20 w-full  rounded grid gap-3 grid-cols-4'>
-                                <div className='min-h-[50px] rounded bg-orange-500  flex items-center justify-center'>
-                                    <p className='text-xs sm:text-base lg:text-2xl p-1 text-center'>
-                                        Amount to pay
-                                    </p>
+                        <QueryClientProvider client={queryClient}>
+                            <div className='flex flex-col fixed top-0 left-0 w-full h-full items-center justify-center p-4'>
+                                <div className='flex items-center justify-evenly h-10 w-full bg-sky-200 rounded gap-2'>
+                                    <p className="text-lg font-medium">French latte cafe,</p>
+                                    <p className="text-lg font-medium">{currentDate?.toDateString()}</p>
                                 </div>
-                                <div className='min-h-[50px] rounded bg-orange-500  flex items-center justify-center'>
-                                    <FaHandPointUp className='text-2xl sm:text-4xl lg:text-4xl' />
+                                {
+                                    billIsNotGenerated?.show
+                                        ?
+                                        <p className="text-sm font-semibold text-rose-500">{billIsNotGenerated?.message}</p>
+                                        :
+                                        <></>
+                                }
+                                <div className='flex-grow h-96 w-full border border-sky-400 rounded my-1 flex items-center justify-center '>
+                                    <p className='text-4xl'>Menu</p>
                                 </div>
-                                <div className='min-h-[50px] rounded bg-orange-500  flex items-center justify-center'>
-                                    <RiBillFill className='text-2xl sm:text-4xl lg:text-4xl' />
+                                <div className='flex-none h-10 w-full border border-sky-400 rounded mb-2 flex items-center justify-center '>
+                                    <p>{inputNumber}</p>
                                 </div>
-                                <div className='min-h-[50px] rounded bg-orange-500  flex items-center justify-center'>
-                                    <IoPersonSharp className='text-2xl sm:text-4xl lg:text-4xl' />
+                                {/* {billIsNotGenerated.show && (
+                                    <div className="absolute inset-0 bg-gray-900 opacity-50 z-50"></div>
+                                )} */}
+                                <div className='flex-none h-20 w-full  rounded grid gap-3 grid-cols-4'>
+                                    <div className='cursor-pointer min-h-[50px] rounded border border-sky-400 flex items-center justify-center'>
+                                    
+                                        <button className='text-xs sm:text-base lg:text-2xl p-1 text-center flex sm:flex-row flex-col items-center justify-center'
+                                        disabled={billIsNotGenerated.show}
+                                        >
+                                            <GiTakeMyMoney fontSize={'1.5rem'} className="sm:mr-2 mr-0" />
+                                            Amount to pay
+                                        </button>
+                                    </div>
+                                    <div className='cursor-pointer min-h-[50px] rounded border border-sky-400 flex items-center justify-center'>
+                                        {/* <FaHandPointUp className='text-2xl sm:text-4xl lg:text-4xl' /> */}
+                                        <button className="text-xs sm:text-base lg:text-2xl p-1 text-center flex sm:flex-row flex-col items-center justify-center">
+                                            <MdOutlinePayments fontSize={'1.5rem'} className="sm:mr-2 mr-0" />
+                                            Payment
+                                        </button>
+                                    </div>
+                                    <div className='cursor-pointer min-h-[50px] rounded border border-sky-400 flex items-center justify-center'>
+                                        <button className="text-xs sm:text-base lg:text-2xl p-1 text-center flex sm:flex-row flex-col items-center justify-center">
+                                            <RiBillFill fontSize={'1.5rem'} className="sm:mr-2 mr-0" />
+                                            Bill
+                                        </button>
+                                    </div>
+                                    <div className='cursor-pointer min-h-[50px] rounded border border-sky-400 flex items-center justify-center'>
+                                        <button className="text-xs sm:text-base lg:text-2xl p-1 text-center flex sm:flex-row flex-col items-center justify-center">
+                                            {/* <IoPersonSharp className='text-2xl sm:text-4xl lg:text-4xl' /> */}
+                                            <FaPerson fontSize={'1.5rem'} className="sm:mr-2 mr-0" />
+                                            Call Waiter
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        </QueryClientProvider>
                     )
             }
         </>

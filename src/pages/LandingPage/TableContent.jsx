@@ -1,5 +1,5 @@
 import TableCell from '@mui/material/TableCell';
-import { QueryClient, QueryClientProvider, useQuery } from "react-query";
+import {useQuery } from "react-query";
 import {
     CircularProgress,
 } from "@mui/material";
