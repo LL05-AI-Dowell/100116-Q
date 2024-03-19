@@ -163,6 +163,7 @@ const MenuScreen = () => {
           <button
             className='bg-green-400 py-1 px-4 rounded-lg text-sm text-gray-500 shadow cursor-pointer'
             onClick={handleSubmit}
+            disabled={done}
           >
             Submit
           </button>
