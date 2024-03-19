@@ -1,4 +1,4 @@
-import { React, useState } from "react";
+import { React, useEffect, useState } from "react";
 import { FaHandPointUp } from "react-icons/fa";
 import { RiBillFill } from "react-icons/ri";
 import { IoPersonSharp } from "react-icons/io5";
@@ -17,6 +17,7 @@ import {
     QueryClient,
     QueryClientProvider,
 } from 'react-query'
+import { getStoreData } from "../../../services/qServices";
 
 const QrCodeScreen = () => {
     const queryClient = new QueryClient();
@@ -40,6 +41,8 @@ const QrCodeScreen = () => {
         show: false,
         message: "",
     });
+    const [isStoreDataLoading, setIsStoreDataLoading] = useState(false);
+    const [storeData, setStoreData] = useState([]);
 
     const dataToPostForQuery = {
         "workspace_id": workspaceId,
@@ -122,6 +125,18 @@ const QrCodeScreen = () => {
         // setShowModal(false);
     };
 
+    useEffect(() => {
+        setIsStoreDataLoading(true);
+        getStoreData(workspaceId).then(res => {
+            console.log('get store data ress', res.data);
+            setStoreData(res?.data?.response);
+            setIsStoreDataLoading(false);
+        }).catch(err => {
+            console.log('get store data errrrrr', err);
+            setIsStoreDataLoading(false);
+        })
+    }, [showModal])
+
     return (
         <>
             {
@@ -177,7 +192,7 @@ const QrCodeScreen = () => {
                         <QueryClientProvider client={queryClient}>
                             <div className='flex flex-col fixed top-0 left-0 w-full h-full items-center justify-center p-4'>
                                 <div className='flex items-center justify-evenly h-10 w-full bg-sky-200 rounded gap-2'>
-                                    <p className="text-lg font-medium">French latte cafe,</p>
+                                    <p className="text-lg font-medium">{storeData[0]?.store_name === "" ? 'N/A' : storeData[0]?.store_name}</p>
                                     <p className="text-lg font-medium">{currentDate?.toDateString()}</p>
                                 </div>
                                 {
@@ -198,9 +213,9 @@ const QrCodeScreen = () => {
                                 )} */}
                                 <div className='flex-none h-20 w-full  rounded grid gap-3 grid-cols-4'>
                                     <div className='cursor-pointer min-h-[50px] rounded border border-sky-400 flex items-center justify-center'>
-                                    
+
                                         <button className='text-xs sm:text-base lg:text-2xl p-1 text-center flex sm:flex-row flex-col items-center justify-center'
-                                        disabled={billIsNotGenerated.show}
+                                            disabled={billIsNotGenerated.show}
                                         >
                                             <GiTakeMyMoney fontSize={'1.5rem'} className="sm:mr-2 mr-0" />
                                             Amount to pay

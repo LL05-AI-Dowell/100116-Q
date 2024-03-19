@@ -138,3 +138,10 @@ export const initiateOlderOrder = async (dataToPost) => {
     };
     return await qServicesAxiosInstance.post(`/v2/customer-services/?type=old_order`,dataToPost, { headers });
 }
+
+export const updatStoreDataAPI = async (workspace_id,store_id,user_id,dataToPost) => {
+    const headers = {
+        'Authorization': `Bearer ${getSavedApiKey()}`
+    };
+    return await qServicesAxiosInstance.post(`/v2/store-services/?type=update_store_data&workspace_id=${workspace_id}&store_id=${store_id}&user_id=${user_id}`,dataToPost, { headers });
+}
