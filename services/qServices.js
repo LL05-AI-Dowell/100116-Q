@@ -214,18 +214,31 @@ export const initiateNewOrder = async (dataToPost) => {
 };
 
 export const initiateOlderOrder = async (dataToPost) => {
-    const headers = {
-        'Authorization': `Bearer ${getSavedApiKey()}`
-    };
-    return await qServicesAxiosInstance.post(`/v2/customer-services/?type=old_order`,dataToPost, { headers });
-}
+  const headers = {
+    Authorization: `Bearer ${getSavedApiKey()}`,
+  };
+  return await qServicesAxiosInstance.post(
+    `/v2/customer-services/?type=old_order`,
+    dataToPost,
+    { headers }
+  );
+};
 
-export const updatStoreDataAPI = async (workspace_id,store_id,user_id,dataToPost) => {
-    const headers = {
-        'Authorization': `Bearer ${getSavedApiKey()}`
-    };
-    return await qServicesAxiosInstance.post(`/v2/store-services/?type=update_store_data&workspace_id=${workspace_id}&store_id=${store_id}&user_id=${user_id}`,dataToPost, { headers });
-}
+export const updatStoreDataAPI = async (
+  workspace_id,
+  store_id,
+  user_id,
+  dataToPost
+) => {
+  const headers = {
+    Authorization: `Bearer ${getSavedApiKey()}`,
+  };
+  return await qServicesAxiosInstance.post(
+    `/v2/store-services/?type=update_store_data&workspace_id=${workspace_id}&store_id=${store_id}&user_id=${user_id}`,
+    dataToPost,
+    { headers }
+  );
+};
 
 export const icreateMenu = async (
   workspace_id,
@@ -239,6 +252,16 @@ export const icreateMenu = async (
   return await qServicesAxiosInstance.post(
     `/v2/store-services/?type=create_menu&workspace_id=${workspace_id}&user_id=${user_id}&store_id=${store_id}`,
     dataToPost,
+    { headers }
+  );
+};
+
+export const getMenuData = async (workspace_id, store_id) => {
+  const headers = {
+    Authorization: `Bearer ${getSavedApiKey()}`,
+  };
+  return await qServicesAxiosInstance.get(
+    `/v2/store-services/?type=retrieve_menu_details&workspace_id=${workspace_id}&store_id=${store_id}&limit=1&offset=0`,
     { headers }
   );
 };
