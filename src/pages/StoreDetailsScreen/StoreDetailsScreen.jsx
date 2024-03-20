@@ -13,7 +13,7 @@ import { getSavedNewUserDetails } from "../../hooks/useDowellLogin";
 
 
 const StoreDetailsScreen = () => {
-    const { currentUser } = useCurrentUserContext();
+    const { currentUser, qrCodeResponse } = useCurrentUserContext();
     const [storeData, setStoreData] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
@@ -26,7 +26,7 @@ const StoreDetailsScreen = () => {
     const [seatOptions, setSeatOption] = useState([]);
     const [allPromises, setAllPromises] = useState([]);
     const [dataToPostForAllPromises, setDataToPostForAllPromises] = useState([]);
-    const [isActive,setIsActive] = useState(false);
+    const [isActive, setIsActive] = useState(false);
 
     const handleSeatChangeForTable = (event) => {
         const options = event.target.options;
@@ -53,7 +53,7 @@ const StoreDetailsScreen = () => {
         const existingIndex = dataToPostForAllPromises.findIndex(item =>
             Object.keys(item.update_data).includes('PAYMENT_METHOD')
         );
-    
+
         if (existingIndex !== -1) {
             setDataToPostForAllPromises(prevData => {
                 const newData = [...prevData];
@@ -77,21 +77,67 @@ const StoreDetailsScreen = () => {
         });
     }, [])
 
+    // useEffect(() => {
+    //     if (storeData[0]?.tables?.length) {
+    //         const tableLength = storeData[0].tables.length;
+    //         const numSeats = tableLength * 4;
+    //         const options = Array.from({ length: numSeats }, (_, i) => ({ value: String(i + 1), label: i + 1 }));
+    //         setSeatOption(options);
+    //     }
+    // }, [storeData]);
+
     useEffect(() => {
         if (storeData[0]?.tables?.length) {
             const tableLength = storeData[0].tables.length;
             const numSeats = tableLength * 4;
             const options = Array.from({ length: numSeats }, (_, i) => ({ value: String(i + 1), label: i + 1 }));
+            console.log('responseeeeeeee', qrCodeResponse)
             setSeatOption(options);
+            // const seatNumbers = qrCodeResponse?.map(item => parseInt(item.seat_number.split('_').pop()));
+            // const filteredOptions = options?.filter(option => seatNumbers.includes(parseInt(option.label)));
+
+            // setSeatOption(filteredOptions);
         }
     }, [storeData]);
 
-    const handleSelectChange = (selectedOptions,table_name) => {
-        console.log('handleSelectChange', selectedOptions, table_name);
+    // const handleSelectChange = (selectedOptions, table_name) => {
+    //     console.log('handleSelectChange', selectedOptions, table_name);
+
+    //     setSelectedOption(selectedOptions);
+    //     const remainingOptions = seatOptions.filter(option => !selectedOptions.includes(option));
+    //     setSeatOption(remainingOptions);
+    // };
+    const handleSelectChange = (selectedOptions, tableName) => {
+        console.log('handleSelectChange', selectedOptions, tableName);
+    
+        // setSelectedOption(selectedOptions);
+        
+        const updatedTables = storeData[0].tables.map(table => {
+            if (table.table_name === tableName) {
+
+                const newSeats = selectedOptions.map(option => ({
+                    "seat_number": `seat_number_${option.label}`
+                }));
+
+                const updatedTable = {
+                    ...table,
+                    seat_data: [...table.seat_data, newSeats]
+                };
+                console.log('updatedTable', updatedTable);
+                return updatedTable;
+            }
+            return table;
+        });
+        console.log('tablessssssssssssssssssssssssssssssssssssss',updatedTables);
+    
+        // Update the state with the modified tables data
         setSelectedOption(selectedOptions);
         const remainingOptions = seatOptions.filter(option => !selectedOptions.includes(option));
         setSeatOption(remainingOptions);
     };
+    
+
+
 
     const handleCloseEditModal = () => {
         setShowEditModal(false);
@@ -114,7 +160,7 @@ const StoreDetailsScreen = () => {
         const existingIndex = dataToPostForAllPromises.findIndex(item =>
             Object.keys(item.update_data).includes('bill_genration_by')
         );
-    
+
         if (existingIndex !== -1) {
             setDataToPostForAllPromises(prevData => {
                 const newData = [...prevData];
@@ -142,7 +188,7 @@ const StoreDetailsScreen = () => {
         const existingIndex = dataToPostForAllPromises.findIndex(item =>
             Object.keys(item.update_data).includes('store_name')
         );
-    
+
         if (existingIndex !== -1) {
             setDataToPostForAllPromises(prevData => {
                 const newData = [...prevData];
@@ -154,7 +200,10 @@ const StoreDetailsScreen = () => {
         }
     }
 
-    const handleIsActiveChange = ()=>{
+    // updatStoreDataAPI(currentUser?.userinfo?.client_admin_id, storeData[0]._id,getSavedNewUserDetails()[0]._id)
+    // setAllPromises(prevPromises => [...prevPromises, updatStoreDataAPI(currentUser?.userinfo?.client_admin_id, storeData[0]._id, getSavedNewUserDetails()[0]._id, dataToPostForUpdatingStoreName)]);
+
+    const handleIsActiveChange = () => {
         setIsActive(!isActive);
         const dataToPostForUpdatingActiveStatus = {
             "update_data": {
@@ -162,12 +211,10 @@ const StoreDetailsScreen = () => {
             },
             "timezone": currentUser?.userinfo?.timezone
         }
-        // updatStoreDataAPI(currentUser?.userinfo?.client_admin_id, storeData[0]._id,getSavedNewUserDetails()[0]._id)
-        // setAllPromises(prevPromises => [...prevPromises, updatStoreDataAPI(currentUser?.userinfo?.client_admin_id, storeData[0]._id, getSavedNewUserDetails()[0]._id, dataToPostForUpdatingStoreName)]);
         const existingIndex = dataToPostForAllPromises.findIndex(item =>
             Object.keys(item.update_data).includes('is_active')
         );
-    
+
         if (existingIndex !== -1) {
             setDataToPostForAllPromises(prevData => {
                 const newData = [...prevData];
