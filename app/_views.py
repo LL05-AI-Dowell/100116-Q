@@ -286,7 +286,7 @@ class user_details_services(APIView):
             {
                 "workspace_id":workspace_id
             },
-            2,
+            1,
             0,
             False
         ))
