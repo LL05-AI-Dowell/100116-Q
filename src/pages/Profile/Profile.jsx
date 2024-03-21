@@ -17,6 +17,7 @@ import { userAuth } from "../../../services/qServices";
 import { CircularProgress } from "@mui/material";
 import StoreDetailsScreen from "../StoreDetailsScreen/StoreDetailsScreen";
 import MenuScreen from "../MenuScreen/MenuScreen";
+import MenuTab from "../MenuScreen/MenuTab";
 
 const Profile = () => {
   const { currentUser } = useCurrentUserContext();
@@ -138,7 +139,7 @@ const Profile = () => {
                     <Tab label='USER DETAILS' value='3' />
                     <Tab label='STORE DETAILS' value='2' />
                     <Tab label='SEAT INFORMATION' value='1' />
-                    <Tab label='ADD MENU' value='4' />
+                    <Tab label='MENU DETAILS' value='4' />
                   </TabList>
                 </Box>
                 <TabPanel value='3'>{<UserDetailsScreen />}</TabPanel>
@@ -146,7 +147,7 @@ const Profile = () => {
                   <StoreDetailsScreen />
                 </TabPanel>
                 <TabPanel value='1'>{<SeatDetails />}</TabPanel>
-                <TabPanel value='4'>{<MenuScreen />}</TabPanel>
+                <TabPanel value='4'>{<MenuTab />}</TabPanel>
               </TabContext>
             </Box>
             <img
