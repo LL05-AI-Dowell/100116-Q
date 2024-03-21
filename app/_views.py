@@ -1273,7 +1273,7 @@ class customer_services(APIView):
             return CustomResponse(False, "Kindly initiate a new order, You have already paid the bill",None, status.HTTP_200_OK)
 
         if data["order_status"] == "payment_generated":
-            return CustomResponse(False, "The bill is generated ,Kindly pay the bill",None, status.HTTP_402_PAYMENT_REQUIRED)
+            return CustomResponse(False, "The bill is generated ,Kindly pay the bill",data, status.HTTP_402_PAYMENT_REQUIRED)
 
         if data["order_status"] == "order_initiated":
             return CustomResponse(False, "The bill is not yet generated ,Kindly wait for the bill",None, status.HTTP_200_OK)
@@ -1288,7 +1288,7 @@ class customer_services(APIView):
         if check_session is None:
             return CustomResponse(False, "Session has expired, Kindly initiate new order", None, status.HTTP_401_UNAUTHORIZED)
         
-        return CustomResponse(True, "Customer Data retrieved" ,None, status.HTTP_200_OK)
+        return CustomResponse(True, "Customer Data retrieved" ,data, status.HTTP_200_OK)
         
     def update_payment_status(self,request):
         """
