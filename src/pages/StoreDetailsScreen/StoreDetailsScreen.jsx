@@ -27,6 +27,7 @@ const StoreDetailsScreen = () => {
     const [allPromises, setAllPromises] = useState([]);
     const [dataToPostForAllPromises, setDataToPostForAllPromises] = useState([]);
     const [isActive, setIsActive] = useState(false);
+    const [isUpdateLoading, setIsUpdateLoading] = useState(false);
 
     const handleSeatChangeForTable = (event) => {
         const options = event.target.options;
@@ -92,11 +93,11 @@ const StoreDetailsScreen = () => {
             const numSeats = tableLength * 4;
             const options = Array.from({ length: numSeats }, (_, i) => ({ value: String(i + 1), label: i + 1 }));
             console.log('responseeeeeeee', qrCodeResponse)
-            setSeatOption(options);
-            // const seatNumbers = qrCodeResponse?.map(item => parseInt(item.seat_number.split('_').pop()));
-            // const filteredOptions = options?.filter(option => seatNumbers.includes(parseInt(option.label)));
+            // setSeatOption(options);
+            const seatNumbers = qrCodeResponse?.map(item => parseInt(item.seat_number.split('_').pop()));
+            const filteredOptions = options?.filter(option => seatNumbers.includes(parseInt(option.label)));
 
-            // setSeatOption(filteredOptions);
+            setSeatOption(filteredOptions);
         }
     }, [storeData]);
 
@@ -107,36 +108,62 @@ const StoreDetailsScreen = () => {
     //     const remainingOptions = seatOptions.filter(option => !selectedOptions.includes(option));
     //     setSeatOption(remainingOptions);
     // };
+
     const handleSelectChange = (selectedOptions, tableName) => {
         console.log('handleSelectChange', selectedOptions, tableName);
-    
-        // setSelectedOption(selectedOptions);
-        
+        console.log('qr', qrCodeResponse);
+
         const updatedTables = storeData[0].tables.map(table => {
             if (table.table_name === tableName) {
-
-                const newSeats = selectedOptions.map(option => ({
-                    "seat_number": `seat_number_${option.label}`
-                }));
-
-                const updatedTable = {
-                    ...table,
-                    seat_data: [...table.seat_data, newSeats]
-                };
+                const updatedTable = { ...table };
+                updatedTable.seat_data = [...updatedTable.seat_data];
+                const existingSeatNumbers = updatedTable.seat_data.map(seat => seat.seat_number);
+                const uniqueSelectedOptions = selectedOptions.filter(option => !existingSeatNumbers.includes(`seat_number_${option.label}`));
+               
+                const newSeats = uniqueSelectedOptions.map(option => {
+                    const matchingSeat = qrCodeResponse.find(qrSeat => qrSeat.seat_number === `seat_number_${option.label}`);
+                    if (matchingSeat) {
+                        return {
+                            "seat_number": `seat_number_${option.label}`,
+                            "seat_id": matchingSeat?._id,
+                            "qrcode_id": matchingSeat?.qrcode_id
+                        };
+                    }
+                });
+                updatedTable.seat_data = [...updatedTable.seat_data, ...newSeats];
                 console.log('updatedTable', updatedTable);
                 return updatedTable;
             }
             return table;
         });
-        console.log('tablessssssssssssssssssssssssssssssssssssss',updatedTables);
-    
-        // Update the state with the modified tables data
+
+        console.log('updatedTables', updatedTables);
+        const updatedStoreData = [{ ...storeData[0], tables: updatedTables }];
+        setStoreData(updatedStoreData);
+
+        const dataToPostForUpdatingTables = {
+            "update_data": {
+                "tables": updatedTables,
+            },
+            "timezone": currentUser?.userinfo?.timezone
+        }
+        const existingIndex = dataToPostForAllPromises.findIndex(item =>
+            Object.keys(item.update_data).includes('tables')
+        );
+
+        if (existingIndex !== -1) {
+            setDataToPostForAllPromises(prevData => {
+                const newData = [...prevData];
+                newData[existingIndex] = dataToPostForUpdatingTables;
+                return newData;
+            });
+        } else {
+            setDataToPostForAllPromises(prevData => [...prevData, dataToPostForUpdatingTables]);
+        }
         setSelectedOption(selectedOptions);
         const remainingOptions = seatOptions.filter(option => !selectedOptions.includes(option));
         setSeatOption(remainingOptions);
     };
-    
-
 
 
     const handleCloseEditModal = () => {
@@ -230,6 +257,24 @@ const StoreDetailsScreen = () => {
         console.log('promisesssss', dataToPostForAllPromises);
     }
 
+    const handleSaveChangesClick = () => {
+        console.log('clicked');
+        setIsUpdateLoading(true);
+
+        // updatStoreDataAPI(currentUser?.userinfo?.client_admin_id, storeData[0]._id, getSavedNewUserDetails()[0]._id, dataToPost)
+        const promises = dataToPostForAllPromises.map(dataToPost => updatStoreDataAPI(currentUser?.userinfo?.client_admin_id, storeData[0]._id, getSavedNewUserDetails()[0]._id, dataToPost));
+
+        Promise.all(promises)
+            .then(results => {
+                console.log('All requests succeeded:', results);
+                setIsUpdateLoading(false);
+            })
+            .catch(error => {
+                console.error('Error occurred during requests:', error);
+                setIsUpdateLoading(false);
+            });
+    }
+
 
     return (
         <>
@@ -268,7 +313,7 @@ const StoreDetailsScreen = () => {
                 {
                     showEditModal ?
                         <Dialog open={isModalOpen} onClose={false} className="w-[100%]">
-                            <button onClick={check}>check</button>
+                            {/* <button onClick={check}>check</button> */}
                             <div className="p-4 w-full flex flex-col items-center justify-center rounded">
                                 <div className="w-full flex items-center justify-end">
                                     <MdCancel fontSize={'1.2rem'} onClick={handleCloseEditModal} color="red" />
@@ -375,6 +420,7 @@ const StoreDetailsScreen = () => {
                                         )
                                     }
                                 </div>
+                                <button onClick={handleSaveChangesClick}>{isUpdateLoading ? <CircularProgress /> : 'Save Changes'}</button>
                             </div>
                         </Dialog> : <></>
                 }

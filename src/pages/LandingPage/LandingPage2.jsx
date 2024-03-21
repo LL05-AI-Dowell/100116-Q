@@ -21,6 +21,8 @@ import {
     getStoreData,
     createStore,
     getQrCode,
+    getQrCodeIdBySeatNumber,
+    createOrder
 } from '../../../services/qServices';
 import {
     CircularProgress,
@@ -87,11 +89,7 @@ const LandingPage2 = () => {
     const currentDate = new Date();
     const [userDetails, setUserDetails] = useState([]);
     const [showBanner, setShowBanner] = useState(false);
-    const [qrCodeIdForSeatNumber, setQrCodeIdForSeatNumber] = useState({
-        seatNumber: null,
-        qrCodeId: null,
-        amount: null,
-    });
+    const [qrCodeIdForSeatNumber, setQrCodeIdForSeatNumber] = useState('');
     const [enterPaymentRecordLoading, setEnterPaymentRecordLoading] = useState(false);
     const [seatNumber, setSeatNumber] = useState(null);
     const [amountEntered, setAmountEntered] = useState('');
@@ -100,6 +98,7 @@ const LandingPage2 = () => {
     const [noOrderInititatedForSeat, setNoOrderInititatedForSeat] = useState(false);
     const [orderInitiatedForSeat,setOrderInitiatedForSeat] = useState([]);
     const [selectedTableNumber,setSelectedTableNumber] = useState(null);
+    const [orderInitiatedId, setOrderInitiatedId] = useState('');
     const seatNumberRef = useRef(null);
     const amountRef = useRef(null);
 
@@ -181,34 +180,16 @@ const LandingPage2 = () => {
             }
         });
 
-        // await getQrCodeIdBySeatNumber(currentUser?.userinfo?.client_admin_id, value).then(res => {
-        //     console.log('res get qr code id by seat', res?.data?.response);
-        //     setQrCodeIdForSeatNumber(prevVal => ({ ...prevVal, qrCodeId: res?.data?.response, seatNumber: value }));
-        // }).catch(err => {
-        //     console.log('err get qr code id by seat no', err);
-        //     if (err?.response?.status === 400) {
-        //         setShowActivateSeat(true);
-        //     }
-        // })
+        await getQrCodeIdBySeatNumber(currentUser?.userinfo?.client_admin_id, value).then(res => {
+            console.log('res get qr code id by seat', res?.data?.response);
+            setQrCodeIdForSeatNumber(res?.data?.response);
+        }).catch(err => {
+            console.log('err get qr code id by seat no', err);
+            if (err?.response?.status === 400) {
+                setShowActivateSeat(true);
+            }
+        })
     };
-
-    const handleAmountInputChange = (event) => {
-        const currentValue = parseInt(event.target.value || '0', 10);
-
-        if (event.nativeEvent.inputType === 'insertText') {
-            const newValue = currentValue < 0 ? 0 : currentValue;
-            event.target.value = newValue;
-            setAmountEntered(newValue);
-        } else if (currentValue <= 0) {
-            event.target.value = 0;
-            setAmountEntered(0);
-        } else {
-            const newValue = event.key === 'ArrowUp' ? currentValue + 1 : event.key === 'ArrowDown' ? Math.max(0, currentValue - 1) : currentValue;
-            event.target.value = newValue;
-            setAmountEntered(newValue);
-        }
-        setQrCodeIdForSeatNumber(prevVal => ({ ...prevVal, amount: Number(event.target.value) }));
-    }
 
     useEffect(() => {
         if (!currentUser || !currentUserApiKey) return;
@@ -390,13 +371,16 @@ const LandingPage2 = () => {
         // setEnterPaymentRecordLoading(true);
         const dataToPost = {
             "workspace_id": currentUser?.userinfo?.client_admin_id,
-            "qrcode_id": qrCodeIdForSeatNumber?.qrCodeId,
+            "qrcode_id": qrCodeIdForSeatNumber,
             "date": formatDateForAPI(currentDate),
             "timezone": currentUser?.userinfo?.timezone,
-            "seat_number": qrCodeIdForSeatNumber?.seatNumber,
+            "seat_number": seatNumber,
             "store_id": getSavedNewUserDetails()[0].store_ids[0],
-            "amount": qrCodeIdForSeatNumber?.amount
+            "order_intiated_id": orderInitiatedId,
+            "amount": amountEntered,
         }
+
+        console.log('dataToPost', dataToPost);
         // console.log(dataToPost)
         // await createCustomerPayment(dataToPost).then(res => {
         //     setEnterPaymentRecordLoading(false);
@@ -410,6 +394,18 @@ const LandingPage2 = () => {
         //         navigate('/error');
         //     }
         // })
+
+        await createOrder(dataToPost).then(res =>{
+            console.log('createOrder resss', res);
+
+            setEnterPaymentRecordLoading(false);
+        }).catch(err => {
+            setEnterPaymentRecordLoading(false);
+            console.log('err createOrder', err);
+            if (err?.response?.status === 400) {
+                navigate('/error');
+            }
+        });
     }
 
     const handleCloseBanner = () => {
@@ -636,10 +632,11 @@ const LandingPage2 = () => {
                                                         <div className='flex flex-row flex-wrap items-center justify-center'>
                                                             {
                                                                 storeDetailsResponse[0].tables[selectedTableNumber]?.seat_data.length === 0?<p>No Seat</p>:
-                                                                createArrayWithLength(storeDetailsResponse[0].tables[selectedTableNumber]?.seat_data.length)
+                                                                storeDetailsResponse[0].tables[selectedTableNumber]?.seat_data
                                                                 .map((seat, index) => {
                                                                     
                                                                     const seatNumber = parseInt(seat?.seat_number?.split('_').pop());
+                                                                    // {console.log('seat_number', seat?.seat_number)}
                                                                     return (
                                                                         <button
                                                                             className="bg-inherit text-black border-solid border border-sky-500 rounded my-0.5 w-12 h-8"
@@ -681,7 +678,7 @@ const LandingPage2 = () => {
                                                             </button>
                                                             {
                                                                 <ul>{
-                                                                    createArrayWithLength(orderInitiatedForSeat.length)
+                                                                    orderInitiatedForSeat
                                                                         .slice(
                                                                             seatPagination,
                                                                             seatPagination + 5
@@ -691,9 +688,10 @@ const LandingPage2 = () => {
                                                                                 <li
                                                                                     className='cursor-pointer flex flex-col justify-start bg-inherit text-black border-solid border border-sky-500 rounded m-3 p-1 w-max h-max'
                                                                                     onClick={() => {
-                                                                                        setOrderNumber(s);
+                                                                                        setOrderNumber(s?.phone_number);
+                                                                                        setOrderInitiatedId(s?.order_initiated_id);
                                                                                     }}
-                                                                                    key={`${s}_button`}
+                                                                                    key={`${s?.order_initiated_id}_button`}
                                                                                 >
                                                                                     {s?.phone_number}
                                                                                 </li>

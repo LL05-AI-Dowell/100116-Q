@@ -266,7 +266,7 @@ const QrCodeScreen = () => {
                   fontSize={"1.5rem"}
                   className='sm:mr-2 mr-0'
                 />
-                Payment
+                Pay
               </button>
             </div>
             <div className='cursor-pointer min-h-[50px] rounded border border-sky-400 flex items-center justify-center'>

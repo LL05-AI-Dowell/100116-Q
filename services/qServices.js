@@ -197,7 +197,7 @@ export const retrieveInitiatedOrder = async (
     Authorization: `Bearer ${getSavedApiKey()}`,
   };
   return await qServicesAxiosInstance.get(
-    `/v2/customer-services/?type=retrive_initiated_order&workspace_id=${workspace_id}&seat_number=${seat_no}&date=${date}&store_id=${store_id}&limit=10&offset=0`,
+    `/v2/customer-services/?type=retrive_initiated_order&workspace_id=${workspace_id}&seat_number=${seat_no}&date=${date}&store_id=${store_id}&limit=50&offset=0`,
     { headers }
   );
 };
@@ -265,3 +265,12 @@ export const getMenuData = async (workspace_id, store_id) => {
     { headers }
   );
 };
+
+
+export const createOrder = async (dataToPost) => {
+  const headers = {
+    Authorization: `Bearer ${getSavedApiKey()}`,
+  };
+  return await qServicesAxiosInstance.post(
+    `/v2/customer-services/?type=create_order`,dataToPost,{ headers });
+}
