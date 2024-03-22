@@ -1265,6 +1265,9 @@ class customer_services(APIView):
         if not response["success"]:
             return CustomResponse(False, "Failed to retrieve customer data",None, status.HTTP_400_BAD_REQUEST)
         
+        if response["data"] is None or len(response["data"]) == 0:
+            return CustomResponse(False, "No customer data found",None, status.HTTP_404_NOT_FOUND)
+        
         data = response.get('data',[])[0]
         if len(data) == 0:
             return CustomResponse(False, "Kindly initiate a new order",None, status.HTTP_404_NOT_FOUND)
