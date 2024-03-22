@@ -7,8 +7,12 @@ import { IoAddCircleSharp } from "react-icons/io5";
 import { createQrCode } from "../../../services/qServices";
 import { getSavedNewUserDetails } from "../../hooks/useDowellLogin";
 import { MdOutlineErrorOutline } from "react-icons/md";
+import { formatDateForAPI } from "../../helpers/helpers";
 
 const SeatDetails = () => {
+    const OPEN_PAGE_URL = 'https://www.q.uxlivinglab.online/';
+    // const OPEN_PAGE_URL = 'http://localhost:5173/';
+    const currentDate = new Date();
     const user = getSavedNewUserDetails();
     const { currentUser, qrCodeResponse } = useCurrentUserContext();
     const [loading, setLoading] = useState(true);
@@ -20,6 +24,7 @@ const SeatDetails = () => {
             setLoading(false);
         }
     }, [qrCodeResponse]);
+    // {console.log('URLLLLLL',process.env.Q_APP_URL)}
 
     const handleAddQrCode = async () => {
         setIsQrCodeLoading(true);
@@ -27,13 +32,15 @@ const SeatDetails = () => {
             setShowBanner(true);
             setIsQrCodeLoading(false);
         }
-        const dataToPost = {
-            "link": "https://xvr8nq-5173.csb.app/",
-            "timezone": currentUser?.userinfo?.timezone,
-            "username": currentUser?.userinfo?.username,
-        }
+
         if (qrCodeResponse.length === 0) {
-            await createQrCode(currentUser?.userinfo?.client_admin_id, user[0]?._id, 1, dataToPost).then(res => {
+            const dataToPost = {
+                // "link": "https://xvr8nq-5173.csb.app/",
+                "link": `${OPEN_PAGE_URL}qrlink/?view=qrlinks`,
+                "timezone": currentUser?.userinfo?.timezone,
+                "username": currentUser?.userinfo?.username,
+            }
+            await createQrCode(currentUser?.userinfo?.client_admin_id, user[0]?._id,getSavedNewUserDetails()[0].store_ids[0], 1, dataToPost).then(res => {
                 console.log('qr code created', res)
                 setIsQrCodeLoading(false);
             }).catch(err => {
@@ -50,7 +57,13 @@ const SeatDetails = () => {
                     return i;
                 }
             }
-            await createQrCode(currentUser?.userinfo?.client_admin_id, user[0]?._id, maxSeatNumber + 1, dataToPost).then(res => {
+            const dataToPost = {
+                // "link": `${OPEN_PAGE_URL}qrlink/?view=qrlinks`,
+                "link": `${OPEN_PAGE_URL}qrlink/?view=qrlinks`,
+                "timezone": currentUser?.userinfo?.timezone,
+                "username": currentUser?.userinfo?.username,
+            }
+            await createQrCode(currentUser?.userinfo?.client_admin_id, user[0]?._id,getSavedNewUserDetails()[0].store_ids[0], maxSeatNumber + 1, dataToPost).then(res => {
                 console.log('qr code created', res)
                 setIsQrCodeLoading(false);
             }).catch(err => {

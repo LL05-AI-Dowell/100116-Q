@@ -73,7 +73,10 @@ const CardDetails = ({ qrCodeResponse }) => {
   }
 
   return (
-    <Card sx={{ display: 'flex', width: '46%', margin: '1rem', padding: '0.9%' }}>
+    <Card sx={{ display: 'flex', width: '46%', margin: '1rem', padding: '0.9%' ,
+    '@media (max-width: 1100px)': {
+      width: '100%',
+  } }}>
       <div className="w-2/5 flex items-center justify-center" onClick={handleImageClick}>
         <img
           src={qrCodeResponse.qrcode_image_url}
@@ -81,7 +84,7 @@ const CardDetails = ({ qrCodeResponse }) => {
           className="h-max w-full shadow-5xl mx-2"
         />
       </div>
-      <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'left', justifyContent: 'left' }}>
+      <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'left', justifyContent: 'left',width:'60%' }}>
         <Typography variant="h6" component="h6" sx={{ fontSize: '1.3rem', textAlign: 'left', margin: '5px' }}>
           {changeName(qrCodeResponse.qrcode_name)}
         </Typography>

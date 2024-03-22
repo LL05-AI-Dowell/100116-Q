@@ -60,6 +60,7 @@ export default function useDowellLogin() {
         const localUserDetails = getSavedLoggedInUser();
         const localAPIKey = getSavedApiKey();
         const isSuccessScreen = view === 'success'
+        const isqrCodeScreen = (pathname === '/qrlink' || pathname === '/qrlink/')
 
         if (localAPIKey) {
             setCurrentUserApiKey(localAPIKey);
@@ -141,6 +142,7 @@ export default function useDowellLogin() {
             return
         }
         if (isSuccessScreen) return
+        if (isqrCodeScreen) return
         // redirecting to login
         sessionStorage.clear();
         window.location.replace(PRODUCT_LOGIN_URL);

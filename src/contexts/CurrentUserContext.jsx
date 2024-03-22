@@ -12,6 +12,7 @@ const UserContextProvider = ({ children }) => {
     const [qUserDetails, setQUserDetails] = useState(null);
     const [intialConfigurationLoaded, setIntialConfigurationLoaded] = useState(false);
     const [qrCodeResponse, setQrCodeResponse] = useState(null);
+    const [storeDetailsResponse, setStoreDetailsResponse] = useState(null);
 
     return <>
         <UserContext.Provider
@@ -27,7 +28,9 @@ const UserContextProvider = ({ children }) => {
                 intialConfigurationLoaded,
                 setIntialConfigurationLoaded,
                 qrCodeResponse,
-                setQrCodeResponse
+                setQrCodeResponse,
+                storeDetailsResponse,
+                setStoreDetailsResponse,
             }}
         >
             {children}

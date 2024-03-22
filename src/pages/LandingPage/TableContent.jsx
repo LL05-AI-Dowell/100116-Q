@@ -1,5 +1,5 @@
 import TableCell from '@mui/material/TableCell';
-import { QueryClient, QueryClientProvider, useQuery } from "react-query";
+import {useQuery } from "react-query";
 import {
     CircularProgress,
 } from "@mui/material";
@@ -22,7 +22,7 @@ const SeatRow = ({ seatNumber, pagination }) => {
         ["seatData", seatNumber],
         () => getPaymentDetailForSeat(currentUser?.userinfo?.client_admin_id, seatNumber + pagination + 1, formatDateForAPI(currentDate), getSavedNewUserDetails()[0]?.store_ids[0], dataToPost),
         {
-            refetchInterval: 15000, // Refresh every 5 seconds
+            refetchInterval: 15000, // Refresh every 15 seconds
         }
     );
 
@@ -84,7 +84,7 @@ const SeatRow = ({ seatNumber, pagination }) => {
                 <>
                     <TableCell align='center' sx={{ padding: '5px' }}>{amount}</TableCell>
                     <TableCell align='left' sx={{ display: "flex", padding: '5px' }}>
-                        {reversedArray.map((item, index) => {
+                        {reversedArray.slice(0,5).map((item, index) => {
                             const isPaid = item.is_paid;
                             const paymentStatus = item.payment_status;
                             return (
