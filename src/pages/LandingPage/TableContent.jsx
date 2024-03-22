@@ -84,7 +84,7 @@ const SeatRow = ({ seatNumber, pagination }) => {
                 <>
                     <TableCell align='center' sx={{ padding: '5px' }}>{amount}</TableCell>
                     <TableCell align='left' sx={{ display: "flex", padding: '5px' }}>
-                        {reversedArray.map((item, index) => {
+                        {reversedArray.slice(0,5).map((item, index) => {
                             const isPaid = item.is_paid;
                             const paymentStatus = item.payment_status;
                             return (

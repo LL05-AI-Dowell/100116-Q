@@ -10,8 +10,8 @@ import { MdOutlineErrorOutline } from "react-icons/md";
 import { formatDateForAPI } from "../../helpers/helpers";
 
 const SeatDetails = () => {
-    // const OPEN_PAGE_URL = 'https://www.q.uxlivinglab.online/';
-    const OPEN_PAGE_URL = 'http://localhost:5173/';
+    const OPEN_PAGE_URL = 'https://www.q.uxlivinglab.online/';
+    // const OPEN_PAGE_URL = 'http://localhost:5173/';
     const currentDate = new Date();
     const user = getSavedNewUserDetails();
     const { currentUser, qrCodeResponse } = useCurrentUserContext();

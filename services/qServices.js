@@ -118,7 +118,7 @@ export const getPaymentDetailForSeat = async (
     Authorization: `Bearer ${getSavedApiKey()}`,
   };
   return await qServicesAxiosInstance.get(
-    `/v2/customer-services/?type=retrieve_orders_by_seat&workspace_id=${workspace_id}&seat_number=${seat_no}&date=${date}&store_id=${store_id}&limit=5&offset=0`,
+    `/v2/customer-services/?type=retrieve_orders_by_seat&workspace_id=${workspace_id}&seat_number=${seat_no}&date=${date}&store_id=${store_id}&limit=100&offset=0`,
     { headers }
   );
 };
@@ -191,13 +191,14 @@ export const retrieveInitiatedOrder = async (
   workspace_id,
   seat_no,
   date,
-  store_id
+  store_id,
+  limit
 ) => {
   const headers = {
     Authorization: `Bearer ${getSavedApiKey()}`,
   };
   return await qServicesAxiosInstance.get(
-    `/v2/customer-services/?type=retrive_initiated_order&workspace_id=${workspace_id}&seat_number=${seat_no}&date=${date}&store_id=${store_id}&limit=50&offset=0`,
+    `/v2/customer-services/?type=retrive_initiated_order&workspace_id=${workspace_id}&seat_number=${seat_no}&date=${date}&store_id=${store_id}&limit=${limit}&offset=0`,
     { headers }
   );
 };

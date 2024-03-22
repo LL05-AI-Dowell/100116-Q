@@ -23,7 +23,7 @@ const Profile = () => {
   const { currentUser } = useCurrentUserContext();
   const navigate = useNavigate();
   const [value, setValue] = useState("1");
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(true);
   const [username, setUsername] = useState(currentUser?.userinfo?.username);
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -114,7 +114,7 @@ const Profile = () => {
         </div>
       </Dialog>
       <div className='h-screen m-0 p-0 gradient_ flex items-baseline overflow-scroll'>
-        <div className='w-full h-full bg-white margin_ shadow-black mt-3.5 p-4 pt-2 pb-6 rounded-md md:w-11/12 md:h-max'>
+        <div className='w-full h-full bg-white margin_ shadow-black mt-3.5 p-4 pt-2 pb-6 rounded-md md:w-11/12 md:h-max bg-[#f6f6f6]'>
           <div className='w-full flex items-start justify-between x'>
             <MdArrowBackIos
               onClick={() => navigate(-1)}

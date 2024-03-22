@@ -12,20 +12,14 @@ import { CircularProgress } from "@mui/material";
 import { QueryClient, QueryClientProvider, useQuery } from "react-query";
 import { GiTakeMyMoney } from "react-icons/gi";
 import { MdOutlinePayments } from "react-icons/md";
-import { FaPerson } from "react-icons/fa6";
-// import {
-//   useQuery,
-//   useMutation,
-//   useQueryClient,
-//   QueryClient,
-//   QueryClientProvider,
-// } from "react-query";
 import { getStoreData, getMenuData } from "../../../services/qServices";
 import MenuCard from "./MenuCard";
-
+import { useNavigate } from "react-router-dom";
+import { FaPerson } from "react-icons/fa6";
 const queryClient = new QueryClient();
 
 const QrCodeScreen = () => {
+  const navigate = useNavigate();
   //   const queryClient = new QueryClient();
   const currentDate = new Date();
   const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -51,6 +45,11 @@ const QrCodeScreen = () => {
   const [isMenuDataLoading, setIsMenuDataLoading] = useState(false);
   const [storeData, setStoreData] = useState([]);
   const [menuData, setMenuData] = useState([]);
+  const [olderOrderResponseForPayment, setOldOrderResponseForPayment] = useState({});
+  const [recordNotFound, setRecordNotFound] = useState({
+    show: false,
+    message: "",
+  });
 
   const dataToPostForQuery = {
     workspace_id: workspaceId,
@@ -63,8 +62,8 @@ const QrCodeScreen = () => {
     ["menuData"],
     () =>
       initiateOlderOrder(dataToPostForQuery)
-        .then(() => {})
-        .catch(() => {}),
+        .then(() => { })
+        .catch(() => { }),
     {
       refetchInterval: 15000, // Refresh every 15 seconds
     }
@@ -120,7 +119,7 @@ const QrCodeScreen = () => {
 
     // console.log(dataToPost);
     await initiateOlderOrder(dataToPost)
-      .then((res) => {
+      .then(res => {
         console.log("initiate older order resss", res?.data?.success);
 
         if (res?.data?.success === false) {
@@ -135,6 +134,24 @@ const QrCodeScreen = () => {
       .catch((err) => {
         console.log("initiate older order err", err);
         setIsOlderOrderLoading(false);
+        if (err?.response?.status === 400) {
+          navigate('/error');
+        }
+        if (err?.response?.status === 402) {
+          // navigate('/error');
+          setBillIsNotGenerated({
+            show: true,
+            message: err?.response?.data?.message,
+          });
+          setOldOrderResponseForPayment(err?.response?.data?.response);
+          setShowModal(false);
+        }
+        if (err?.response?.status === 404) {
+          setRecordNotFound({
+            show: true,
+            message: err?.response?.data?.message,
+          });
+        }
       });
 
     // setShowModal(false);
@@ -171,53 +188,58 @@ const QrCodeScreen = () => {
   return (
     <>
       {showModal ? (
-        <div className='fixed top-0 left-0 w-full h-full flex items-center justify-center'>
-          {phoneModal ? (
-            <div className='h-40 w-64 rounded-lg bg-orange-300 flex flex-col gap-5 items-center justify-center'>
-              <input
-                className='placeholder:italic placeholder:text-slate-400 block bg-white w-3/4 border border-slate-300 rounded-md py-2 pl-3 shadow-sm focus:outline-none focus:border-sky-500 focus:ring-1 sm:text-sm'
-                placeholder='Enter phone number'
-                type='text'
-                value={inputNumber}
-                onChange={(e) => setInputValue(e.target.value)}
-              />
+        <>
+          {
+            recordNotFound.show ? <p className="text-lg text-rose-500 font-medium">{recordNotFound.message}</p> : <></>
+          }
+          <div className='fixed top-0 left-0 w-full h-full flex items-center justify-center'>
+            {phoneModal ? (
+              <div className='h-40 w-64 rounded bg-[#bbbcbe] flex flex-col gap-5 items-center justify-center'>
+                <input
+                  className='placeholder:italic placeholder:text-slate-400 block bg-white w-3/4 border border-slate-300 py-2 pl-3 shadow-sm focus:outline-none focus:border-sky-500 focus:ring-1 sm:text-sm'
+                  placeholder='Enter phone number'
+                  type='text'
+                  value={inputNumber}
+                  onChange={(e) => setInputValue(e.target.value)}
+                />
 
-              {isnewOrder ? (
+                {isnewOrder ? (
+                  <button
+                    className='px-7 py-2 rounded bg-[#1c8382] text-white text-lg font-medium'
+                    onClick={handleNewOrderClick}
+                  >
+                    {isNewOrderLoading ? <CircularProgress /> : "Enter"}
+                  </button>
+                ) : (
+                  <button
+                    className='px-7 py-2 rounded bg-[#1c8382] text-white text-lg font-medium'
+                    onClick={handleOrder}
+                  >
+                    {isOlderOrderLoading ? <CircularProgress /> : "Enter"}
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className='h-40 w-64 rounded bg-[#bbbcbe] flex flex-col gap-5 items-center justify-center'>
                 <button
-                  className='px-7 py-2 rounded-full text-white font-semibold bg-gray-600'
-                  onClick={handleNewOrderClick}
+                  className='px-7 py-2 rounded bg-[#1c8382] text-white text-lg font-medium'
+                  onClick={handleOlderOrder}
                 >
-                  {isNewOrderLoading ? <CircularProgress /> : "Enter"}
+                  Older order
                 </button>
-              ) : (
                 <button
-                  className='px-7 py-2 rounded-full text-white font-semibold bg-gray-600'
-                  onClick={handleOrder}
+                  className='px-7 py-2 rounded bg-[#1c8382] text-white text-lg font-medium'
+                  onClick={handleNewOrder}
                 >
-                  {isOlderOrderLoading ? <CircularProgress /> : "Enter"}
+                  New order
                 </button>
-              )}
-            </div>
-          ) : (
-            <div className='h-40 w-64 rounded-lg bg-orange-300 flex flex-col gap-5 items-center justify-center'>
-              <button
-                className='px-7 py-2 rounded-full text-white font-semibold bg-gray-600'
-                onClick={handleOlderOrder}
-              >
-                Older order
-              </button>
-              <button
-                className='px-7 py-2 rounded-full text-white font-semibold bg-gray-600'
-                onClick={handleNewOrder}
-              >
-                New order
-              </button>
-            </div>
-          )}
-        </div>
+              </div>
+            )}
+          </div>
+        </>
       ) : (
-        <div className='flex flex-col fixed top-0 left-0 w-full h-full items-center justify-center p-4'>
-          <div className='flex items-center justify-evenly h-10 w-full bg-sky-200 rounded gap-2'>
+        <div className='flex flex-col fixed top-0 left-0 w-full h-full items-center justify-center p-2'>
+          <div className='flex items-center justify-evenly h-12 w-full bg-[#1c8382] rounded gap-2 text-[#fff] shadow-xl'>
             <p className='text-lg font-medium'>
               {storeData[0]?.store_name === ""
                 ? "N/A"
@@ -226,16 +248,16 @@ const QrCodeScreen = () => {
             <p className='text-lg font-medium'>{currentDate?.toDateString()}</p>
           </div>
           {billIsNotGenerated?.show ? (
-            <p className='text-sm font-semibold text-rose-500'>
+            <p className='text-sm font-semibold text-rose-600'>
               {billIsNotGenerated?.message}
             </p>
           ) : (
             <></>
           )}
           {/* Menu display is here ---------------------------------------------------- */}
-          <div className='flex-grow h-96 w-full border  border-sky-400 rounded my-1 flex flex-col items-center  justify-center overflow-auto'>
-            <div className='w-full h-full p-4'>
-              <h3 className='text-xl font-semibold mb-2 text-center'>
+          <div className='flex-grow h-96 w-full shadow-md rounded my-1 flex flex-col items-center  justify-center overflow-auto bg-[#f0ffff]'>
+            <div className='w-full h-full p-2'>
+              <h3 className='text-2xl font-semibold mb-2 text-center'>
                 Menu Items
               </h3>
               {menuData?.map((menu) => (
@@ -243,31 +265,55 @@ const QrCodeScreen = () => {
               ))}
             </div>
           </div>
-          <div className='flex-none h-10 w-full border border-sky-400 rounded mb-2 flex items-center justify-center '>
-            <p>{inputNumber}</p>
+          <div className='flex-none h-12 w-full bg-[#1c8382] rounded mb-2 flex items-center justify-center text-[#fff]'>
+            <p className="text-xl font-medium">{inputNumber}</p>
           </div>
           {/* {billIsNotGenerated.show && (
                                     <div className="absolute inset-0 bg-gray-900 opacity-50 z-50"></div>
                                 )} */}
           <div className='flex-none h-20 w-full  rounded grid gap-3 grid-cols-4'>
-            <div className='cursor-pointer min-h-[50px] rounded border border-sky-400 flex items-center justify-center'>
-              <button
-                className='text-xs sm:text-base lg:text-2xl p-1 text-center flex sm:flex-row flex-col items-center justify-center'
-                disabled={billIsNotGenerated.show}
-              >
-                <GiTakeMyMoney fontSize={"1.5rem"} className='sm:mr-2 mr-0' />
-                Amount to pay
-              </button>
+            <div className={`cursor-pointer min-h-[50px] rounded flex items-center justify-center ${olderOrderResponseForPayment?.amount ? 'bg-cyan-200' : 'bg-[#bbbcbe] text-[#fff]'}`}>
+              {
+                olderOrderResponseForPayment?.amount ?
+                  <button
+                    className='font-bold text-2xl sm:text-base lg:text-3xl p-1 text-center flex sm:flex-row flex-col items-center justify-center'
+                  // disabled={billIsNotGenerated.show}
+                  >
+                    <p className="font-medium">Amount</p>
+                    {olderOrderResponseForPayment?.amount}
+                  </button> :
+                  <button
+                    className='text-xs sm:text-base lg:text-2xl p-1 text-center flex sm:flex-row flex-col items-center justify-center'
+                  // disabled={billIsNotGenerated.show}
+                  >
+                    <GiTakeMyMoney fontSize={"1.5rem"} className='sm:mr-2 mr-0' />
+                    Amount to pay
+                  </button>
+              }
             </div>
-            <div className='cursor-pointer min-h-[50px] rounded border border-sky-400 flex items-center justify-center'>
+            <div className={`cursor-pointer min-h-[50px] rounded flex items-center justify-center ${olderOrderResponseForPayment?.is_paid === false ? 'bg-green-400 shadow-md shadow-2xl' : 'bg-[#bbbcbe] text-[#fff]'}`}>
               {/* <FaHandPointUp className='text-2xl sm:text-4xl lg:text-4xl' /> */}
-              <button className='text-xs sm:text-base lg:text-2xl p-1 text-center flex sm:flex-row flex-col items-center justify-center'>
-                <MdOutlinePayments
-                  fontSize={"1.5rem"}
-                  className='sm:mr-2 mr-0'
-                />
-                Pay
-              </button>
+              {
+                olderOrderResponseForPayment?.is_paid === false ?
+                  <a className='text-xs sm:text-base lg:text-2xl p-1 text-center flex sm:flex-row flex-col items-center justify-center'
+                    href={olderOrderResponseForPayment?.payment_link}
+                    // href="https://chat.openai.com/c/3105895a-d83c-45d5-9001-6ab9122cea21"
+                    target="blank"
+                  >
+                    <MdOutlinePayments
+                      fontSize={"1.5rem"}
+                      className='sm:mr-2 mr-0'
+                    />
+                    <p className="text-xl">Pay</p>
+                  </a> :
+                  <button className='text-xs sm:text-base lg:text-2xl p-1 text-center flex sm:flex-row flex-col items-center justify-center'>
+                    <MdOutlinePayments
+                      fontSize={"1.5rem"}
+                      className='sm:mr-2 mr-0'
+                    />
+                    Pay
+                  </button>
+              }
             </div>
             <div className='cursor-pointer min-h-[50px] rounded border border-sky-400 flex items-center justify-center'>
               <button className='text-xs sm:text-base lg:text-2xl p-1 text-center flex sm:flex-row flex-col items-center justify-center'>
