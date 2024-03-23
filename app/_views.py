@@ -1168,8 +1168,8 @@ class customer_services(APIView):
             return CustomResponse(False, "Posting wrong data to API",serializer.errors, status.HTTP_400_BAD_REQUEST)
         
         payment_receipt_id = generate_store_id()
-        callback_url =f"http://localhost:5173/success/?view=success&payment_receipt_id={payment_receipt_id}&date={date}&workspace_id={workspace_id}&qrcode_id={qrcode_id}&seat_number={seat_number}"
-        # callback_url =f"https://www.q.uxlivinglab.online/success/?view=success&payment_receipt_id={payment_receipt_id}&date={date}&workspace_id={workspace_id}&qrcode_id={qrcode_id}&seat_number={seat_number}"
+        # callback_url =f"http://localhost:5173/success/?view=success&payment_receipt_id={payment_receipt_id}&date={date}&workspace_id={workspace_id}&qrcode_id={qrcode_id}&seat_number={seat_number}"
+        callback_url =f"https://www.q.uxlivinglab.online/success/?view=success&payment_receipt_id={payment_receipt_id}&date={date}&workspace_id={workspace_id}&qrcode_id={qrcode_id}&seat_number={seat_number}&store_id={store_id}"
         
         # payment information will be changed later
         
@@ -1308,16 +1308,19 @@ class customer_services(APIView):
         workspace_id = request.GET.get('workspace_id')
         qrcode_id = request.GET.get('qrcode_id')
         seat_number = request.GET.get('seat_number')
+        store_id = request.GET.get('store_id')
 
         
         if not qrcode_id and not payment_receipt_id and not workspace_id and not date:
             return CustomResponse(False, "Payment Details are missing",None, status.HTTP_400_BAD_REQUEST)
         
+        generated_link = f'https://www.q.uxlivinglab.online/qrlink/?view=qrlinks&workspace_id={workspace_id}&store_id={store_id}&seat_number={seat_number}'
         update_qr_code = update_qr_code_link(
             qrcode_id,
-            "https://xvr8nq-5173.csb.app/",
+            generated_link,
             f'seat_number_{seat_number}'
         )
+
 
         if not update_qr_code:
             return CustomResponse(False, "Failed to update the qrcode link contact to administrator",None, status.HTTP_400_BAD_REQUEST)
