@@ -151,12 +151,12 @@ const LandingPage2 = () => {
         }
     };
 
-    const handleInputChange = async (value, limit) => {
+    const handleInputChange = async (value) => {
         setNoOrderInititatedForSeat(false);
         setShowActivateSeat(false);
         setRetrievingOrders(true);
         console.log(currentUser?.userinfo?.client_admin_id, value, formatDateForAPI(currentDate), getSavedNewUserDetails()[0].store_ids[0]);
-        await retrieveInitiatedOrder(currentUser?.userinfo?.client_admin_id, value, formatDateForAPI(currentDate), getSavedNewUserDetails()[0].store_ids[0], limit).then(res => {
+        await retrieveInitiatedOrder(currentUser?.userinfo?.client_admin_id, value, formatDateForAPI(currentDate), getSavedNewUserDetails()[0].store_ids[0]).then(res => {
             console.log('retrieved initiated order ress', res);
             if (res?.data?.response?.length === 0) {
                 setNoOrderInititatedForSeat(true);
@@ -639,7 +639,7 @@ const LandingPage2 = () => {
                                                                                 <button
                                                                                     className="text-black border-solid bg-[#bbbcbe] rounded my-0.5 w-12 h-8"
                                                                                     onClick={() => {
-                                                                                        handleInputChange(seatNumberr, 6);
+                                                                                        handleInputChange(seatNumberr);
                                                                                         setSeatNumber(seatNumberr);
                                                                                     }}
                                                                                     key={`${index}_button`}
@@ -704,7 +704,7 @@ const LandingPage2 = () => {
                                                                         className="rotate-90 cursor-pointer bg-inherit text-black flex items-center justify-center w-max h-max"
                                                                         onClick={() => {
                                                                             incrementSeatPagination(5, 100 / 5);
-                                                                            handleInputChange(seatNumber, seatPagination + 11);
+                                                                            // handleInputChange(seatNumber);
                                                                         }}
                                                                     >
                                                                         <IoIosArrowForward />

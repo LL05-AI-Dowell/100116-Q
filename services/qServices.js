@@ -151,13 +151,14 @@ export const updatePaymentRecord = async (
   date,
   qrcode_id,
   workspace_id,
-  seat_no
+  seat_no,
+  store_id
 ) => {
   const headers = {
     Authorization: `Bearer ${getSavedApiKey()}`,
   };
   return await qServicesAxiosInstance.get(
-    `/v2/customer-services/?type=update_payment_status&payment_receipt_id=${paymentReceiptId}&date=${date}&workspace_id=${workspace_id}&qrcode_id=${qrcode_id}&seat_number=${seat_no}`,
+    `/v2/customer-services/?type=update_payment_status&payment_receipt_id=${paymentReceiptId}&date=${date}&workspace_id=${workspace_id}&qrcode_id=${qrcode_id}&seat_number=${seat_no}&store_id=${store_id}`,
     { headers }
   );
 };
@@ -191,14 +192,13 @@ export const retrieveInitiatedOrder = async (
   workspace_id,
   seat_no,
   date,
-  store_id,
-  limit
+  store_id
 ) => {
   const headers = {
     Authorization: `Bearer ${getSavedApiKey()}`,
   };
   return await qServicesAxiosInstance.get(
-    `/v2/customer-services/?type=retrive_initiated_order&workspace_id=${workspace_id}&seat_number=${seat_no}&date=${date}&store_id=${store_id}&limit=${limit}&offset=0`,
+    `/v2/customer-services/?type=retrive_initiated_order&workspace_id=${workspace_id}&seat_number=${seat_no}&date=${date}&store_id=${store_id}&limit=100&offset=0`,
     { headers }
   );
 };

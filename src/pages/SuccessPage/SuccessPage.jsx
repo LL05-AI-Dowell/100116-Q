@@ -19,9 +19,10 @@ const Success = () => {
     const date = query.get("date");
     const qrCodeId = query.get("qrcode_id");
     const seat_number = query.get("seat_number");
+    const store_id = query.get("store_id");
 
     useEffect(() => {
-        updatePaymentRecord(paymentReceiptId, date, qrCodeId, workspaceId, seat_number)
+        updatePaymentRecord(paymentReceiptId, date, qrCodeId, workspaceId, seat_number, store_id)
             .then((response) => {
                 setApiResponse({ status: response.status, data: response.data });
             })
@@ -31,7 +32,7 @@ const Success = () => {
             .finally(() => {
                 setLoading(false);
             });
-    }, [paymentReceiptId, workspaceId, date, qrCodeId, seat_number]);
+    }, [paymentReceiptId, workspaceId, date, qrCodeId, seat_number, store_id]);
 
     if (loading) {
         return (
