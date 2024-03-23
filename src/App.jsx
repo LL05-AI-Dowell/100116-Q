@@ -9,6 +9,7 @@ import LandingPage2 from "./pages/LandingPage/LandingPage2";
 import QrCodeScreen from "./pages/QrCodeScreen/QrCodeScreen";
 
 function App() {
+  console.log = () => { };
   useDowellLogin();
 
   // // USE ONLY WHEN APP IS BROKEN/UNDERGOING MAJOR CHANGES
