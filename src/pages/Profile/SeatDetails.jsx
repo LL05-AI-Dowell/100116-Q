@@ -8,13 +8,16 @@ import { createQrCode } from "../../../services/qServices";
 import { getSavedNewUserDetails } from "../../hooks/useDowellLogin";
 import { MdOutlineErrorOutline } from "react-icons/md";
 import { formatDateForAPI } from "../../helpers/helpers";
+import { getQrCode } from "../../../services/qServices";
+import { useNavigate } from "react-router-dom";
 
 const SeatDetails = () => {
+    const navigate = useNavigate();
     const OPEN_PAGE_URL = 'https://www.q.uxlivinglab.online/';
     // const OPEN_PAGE_URL = 'http://localhost:5173/';
     const currentDate = new Date();
     const user = getSavedNewUserDetails();
-    const { currentUser, qrCodeResponse } = useCurrentUserContext();
+    const { currentUser, qrCodeResponse,setQrCodeResponse } = useCurrentUserContext();
     const [loading, setLoading] = useState(true);
     const [showBanner, setShowBanner] = useState(false);
     const [isQrCodeLoading, setIsQrCodeLoading] = useState(false);
@@ -43,6 +46,7 @@ const SeatDetails = () => {
             await createQrCode(currentUser?.userinfo?.client_admin_id, user[0]?._id,getSavedNewUserDetails()[0].store_ids[0], 1, dataToPost).then(res => {
                 console.log('qr code created', res)
                 setIsQrCodeLoading(false);
+                handleGetQrCode();
             }).catch(err => {
                 console.log('errrr qr code created', err)
                 setIsQrCodeLoading(false);
@@ -66,12 +70,24 @@ const SeatDetails = () => {
             await createQrCode(currentUser?.userinfo?.client_admin_id, user[0]?._id,getSavedNewUserDetails()[0].store_ids[0], maxSeatNumber + 1, dataToPost).then(res => {
                 console.log('qr code created', res)
                 setIsQrCodeLoading(false);
+                handleGetQrCode();
             }).catch(err => {
                 console.log('errrr qr code created', err)
                 setIsQrCodeLoading(false);
             })
         }
     }
+
+    const handleGetQrCode = async () => {
+        await getQrCode(currentUser?.userinfo?.client_admin_id, getSavedNewUserDetails()[0]?._id).then(async (res) => {
+          setQrCodeResponse(res?.data?.response);
+        }).catch(err => {
+          console.log('error qr code retrieval', err);
+          if (err?.response?.status === 400) {
+            navigate('/error');
+          }
+        })
+      }
 
     return (
         <div>
@@ -100,7 +116,7 @@ const SeatDetails = () => {
                     </div>
                     <div className="flex flex-wrap overflow-y-scroll">
                         {qrCodeResponse.map(qrCode => (
-                            <Card qrCodeResponse={qrCode} />
+                            <Card key={qrCode._id} qrCodeResponse={qrCode} />
                         ))}
                     </div>
                 </>

@@ -481,7 +481,7 @@ const LandingPage = () => {
                                                     className="h-10 w-10 rounded-full shadow-2xl cursor-pointer"
                                                     onClick={() => navigate('/profile')}
                                                 />
-                                                <button class="cursor-pointer flex items-center justify-between bg-white hover:bg-rose-100 text-gray-800 font-semibold py-2 px-2 border border-rose-600 rounded shadow mx-4"><CiLogout className="mx-1 text-xl" />Logout</button>
+                                                <button className="cursor-pointer flex items-center justify-between bg-white hover:bg-rose-100 text-gray-800 font-semibold py-2 px-2 border border-rose-600 rounded shadow mx-4"><CiLogout className="mx-1 text-xl" />Logout</button>
                                             </div>
                                         </div>
                                         {
@@ -587,7 +587,7 @@ const LandingPage = () => {
                                                     }
                                                 }}
                                             ></input>
-                                            <button class="cursor-pointer flex items-center justify-center bg-white hover:bg-green-100 text-gray-800 font-semibold py-2 px-4 border border-green-400 rounded shadow m-2"
+                                            <button className="cursor-pointer flex items-center justify-center bg-white hover:bg-green-100 text-gray-800 font-semibold py-2 px-4 border border-green-400 rounded shadow m-2"
                                                 onClick={handleEnterDataClick}
                                             >
                                                 {enterPaymentRecordLoading ? (
