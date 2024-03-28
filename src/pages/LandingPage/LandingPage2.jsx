@@ -626,18 +626,19 @@ const LandingPage2 = () => {
                                                         </div>
                                                     </div>
                                                     <div className='sm:w-2/6 w-full mx-4 shadow-inner p-4'>
-                                                        <p className='p-3 bg-[#1c8382] text-[#fff] text-xl font-medium rounded sm:w-[98%] w-[100%] shadow-md'>Seats</p>
-                                                        <div className='flex-none items-center justify-center grid gap-3 grid-cols-2'>
+                                                        <p className='p-3 bg-[#1c8382] text-[#fff] text-xl font-medium rounded sm:w-[95%] w-[100%] shadow-md '>Seats</p>
+                                                        <div className='flex-none grid gap-3 grid-cols-2 margin_'>
                                                             {
-                                                                storeDetailsResponse[0].tables[selectedTableNumber]?.seat_data.length === 0 ? <p>No Seat</p> :
+                                                                storeDetailsResponse[0].tables[selectedTableNumber]?.seat_data.length === 0 ? <p className='w-full flex items-center justify-center'>No Seat</p> :
                                                                     storeDetailsResponse[0].tables[selectedTableNumber]?.seat_data
+                                                                        // [1,2,3,4]
                                                                         .map((seat, index) => {
 
                                                                             const seatNumberr = parseInt(seat?.seat_number?.split('_').pop());
                                                                             // {console.log('seat_number', seat?.seat_number)}
                                                                             return (
                                                                                 <button
-                                                                                    className="text-black border-solid bg-[#bbbcbe] rounded my-0.5 w-[80%] h-full py-2"
+                                                                                    className="text-black bg-[#bbbcbe] rounded my-0.5 w-[80%] h-full py-2"
                                                                                     onClick={() => {
                                                                                         handleInputChange(seatNumberr);
                                                                                         setSeatNumber(seatNumberr);
