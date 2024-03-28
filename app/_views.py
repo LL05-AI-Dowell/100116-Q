@@ -81,7 +81,7 @@ class kitchen_sink_services(APIView):
         ))
 
         if not response["success"]:
-            return CustomResponse(False, "Falied to create collection, kindly contact the administrator.",None, status.HTTP_400_BAD_REQUEST)
+            return CustomResponse(False, "Falied to create collection, kindly contact the administrator.",response, status.HTTP_400_BAD_REQUEST)
 
         return CustomResponse(True,"Collection has been created successfully", None, status.HTTP_200_OK)
 
