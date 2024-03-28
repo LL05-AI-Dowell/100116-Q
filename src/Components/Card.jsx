@@ -85,11 +85,12 @@ const CardDetails = ({ qrCodeResponse }) => {
         />
       </div>
       <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'left', justifyContent: 'left',width:'60%' }}>
-        <Typography variant="h6" component="h6" sx={{ fontSize: '1.3rem', textAlign: 'left', margin: '5px' }}>
+        {/* <Typography variant="h6" component="h6" sx={{ fontSize: '1.3rem', textAlign: 'left', margin: '5px' }}>
           {changeName(qrCodeResponse.qrcode_name)}
         </Typography>
         <Typography variant="body1" component="p" sx={{ textAlign: 'left', display: 'flex', alignItems: 'center', margin: '5px' }}>
-          <p className="mx-0.5 text-sm">Seat Number:</p><p className="font-light">{changeName(qrCodeResponse.seat_number)}</p>
+          <b className="mx-0.5 text-sm">Seat Number:</b>
+          <p className="font-light">{changeName(qrCodeResponse.seat_number)}</p>
         </Typography>
         <Typography variant="body1" component="p" sx={{ textAlign: 'left', display: 'flex', alignItems: 'center', margin: '5px' }}>
           <p className="mx-0.5 text-sm">SeatShorthand URL:</p>
@@ -103,7 +104,30 @@ const CardDetails = ({ qrCodeResponse }) => {
           </a>
         </Typography>
         <Typography variant="body1" component="p" sx={{ textAlign: 'left', display: 'flex', alignItems: 'center', margin: '5px' }}>
-          <p className="mx-0.5 text-sm">Created At:</p> <p className="font-light">{formattedCreatedAt}</p>
+          <p className="mx-0.5 text-sm">Created At:</p> 
+          <p className="font-light">{formattedCreatedAt}</p>
+        </Typography> */}
+        <Typography variant="h6" component="h6" sx={{ fontSize: '1.3rem', textAlign: 'left', margin: '5px' }}>
+          {changeName(qrCodeResponse.qrcode_name)}
+        </Typography>
+        <Typography variant="body1" component="p" sx={{ textAlign: 'left', display: 'flex', alignItems: 'center', margin: '5px' }}>
+          <Typography component="span" sx={{ mx: 0.5, fontSize: '0.875rem' }}>Seat Number:</Typography>
+          <Typography component="span" variant="body2" sx={{ fontFamily: 'Roboto', fontWeight: 'light' }}>{changeName(qrCodeResponse.seat_number)}</Typography>
+        </Typography>
+        <Typography variant="body1" component="p" sx={{ textAlign: 'left', display: 'flex', alignItems: 'center', margin: '5px' }}>
+          <Typography component="span" sx={{ mx: 0.5, fontSize: '0.875rem' }}>SeatShorthand URL:</Typography>
+          <a
+            href={qrCodeResponse.shorthand_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-700"
+          >
+            <u>Click here!</u>
+          </a>
+        </Typography>
+        <Typography variant="body1" component="p" sx={{ textAlign: 'left', display: 'flex', alignItems: 'center', margin: '5px' }}>
+          <Typography component="span" sx={{ mx: 0.5, fontSize: '0.875rem' }}>Created At:</Typography> 
+          <Typography component="span" variant="body2" sx={{ fontFamily: 'Roboto', fontWeight: 'light' }}>{formattedCreatedAt}</Typography>
         </Typography>
         {qrCodeResponse.is_active ? (
 

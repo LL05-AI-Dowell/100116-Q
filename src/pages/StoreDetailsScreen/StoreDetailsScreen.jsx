@@ -11,9 +11,11 @@ import { FaUserEdit } from "react-icons/fa";
 import Select from "react-select";
 import { IoIosAddCircle } from "react-icons/io";
 import { getSavedNewUserDetails } from "../../hooks/useDowellLogin";
+import { useNavigate } from "react-router-dom";
 
 const StoreDetailsScreen = () => {
-    const { currentUser, qrCodeResponse } = useCurrentUserContext();
+    const navigate = useNavigate();
+    const { currentUser, qrCodeResponse, storeDetailsResponse, setStoreDetailsResponse, } = useCurrentUserContext();
     const [storeData, setStoreData] = useState([]);
     const [storeDataLoaded, setStoreDataLoaded] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -117,8 +119,18 @@ const StoreDetailsScreen = () => {
             const filteredOptions = options?.filter((option) =>
                 seatNumbers.includes(parseInt(option.label))
             );
+            const filteredData = filteredOptions.filter(option => {
+                const existingSeatNumbers = storeData[0]?.tables.reduce((acc, table) => {
+                    table.seat_data.forEach(seat => {
+                        acc.add(parseInt(seat.seat_number.split("_").pop()));
+                    });
+                    return acc;
+                }, new Set());
 
-            setSeatOption(filteredOptions);
+                return !existingSeatNumbers.has(parseInt(option.label));
+            });
+
+            setSeatOption(filteredData);
             setInitialSeatConfigured(true);
         }
     }, [storeDataLoaded, initialSeatConfigured]);
@@ -323,6 +335,7 @@ const StoreDetailsScreen = () => {
 
     const handleSaveChangesClick = () => {
         console.log("clicked");
+        console.log('>>>>>>>>>>>>', storeData);
         setIsUpdateLoading(true);
 
         // updatStoreDataAPI(currentUser?.userinfo?.client_admin_id, storeData[0]._id, getSavedNewUserDetails()[0]._id, dataToPost)
@@ -334,15 +347,18 @@ const StoreDetailsScreen = () => {
                 dataToPost
             )
         );
-
         Promise.all(promises)
             .then((results) => {
                 console.log("All requests succeeded:", results);
                 setIsUpdateLoading(false);
+                setStoreDetailsResponse(storeData);
             })
             .catch((error) => {
                 console.error("Error occurred during requests:", error);
                 setIsUpdateLoading(false);
+                if (error?.response?.status === 400) {
+                    navigate('/error');
+                }
             });
     };
 
