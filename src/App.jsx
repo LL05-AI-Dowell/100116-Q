@@ -9,7 +9,7 @@ import LandingPage2 from "./pages/LandingPage/LandingPage2";
 import QrCodeScreen from "./pages/QrCodeScreen/QrCodeScreen";
 
 function App() {
-  console.log = () => { };
+  console.log = () => {};
   useDowellLogin();
 
   // // USE ONLY WHEN APP IS BROKEN/UNDERGOING MAJOR CHANGES
@@ -19,14 +19,14 @@ function App() {
 
   return (
     <Routes>
-      <Route path="/" Component={LandingPage2} />
-      <Route path="/profile" Component={Profile} />
-      <Route path="/success" Component={Success} />
-      <Route path="/error" Component={ErrorScreen} />
-      <Route path="/qrlink" Component={QrCodeScreen} />
+      <Route path='/' Component={LandingPage2} />
+      <Route path='/view' Component={LandingPage} />
+      <Route path='/profile' Component={Profile} />
+      <Route path='/success' Component={Success} />
+      <Route path='/error' Component={ErrorScreen} />
+      <Route path='/qrlink' Component={QrCodeScreen} />
     </Routes>
-  )
-
+  );
 }
 
-export default App
+export default App;
