@@ -38,7 +38,7 @@ const QrCodeScreen = () => {
 
   const [phoneModal, setPhoneModal] = useState(false);
   const [inputNumber, setInputValue] = useState("");
-  const [showModal, setShowModal] = useState(false);
+  const [showModal, setShowModal] = useState(true);
   const [isnewOrder, setIsNewOrder] = useState(false);
   const [isNewOrderLoading, setIsNewOrderLoading] = useState(false);
   const [isOlderOrderLoading, setIsOlderOrderLoading] = useState(false);
