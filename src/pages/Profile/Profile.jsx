@@ -18,6 +18,7 @@ import { CircularProgress } from "@mui/material";
 import StoreDetailsScreen from "../StoreDetailsScreen/StoreDetailsScreen";
 import MenuScreen from "../MenuScreen/MenuScreen";
 import MenuTab from "../MenuScreen/MenuTab";
+import { MdCancel } from "react-icons/md";
 
 const Profile = () => {
   const { currentUser } = useCurrentUserContext();
@@ -47,7 +48,6 @@ const Profile = () => {
 
   const handleAuthClick = async () => {
     setIncorrectPassword(false);
-    console.log(username, password);
     setIsLoading(true);
     await userAuth({
       username: username,
@@ -69,9 +69,16 @@ const Profile = () => {
         open={isModalOpen}
         onClose={false}
         sx={{ width: "100%" }}
-        // className="border border-sky-300 shadow rounded-md p-4 max-w-sm w-full sm:w-2/4 h-max mx-auto item-center margin_ bg-white"
+      // className="border border-sky-300 shadow rounded-md p-4 max-w-sm w-full sm:w-2/4 h-max mx-auto item-center margin_ bg-white"
       >
         <div className='p-4 w-full flex flex-col items-center justify-center'>
+          <div className='w-full flex items-center justify-end'>
+            <MdCancel
+              fontSize={"1.2rem"}
+              onClick={() => navigate(-1)}
+              color='red'
+            />
+          </div>
           <DialogTitle sx={{ fontSize: "25px", fontWeight: "900" }}>
             Login
           </DialogTitle>
@@ -154,7 +161,7 @@ const Profile = () => {
               src='https://t4.ftcdn.net/jpg/05/89/93/27/360_F_589932782_vQAEAZhHnq1QCGu5ikwrYaQD0Mmurm0N.jpg'
               alt='Profile Photo'
               className='h-10 w-10 rounded-full shadow-2xl mx-10 cursor-pointer'
-              // onClick={() => navigate('/profile')}
+            // onClick={() => navigate('/profile')}
             />
           </div>
         </div>

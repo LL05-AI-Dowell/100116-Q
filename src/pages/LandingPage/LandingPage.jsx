@@ -562,8 +562,8 @@ const LandingPage = () => {
                         /> */}
         </div>
       ) : (
-        <div className='h-screen m-0 p-0 gradient_ flex flex-col sm:flex-row'>
-          <div className='w-full h-full bg-white shadow-black mt-3.5 p-4 pt-2 pb-6 rounded-md md:w-11/12 md:h-max'>
+        <div className='h-screen m-0 p-0 gradient_ flex items-baseline'>
+          <div className='w-full h-full bg-white margin_ shadow-black mt-3.5 p-4 pt-2 pb-6 rounded-md md:w-11/12 md:h-max'>
             {showBanner ? (
               <p className='text-rose-900 text-2xl text-center'>
                 Have you created a seat yet, No?{" "}
@@ -590,7 +590,7 @@ const LandingPage = () => {
                   className='h-10 w-10 rounded-full shadow-2xl cursor-pointer'
                   onClick={() => navigate("/profile")}
                 />
-                <button class='cursor-pointer flex items-center justify-between bg-white hover:bg-rose-100 text-gray-800 font-semibold py-2 px-2 border border-rose-600 rounded shadow mx-4'>
+                <button className='cursor-pointer flex items-center justify-between bg-white hover:bg-rose-100 text-gray-800 font-semibold py-2 px-2 border border-rose-600 rounded shadow mx-4'>
                   <CiLogout className='mx-1 text-xl' />
                   Logout
                 </button>
@@ -729,7 +729,7 @@ const LandingPage = () => {
                 }}
               ></input>
               <button
-                class='cursor-pointer flex items-center justify-center bg-white hover:bg-green-100 text-gray-800 font-semibold py-2 px-4 border border-green-400 rounded shadow m-2'
+                className='cursor-pointer flex items-center justify-center bg-white hover:bg-green-100 text-gray-800 font-semibold py-2 px-4 border border-green-400 rounded shadow m-2'
                 onClick={handleEnterDataClick}
               >
                 {enterPaymentRecordLoading ? (

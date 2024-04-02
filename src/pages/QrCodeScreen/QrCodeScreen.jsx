@@ -271,7 +271,7 @@ const QrCodeScreen = () => {
           {/* {billIsNotGenerated.show && (
                                     <div className="absolute inset-0 bg-gray-900 opacity-50 z-50"></div>
                                 )} */}
-          <div className='flex-none h-20 w-full  rounded grid gap-3 grid-cols-4'>
+          <div className='flex-none h-20 w-full rounded grid gap-3 grid-cols-4'>
             <div className={`cursor-pointer min-h-[50px] rounded flex items-center justify-center ${olderOrderResponseForPayment?.amount ? 'bg-cyan-200' : 'bg-[#bbbcbe] text-[#fff]'}`}>
               {
                 olderOrderResponseForPayment?.amount ?

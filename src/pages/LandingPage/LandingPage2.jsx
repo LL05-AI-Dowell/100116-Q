@@ -42,6 +42,8 @@ import { retrieveInitiatedOrder } from "../../../services/qServices";
 import { GiCancel } from "react-icons/gi";
 import { HiOutlineStatusOnline } from "react-icons/hi";
 import { CiShop } from "react-icons/ci";
+import { IoChatboxEllipsesOutline } from "react-icons/io5";
+import { MdCancel } from "react-icons/md";
 
 const API_URLS = [
   "You're almost ready to use the app!",
@@ -103,6 +105,7 @@ const LandingPage2 = () => {
   const [selectedTableNumber, setSelectedTableNumber] = useState(null);
   const [orderInitiatedId, setOrderInitiatedId] = useState("");
   const [retrievingOrders, setRetrievingOrders] = useState(false);
+  const [showChat, setShowChat] = useState(false);
 
   const incrementStepPagination = (steps, length) => {
     console.log(currentUser);
@@ -498,6 +501,21 @@ const LandingPage2 = () => {
     navigate("/view");
   };
 
+  const handleShowChat = () => {
+    setShowChat(!showChat);
+  };
+
+  const DummyData = () => {
+    return (
+      <div className='flex flex-col items-start justify-center rounded-3xl pl-6 py-1 my-3 bg-slate-300 gap-y-1 '>
+        <span className='font-bold text-gray-700'>Jhon Doe</span>
+        <div className='h-[20px] overflow-hidden'>
+          <span>Call me back ASAP!</span>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <>
       {currentUserDetailLoading ? (
@@ -564,13 +582,13 @@ const LandingPage2 = () => {
           </Modal>
         </div>
       ) : (
-        <div className='h-screen m-0 p-0 gradient_ flex flex-col sm:flex-row'>
+        <div className='h-screen m-0 p-0 gradient_ flex items-baseline'>
           <div className='w-full h-full margin_ shadow-black mt-3.5 p-4 pt-2 pb-6 rounded-md md:w-[98%] sm:h-full bg-[#f6f6f6]'>
             {showBanner ? (
               <p className='text-rose-900 text-2xl text-center'>
                 Have you created a seat yet, No?{" "}
                 <button
-                  className='cursor-pointer bg-white text-xl hover:bg-orange-100 text-gray-800 font-semibold py-1 px-2 border border-orange-400 rounded shadow m-2'
+                  className='cursor-pointer bg-white text-xl hover:bg-orange-100 text-gray-800 font-semibold py-1 px-2 border border-orange-400 shadow rounded m-2'
                   onClick={() => navigate("/profile")}
                 >
                   Create One
@@ -586,13 +604,25 @@ const LandingPage2 = () => {
               />
               {/* <p className="text-5xl font-bold">Q</p> */}
               <div className='flex items-center justify-center'>
+                <div
+                  className='mr-12 relative cursor-pointer'
+                  onClick={handleShowChat}
+                >
+                  <IoChatboxEllipsesOutline
+                    size={36}
+                    color='rgb(156 163 175)'
+                  />
+                  <div className='absolute top-[-5px] right-[-5px] bg-red-400  rounded-full text-white text-sm w-5 h-5 flex items-center justify-center '>
+                    2
+                  </div>
+                </div>
                 <img
                   src='https://t4.ftcdn.net/jpg/05/89/93/27/360_F_589932782_vQAEAZhHnq1QCGu5ikwrYaQD0Mmurm0N.jpg'
                   alt='Profile Photo'
                   className='h-10 w-10 rounded-full shadow-2xl cursor-pointer'
                   onClick={() => navigate("/profile")}
                 />
-                <button class='cursor-pointer flex items-center justify-between bg-white hover:bg-rose-100 text-gray-800 font-semibold py-2 px-2 border border-rose-600 rounded shadow mx-4'>
+                <button className='cursor-pointer flex items-center justify-between bg-white hover:bg-rose-100 text-gray-800 font-semibold py-2 px-2 border border-rose-600 rounded shadow mx-4'>
                   <CiLogout className='mx-1 text-xl' />
                   Logout
                 </button>
@@ -718,12 +748,12 @@ const LandingPage2 = () => {
                   </div>
                 </div>
                 <div className='flex flex-col sm:flex-row w-full my-2'>
-                  <div className='sm:w-4/6 w-full shadow-inner'>
-                    <p className='p-2 bg-[#1c8382] text-[#fff] text-xl font-medium rounded margin_ sm:w-[90%] w-[100%] shadow-md'>
+                  <div className='sm:w-5/6 w-full shadow-inner p-4'>
+                    <p className='p-3 bg-[#1c8382] text-[#fff] text-xl font-medium rounded sm:w-[98%] w-[100%] shadow-md'>
                       Tables
                     </p>
-                    <div className='flex flex-wrap flex-col items-center justify-center m-2'>
-                      <div className='flex items-center justify-center flex-wrap'>
+                    <div className='flex flex-wrap flex-col justify-center'>
+                      <div className='flex-none grid gap-1 grid-cols-5 p-3'>
                         {createArrayWithLength(
                           storeDetailsResponse[0].tables.length
                         )
@@ -731,7 +761,7 @@ const LandingPage2 = () => {
                           .map((s, index) => (
                             <div className=''>
                               <button
-                                className='text-black border-solid bg-[#bbbcbe] rounded m-0.5 w-[95px] h-8'
+                                className='text-black bg-[#bbbcbe] rounded m-0.5 w-full h-full'
                                 onClick={() => {
                                   setSelectedTableNumber(
                                     index + tablePagination
@@ -762,7 +792,7 @@ const LandingPage2 = () => {
                             </div>
                           ))}
                       </div>
-                      <div className='flex items-center m-2'>
+                      <div className='flex items-center m-2 w-full justify-center'>
                         <button
                           className='cursor-pointer bg-inherit text-black border-solid border-2 border-[#1c8382] rounded flex items-center justify-center bg-[#81d3d2] w-16 h-8 m-2'
                           onClick={() => decrementTablesPagination()}
@@ -780,35 +810,40 @@ const LandingPage2 = () => {
                       </div>
                     </div>
                   </div>
-                  <div className='sm:w-1/6 full mx-4 shadow-inner'>
-                    <p className='p-2 rounded mx-1 margin_ w-max bg-[#1c8382] text-[#fff] text-lg font-medium shadow-xl'>
+                  <div className='sm:w-2/6 w-full mx-4 shadow-inner p-4'>
+                    <p className='p-3 bg-[#1c8382] text-[#fff] text-xl font-medium rounded sm:w-[95%] w-[100%] shadow-md '>
                       Seats
                     </p>
-                    <div className='flex flex-row flex-wrap items-center justify-center'>
+                    <div className='flex-none grid gap-3 grid-cols-2 margin_'>
                       {storeDetailsResponse[0].tables[selectedTableNumber]
                         ?.seat_data.length === 0 ? (
-                        <p>No Seat</p>
+                        <p className='w-full flex items-center justify-center'>
+                          No Seat
+                        </p>
                       ) : (
                         storeDetailsResponse[0].tables[
                           selectedTableNumber
-                        ]?.seat_data.map((seat, index) => {
-                          const seatNumberr = parseInt(
-                            seat?.seat_number?.split("_").pop()
-                          );
-                          // {console.log('seat_number', seat?.seat_number)}
-                          return (
-                            <button
-                              className='text-black border-solid bg-[#bbbcbe] rounded my-0.5 w-12 h-8'
-                              onClick={() => {
-                                handleInputChange(seatNumberr);
-                                setSeatNumber(seatNumberr);
-                              }}
-                              key={`${index}_button`}
-                            >
-                              {seatNumberr}
-                            </button>
-                          );
-                        })
+                        ]?.seat_data
+                          // [1,2,3,4]
+                          .map((seat, index) => {
+                            const seatNumberr = parseInt(
+                              seat?.seat_number?.split("_").pop()
+                            );
+                            // {console.log('seat_number', seat?.seat_number)}
+                            return (
+                              <button
+                                className='text-black bg-[#bbbcbe] rounded my-0.5 w-[80%] h-full py-2'
+                                onClick={() => {
+                                  handleInputChange(seatNumberr);
+                                  setSeatNumber(seatNumberr);
+                                }}
+                                key={`${index}_button`}
+                              >
+                                {seatNumberr}
+                                {/* {index} */}
+                              </button>
+                            );
+                          })
                       )}
                     </div>
                   </div>
@@ -835,8 +870,8 @@ const LandingPage2 = () => {
                   </p>
                 </div>
                 <div className='flex w-full sm:mx-3 mx-0 p-4'>
-                  <div className='w-2/6p-2'>
-                    <p className='px-3 py-2 bg-[#1c8382] text-[#fff] text-lg font-medium rounded margin_ shadow-xl'>
+                  <div className='w-2/6 p-2'>
+                    <p className='py-2 bg-[#1c8382] text-[#fff] text-lg font-medium w-full rounded m-3 shadow-xl'>
                       Orders
                     </p>
                     {/* <div className="w-full m-2 flex items-center justify-center sm:w-1/6 sm:m-0"> */}
@@ -886,14 +921,14 @@ const LandingPage2 = () => {
                       </div>
                     )}
                   </div>
-                  <div className='w-4/5 mx-1 mb-10 sm:mb-0'>
-                    <p className='px-3 py-2 bg-[#1c8382] text-[#fff] text-lg font-medium rounded w-[93%] margin_ shadow-xl'>
+                  <div className='w-4/5 mx-1 p-2'>
+                    <p className='px-3 py-2 bg-[#1c8382] text-[#fff] text-lg font-medium rounded w-[99%] m-3 shadow-xl'>
                       Amount
                     </p>
-                    <div className='flex flex-wrap items-center justify-evenly margin_'>
+                    <div className='flex-none items-center justify-evenly margin_ grid gap-3 grid-cols-3'>
                       {[1, 2, 3, 4, 5, 6, 7, 8, 9, 0, "."].map((index, s) => (
                         <button
-                          className='text-black bg-[#bbbcbe] rounded w-1/5 h-[25%] m-3 text-2xl'
+                          className='text-black bg-[#bbbcbe] rounded w-full h-full m-3 text-2xl'
                           onClick={() => {
                             if (index === 0 && amountEntered === "0") {
                               return;
@@ -913,7 +948,7 @@ const LandingPage2 = () => {
                         </button>
                       ))}
                       <button
-                        class='cursor-pointer flex items-center justify-center bg-white hover:bg-green-100 text-gray-800 border border-green-400 rounded shadow w-[24%] h-[25%] text-xl m-2'
+                        className='cursor-pointer flex items-center justify-center bg-white hover:bg-green-100 text-gray-800 border border-green-400 rounded shadow w-full h-full text-xl m-2'
                         onClick={handleEnterDataClick}
                       >
                         {enterPaymentRecordLoading ? (
@@ -928,27 +963,36 @@ const LandingPage2 = () => {
                     </div>
                   </div>
                 </div>
-                <div className='h-[60px] fixed bottom-0 sm:h-full w-full sm:w-32 shadow-black mt-3.5 mr-2 px-2 pt-2   bg-[#eeeef0] flex sm:flex-col sm:hidden items-center justify-center sm:gap-y-24 gap-x-24 sm:gap-x-0'>
-                  <HiOutlineStatusOnline
-                    size={30}
-                    className=' cursor-pointer'
-                  />
-                  <CiShop
-                    size={34}
-                    onClick={handleNavigateToShop}
-                    className=' cursor-pointer'
-                  />
+                <div
+                  className={`fixed top-0 right-10 h-[550px] w-[350px] mt-4 px-4 bg-gray-200 rounded-md  ${
+                    showChat ? "" : "hidden"
+                  } `}
+                >
+                  <div className='flex items-center justify-between pt-3'>
+                    <span className='font-semibold text-2xl'>Chats</span>
+                    <MdCancel
+                      size={28}
+                      className='text-red-500 cursor-pointer'
+                      onClick={handleShowChat}
+                    />
+                  </div>
+                  <div className='mt-4 h-[470px] px-2 gap-y-4 overflow-auto'>
+                    <DummyData />
+                    <DummyData />
+                    <DummyData />
+                    <DummyData />
+                    <DummyData />
+                    <DummyData />
+                    <DummyData />
+                    <DummyData />
+                    <DummyData />
+                    <DummyData />
+                    <DummyData />
+                    <DummyData />
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-          <div className='hidden h-[180px] sm:h-full w-full sm:w-32 shadow-black mt-3.5 mr-2 px-2 pt-2   bg-[#eeeef0] sm:flex sm:flex-col items-center justify-center sm:gap-y-24 gap-x-12 sm:gap-x-0'>
-            <HiOutlineStatusOnline size={40} className=' cursor-pointer' />
-            <CiShop
-              size={44}
-              onClick={handleNavigateToShop}
-              className=' cursor-pointer'
-            />
           </div>
         </div>
       )}
