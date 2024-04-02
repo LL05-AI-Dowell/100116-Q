@@ -16,6 +16,11 @@ import { getStoreData, getMenuData } from "../../../services/qServices";
 import MenuCard from "./MenuCard";
 import { useNavigate } from "react-router-dom";
 import { FaPerson } from "react-icons/fa6";
+import { PiChatCircleTextDuotone } from "react-icons/pi";
+import Modal from "./ScreenData";
+import { IoMdSend } from "react-icons/io";
+
+
 const queryClient = new QueryClient();
 
 const QrCodeScreen = () => {
@@ -33,11 +38,15 @@ const QrCodeScreen = () => {
 
   const [phoneModal, setPhoneModal] = useState(false);
   const [inputNumber, setInputValue] = useState("");
-  const [showModal, setShowModal] = useState(true);
+  const [showModal, setShowModal] = useState(false);
   const [isnewOrder, setIsNewOrder] = useState(false);
   const [isNewOrderLoading, setIsNewOrderLoading] = useState(false);
   const [isOlderOrderLoading, setIsOlderOrderLoading] = useState(false);
   const [billIsNotGenerated, setBillIsNotGenerated] = useState({
+    show: false,
+    message: "",
+  });
+  const [billIsGenerated, setBillIsGenerated] = useState({
     show: false,
     message: "",
   });
@@ -50,6 +59,17 @@ const QrCodeScreen = () => {
     show: false,
     message: "",
   });
+  const [showChatModal, setShowChatModal] = useState(false);
+  const [messageText, setMessageText] = useState("");
+  const [sentMessages, setSentMessages] = useState([]);
+
+  const handleSendChatMessage = () => {
+    if (messageText.trim() !== "") {
+      console.log("Sending message:", messageText);
+      setSentMessages([...sentMessages, messageText]);
+      setMessageText("");
+    }
+  };
 
   const dataToPostForQuery = {
     workspace_id: workspaceId,
@@ -61,11 +81,10 @@ const QrCodeScreen = () => {
   const { isLoading, data, isError } = useQuery(
     ["menuData"],
     () =>
-      initiateOlderOrder(dataToPostForQuery)
-        .then(() => { })
-        .catch(() => { }),
+      // initiateOlderOrder(dataToPostForQuery),
+      handleOrder(),
     {
-      refetchInterval: 15000, // Refresh every 15 seconds
+      refetchInterval: 15000,
     }
   );
 
@@ -121,7 +140,7 @@ const QrCodeScreen = () => {
     await initiateOlderOrder(dataToPost)
       .then(res => {
         console.log("initiate older order resss", res?.data?.success);
-
+        console.log('>>>>>>>>>>>>>>>>>>>>>>>.');
         if (res?.data?.success === false) {
           setBillIsNotGenerated({
             show: true,
@@ -138,8 +157,12 @@ const QrCodeScreen = () => {
           navigate('/error');
         }
         if (err?.response?.status === 402) {
-          // navigate('/error');
+          console.log('a gayaaaaaaaa');
           setBillIsNotGenerated({
+            show: false,
+            message: "",
+          })
+          setBillIsGenerated({
             show: true,
             message: err?.response?.data?.message,
           });
@@ -254,6 +277,13 @@ const QrCodeScreen = () => {
           ) : (
             <></>
           )}
+          {billIsGenerated?.show ? (
+            <p className='text-sm font-semibold text-green-600'>
+              {billIsGenerated?.message}
+            </p>
+          ) : (
+            <></>
+          )}
           {/* Menu display is here ---------------------------------------------------- */}
           <div className='flex-grow h-96 w-full shadow-md rounded my-1 flex flex-col items-center  justify-center overflow-auto bg-[#f0ffff]'>
             <div className='w-full h-full p-2'>
@@ -279,7 +309,7 @@ const QrCodeScreen = () => {
                     className='font-bold text-2xl sm:text-base lg:text-3xl p-1 text-center flex sm:flex-row flex-col items-center justify-center'
                   // disabled={billIsNotGenerated.show}
                   >
-                    <p className="font-medium">Amount</p>
+                    <p className="font-medium">{`Amount =`}</p>
                     {olderOrderResponseForPayment?.amount}
                   </button> :
                   <button
@@ -322,13 +352,37 @@ const QrCodeScreen = () => {
               </button>
             </div>
             <div className='cursor-pointer min-h-[50px] rounded border border-sky-400 flex items-center justify-center'>
-              <button className='text-xs sm:text-base lg:text-2xl p-1 text-center flex sm:flex-row flex-col items-center justify-center'>
+              <button className='text-xs sm:text-base lg:text-2xl p-1 text-center flex sm:flex-row flex-col items-center justify-center'
+                onClick={() => setShowChatModal(true)}>
                 {/* <IoPersonSharp className='text-2xl sm:text-4xl lg:text-4xl' /> */}
-                <FaPerson fontSize={"1.5rem"} className='sm:mr-2 mr-0' />
-                Call Waiter
+                <PiChatCircleTextDuotone fontSize={"1.5rem"} className='sm:mr-2 mr-0' />
+                Chat
               </button>
             </div>
           </div>
+          <Modal
+            isOpen={showChatModal}
+            onClose={() => setShowChatModal(false)}
+            title="Chat"
+          >
+            <div className="flex flex-col items-end w-full h-52 overflow-scroll border border-sky-400 rounded-xl">
+              {sentMessages.map((msg, index) => (
+                <div key={index} className="right-0 px-3 py-1 bg-blue-400 rounded-xl my-2">{msg}</div>
+              ))}
+            </div>
+            <div className="flex flex-row items-center justify-between">
+              <textarea
+                className="w-full h-max border rounded p-2 mb-2"
+                placeholder="Type your message here..."
+                value={messageText}
+                onChange={(e) => setMessageText(e.target.value)}
+              />
+              <IoMdSend
+              fontSize={'2rem'}
+                onClick={handleSendChatMessage}
+              />
+            </div>
+          </Modal>
         </div>
       )}
     </>
