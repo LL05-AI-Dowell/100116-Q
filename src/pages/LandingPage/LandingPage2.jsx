@@ -42,8 +42,6 @@ import { retrieveInitiatedOrder } from "../../../services/qServices";
 import { GiCancel } from "react-icons/gi";
 import { HiOutlineStatusOnline } from "react-icons/hi";
 import { CiShop } from "react-icons/ci";
-import { IoChatboxEllipsesOutline } from "react-icons/io5";
-import { MdCancel } from "react-icons/md";
 
 const API_URLS = [
   "You're almost ready to use the app!",
@@ -505,17 +503,6 @@ const LandingPage2 = () => {
     setShowChat(!showChat);
   };
 
-  const DummyData = () => {
-    return (
-      <div className='flex flex-col items-start justify-center rounded-3xl pl-6 py-1 my-3 bg-slate-300 gap-y-1 '>
-        <span className='font-bold text-gray-700'>Jhon Doe</span>
-        <div className='h-[20px] overflow-hidden'>
-          <span>Call me back ASAP!</span>
-        </div>
-      </div>
-    );
-  };
-
   return (
     <>
       {currentUserDetailLoading ? (
@@ -582,7 +569,7 @@ const LandingPage2 = () => {
           </Modal>
         </div>
       ) : (
-        <div className='h-screen m-0 p-0 gradient_ flex items-baseline'>
+        <div className='h-screen m-0 p-0 gradient_ flex '>
           <div className='w-full h-full margin_ shadow-black mt-3.5 p-4 pt-2 pb-6 rounded-md md:w-[98%] sm:h-full bg-[#f6f6f6]'>
             {showBanner ? (
               <p className='text-rose-900 text-2xl text-center'>
@@ -604,18 +591,6 @@ const LandingPage2 = () => {
               />
               {/* <p className="text-5xl font-bold">Q</p> */}
               <div className='flex items-center justify-center'>
-                <div
-                  className='mr-12 relative cursor-pointer'
-                  onClick={handleShowChat}
-                >
-                  <IoChatboxEllipsesOutline
-                    size={36}
-                    color='rgb(156 163 175)'
-                  />
-                  <div className='absolute top-[-5px] right-[-5px] bg-red-400  rounded-full text-white text-sm w-5 h-5 flex items-center justify-center '>
-                    2
-                  </div>
-                </div>
                 <img
                   src='https://t4.ftcdn.net/jpg/05/89/93/27/360_F_589932782_vQAEAZhHnq1QCGu5ikwrYaQD0Mmurm0N.jpg'
                   alt='Profile Photo'
@@ -869,7 +844,7 @@ const LandingPage2 = () => {
                     {amountEntered ? amountEntered : "Amount"}
                   </p>
                 </div>
-                <div className='flex w-full sm:mx-3 mx-0 p-4'>
+                <div className='flex w-full sm:mx-3 mx-0 p-4 mb-16 sm:mb-0'>
                   <div className='w-2/6 p-2'>
                     <p className='py-2 bg-[#1c8382] text-[#fff] text-lg font-medium w-full rounded m-3 shadow-xl'>
                       Orders
@@ -963,37 +938,25 @@ const LandingPage2 = () => {
                     </div>
                   </div>
                 </div>
-                <div
-                  className={`fixed top-0 right-10 h-[550px] w-[350px] mt-4 px-4 bg-gray-200 rounded-md  ${
-                    showChat ? "" : "hidden"
-                  } `}
-                >
-                  <div className='flex items-center justify-between pt-3'>
-                    <span className='font-semibold text-2xl'>Chats</span>
-                    <MdCancel
-                      size={28}
-                      className='text-red-500 cursor-pointer'
-                      onClick={handleShowChat}
-                    />
-                  </div>
-                  <div className='mt-4 h-[470px] px-2 gap-y-4 overflow-auto'>
-                    <DummyData />
-                    <DummyData />
-                    <DummyData />
-                    <DummyData />
-                    <DummyData />
-                    <DummyData />
-                    <DummyData />
-                    <DummyData />
-                    <DummyData />
-                    <DummyData />
-                    <DummyData />
-                    <DummyData />
-                  </div>
-                </div>
               </div>
             </div>
           </div>
+          <div className='fixed sm:relative flex bottom-0 sm:bottom-auto h-[80px] sm:h-full shadow-black mt-3.5 mr-2 py-8 sm:py-0 px-2  w-full sm:w-32  bg-[#eeeef0] sm:flex flex-row sm:flex-col items-center justify-center gap-y-24 gap-x-24'>
+            <HiOutlineStatusOnline size={40} className=' cursor-pointer' />
+            <CiShop
+              size={44}
+              className=' cursor-pointer'
+              onClick={handleNavigateToShop}
+            />
+          </div>
+          {/* <div className='hidden h-[80px] sm:h-full shadow-black mt-3.5 mr-2 py-8 sm:py-0 px-2  w-full sm:w-32  bg-[#eeeef0] sm:flex flex-row sm:flex-col items-center justify-center gap-y-24 gap-x-24'>
+            <HiOutlineStatusOnline
+              size={40}
+              className=' cursor-pointer'
+              onClick={handleNavigateToShop}
+            />
+            <CiShop size={44} className=' cursor-pointer' />
+          </div> */}
         </div>
       )}
     </>

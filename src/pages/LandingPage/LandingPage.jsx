@@ -48,6 +48,8 @@ import { IoWarningOutline } from "react-icons/io5";
 import DigitalQLogo from "../../assets/Digital_Q.svg";
 import { HiOutlineStatusOnline } from "react-icons/hi";
 import { CiShop } from "react-icons/ci";
+import { MdCancel } from "react-icons/md";
+import { IoChatboxEllipsesOutline } from "react-icons/io5";
 
 const API_URLS = [
   "You're almost ready to use the app!",
@@ -101,6 +103,7 @@ const LandingPage = () => {
   const [seatNumber, setSeatNumber] = useState(null);
   const [amountEntered, setAmountEntered] = useState(null);
   const [showActivateSeat, setShowActivateSeat] = useState(false);
+  const [showChat, setShowChat] = useState(false);
   const seatNumberRef = useRef(null);
   const amountRef = useRef(null);
 
@@ -490,6 +493,21 @@ const LandingPage = () => {
     navigate("/");
   };
 
+  const handleShowChat = () => {
+    setShowChat(!showChat);
+  };
+
+  const DummyData = () => {
+    return (
+      <div className='flex flex-col items-start justify-center rounded-3xl pl-6 py-1 my-3 bg-slate-300 gap-y-1 '>
+        <span className='font-bold text-gray-700'>Jhon Doe</span>
+        <div className='h-[20px] overflow-hidden'>
+          <span>Call me back ASAP!</span>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <>
       {currentUserDetailLoading ? (
@@ -562,7 +580,7 @@ const LandingPage = () => {
                         /> */}
         </div>
       ) : (
-        <div className='h-screen m-0 p-0 gradient_ flex items-baseline'>
+        <div className='h-screen m-0 p-0 gradient_ flex '>
           <div className='w-full h-full bg-white margin_ shadow-black mt-3.5 p-4 pt-2 pb-6 rounded-md md:w-11/12 md:h-max'>
             {showBanner ? (
               <p className='text-rose-900 text-2xl text-center'>
@@ -584,6 +602,18 @@ const LandingPage = () => {
               />
               {/* <p className="text-5xl font-bold">Q</p> */}
               <div className='flex items-center justify-center'>
+                <div
+                  className='mr-12 relative cursor-pointer'
+                  onClick={handleShowChat}
+                >
+                  <IoChatboxEllipsesOutline
+                    size={36}
+                    color='rgb(156 163 175)'
+                  />
+                  <div className='absolute top-[-5px] right-[-5px] bg-red-400  rounded-full text-white text-sm w-5 h-5 flex items-center justify-center '>
+                    2
+                  </div>
+                </div>
                 <img
                   src='https://t4.ftcdn.net/jpg/05/89/93/27/360_F_589932782_vQAEAZhHnq1QCGu5ikwrYaQD0Mmurm0N.jpg'
                   alt='Profile Photo'
@@ -741,18 +771,54 @@ const LandingPage = () => {
                 )}
               </button>
             </div>
+            <div className='sm:hidden h-[80px] sm:h-full shadow-black mt-3.5 mr-2 py-8 sm:py-0 px-2  w-full sm:w-32  bg-[#eeeef0] flex flex-row sm:flex-col items-center justify-center gap-y-24 gap-x-24'>
+              <HiOutlineStatusOnline
+                size={40}
+                className=' cursor-pointer'
+                onClick={handleNavigateToShop}
+              />
+              <CiShop size={44} className=' cursor-pointer' />
+            </div>
             {/* <div className="flex flex-col m-1 items-center justify-center m-4 sm:flex-row sm:m-6">
                                             <button class="cursor-pointer bg-white hover:bg-orange-100 text-gray-800 font-semibold py-2 px-4 border border-orange-400 rounded shadow m-2">Close Seat/Service Desk</button>
                                             <button class="cursor-pointer bg-white hover:bg-sky-100 text-gray-800 font-semibold py-2 px-4 border border-sky-400 rounded shadow m-2">Start Service to Selected Seat/Desk</button>
                                         </div> */}
           </div>
-          <div className='h-[80px] sm:h-full shadow-black mt-3.5 mr-2 py-8 sm:py-0 px-2  w-full sm:w-32  bg-[#eeeef0] flex flex-row sm:flex-col items-center justify-center gap-y-24 gap-x-24'>
+          <div className='hidden h-[80px] sm:h-full shadow-black mt-3.5 mr-2 py-8 sm:py-0 px-2  w-full sm:w-32  bg-[#eeeef0] sm:flex flex-row sm:flex-col items-center justify-center gap-y-24 gap-x-24'>
             <HiOutlineStatusOnline
               size={40}
               className=' cursor-pointer'
               onClick={handleNavigateToShop}
             />
             <CiShop size={44} className=' cursor-pointer' />
+          </div>
+          <div
+            className={`fixed top-0 right-10 h-[550px] w-[350px] mt-4 px-4 bg-gray-200 rounded-md  ${
+              showChat ? "" : "hidden"
+            } `}
+          >
+            <div className='flex items-center justify-between pt-3'>
+              <span className='font-semibold text-2xl'>Chats</span>
+              <MdCancel
+                size={28}
+                className='text-red-500 cursor-pointer'
+                onClick={handleShowChat}
+              />
+            </div>
+            <div className='mt-4 h-[470px] px-2 gap-y-4 overflow-auto'>
+              <DummyData />
+              <DummyData />
+              <DummyData />
+              <DummyData />
+              <DummyData />
+              <DummyData />
+              <DummyData />
+              <DummyData />
+              <DummyData />
+              <DummyData />
+              <DummyData />
+              <DummyData />
+            </div>
           </div>
         </div>
       )}
