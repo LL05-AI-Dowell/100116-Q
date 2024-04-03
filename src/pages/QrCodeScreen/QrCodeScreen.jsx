@@ -16,16 +16,10 @@ import { getStoreData, getMenuData } from "../../../services/qServices";
 import MenuCard from "./MenuCard";
 import { useNavigate } from "react-router-dom";
 import { FaPerson } from "react-icons/fa6";
-import { PiChatCircleTextDuotone } from "react-icons/pi";
-import Modal from "./ScreenData";
-import { IoMdSend } from "react-icons/io";
-import io from 'socket.io-client';
-
 const queryClient = new QueryClient();
-const ENDPOINT="https://www.dowellchat.uxlivinglab.online"
+
 const QrCodeScreen = () => {
   const navigate = useNavigate();
-
   //   const queryClient = new QueryClient();
   const currentDate = new Date();
   const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -47,10 +41,6 @@ const QrCodeScreen = () => {
     show: false,
     message: "",
   });
-  const [billIsGenerated, setBillIsGenerated] = useState({
-    show: false,
-    message: "",
-  });
   const [isStoreDataLoading, setIsStoreDataLoading] = useState(false);
   const [isMenuDataLoading, setIsMenuDataLoading] = useState(false);
   const [storeData, setStoreData] = useState([]);
@@ -60,84 +50,6 @@ const QrCodeScreen = () => {
     show: false,
     message: "",
   });
-  const [socket, setSocket] = useState(null);
-  const [showChatModal, setShowChatModal] = useState(false);
-  const [messageText, setMessageText] = useState("");
-  const [sentMessages, setSentMessages] = useState([]);
-  const[ticketId,setTicketId]=useState("")
-  const[userId,setUserId]=useState("")
-  const[product,setProduct]=useState('SAMANTHA')
-
-  useEffect(() => {
-    const newSocket = io(ENDPOINT);
-    setSocket(newSocket);
-    return () => {
-    newSocket.disconnect();
-    };
-}, []);
-
-
-
-
-useEffect(()=>{
-    if (socket) {
-           socket.emit('create_ticket', {
-            product: "SAMANTHA",
-            workspace_id:"63cf89a0dcc2a171957b290b",
-            email:"reddypranai2017@gmail.com",
-            link_id:"25025148106687329435",
-            api_key: "1b834e07-c68b-4bf6-96dd-ab7cdc62f07f",
-            created_at: new Date().getTime()
-        });
-            socket.on('ticket_response', (data) => {
-                console.log(data);
-        });
-
-        const handleMessage = (data) => {
-            console.log("ticket_message_response")
-            console.log(data,_id);
-        }
-    socket.on('ticket_message_response', handleMessage);
-        
-}
-},[socket])
-
-
-
-
-
-function sendMessage(){
-    socket.emit('ticket_message_event', {
-        ticket_id:123,
-        product: "SAMANTHA",
-        message_data: "Hi from pranai",
-        user_id: 100,
-        reply_to: "None",
-        workspace_id: "63cf89a0dcc2a171957b290b",
-        api_key: "1b834e07-c68b-4bf6-96dd-ab7cdc62f07f",
-        created_at: new Date().getTime()
-    });
-
-}
-
-//workspace_id 
-function getAllMessages(){//not working
-    console.log("Hello")
-    socket.emit('get_ticket_messages', {
-        ticket_id: 123,
-        product: "SAMANTHA",
-        workspace_id: "63cf89a0dcc2a171957b290b",
-        api_key: "1b834e07-c68b-4bf6-96dd-ab7cdc62f07f",
-    });
-
-}
-  const handleSendChatMessage = () => {
-    if (messageText.trim() !== "") {
-      console.log("Sending message:", messageText);
-      setSentMessages([...sentMessages, messageText]);
-      setMessageText("");
-    }
-  };
 
   const dataToPostForQuery = {
     workspace_id: workspaceId,
@@ -149,10 +61,11 @@ function getAllMessages(){//not working
   const { isLoading, data, isError } = useQuery(
     ["menuData"],
     () =>
-      // initiateOlderOrder(dataToPostForQuery),
-      handleOrder(),
+      initiateOlderOrder(dataToPostForQuery)
+        .then(() => { })
+        .catch(() => { }),
     {
-      refetchInterval: 15000,
+      refetchInterval: 15000, // Refresh every 15 seconds
     }
   );
 
@@ -208,7 +121,7 @@ function getAllMessages(){//not working
     await initiateOlderOrder(dataToPost)
       .then(res => {
         console.log("initiate older order resss", res?.data?.success);
-        console.log('>>>>>>>>>>>>>>>>>>>>>>>.');
+
         if (res?.data?.success === false) {
           setBillIsNotGenerated({
             show: true,
@@ -225,12 +138,8 @@ function getAllMessages(){//not working
           navigate('/error');
         }
         if (err?.response?.status === 402) {
-          console.log('a gayaaaaaaaa');
+          // navigate('/error');
           setBillIsNotGenerated({
-            show: false,
-            message: "",
-          })
-          setBillIsGenerated({
             show: true,
             message: err?.response?.data?.message,
           });
@@ -345,13 +254,6 @@ function getAllMessages(){//not working
           ) : (
             <></>
           )}
-          {billIsGenerated?.show ? (
-            <p className='text-sm font-semibold text-green-600'>
-              {billIsGenerated?.message}
-            </p>
-          ) : (
-            <></>
-          )}
           {/* Menu display is here ---------------------------------------------------- */}
           <div className='flex-grow h-96 w-full shadow-md rounded my-1 flex flex-col items-center  justify-center overflow-auto bg-[#f0ffff]'>
             <div className='w-full h-full p-2'>
@@ -377,7 +279,7 @@ function getAllMessages(){//not working
                     className='font-bold text-2xl sm:text-base lg:text-3xl p-1 text-center flex sm:flex-row flex-col items-center justify-center'
                   // disabled={billIsNotGenerated.show}
                   >
-                    <p className="font-medium">{`Amount =`}</p>
+                    <p className="font-medium">Amount</p>
                     {olderOrderResponseForPayment?.amount}
                   </button> :
                   <button
@@ -420,37 +322,13 @@ function getAllMessages(){//not working
               </button>
             </div>
             <div className='cursor-pointer min-h-[50px] rounded border border-sky-400 flex items-center justify-center'>
-              <button className='text-xs sm:text-base lg:text-2xl p-1 text-center flex sm:flex-row flex-col items-center justify-center'
-                onClick={() => setShowChatModal(true)}>
+              <button className='text-xs sm:text-base lg:text-2xl p-1 text-center flex sm:flex-row flex-col items-center justify-center'>
                 {/* <IoPersonSharp className='text-2xl sm:text-4xl lg:text-4xl' /> */}
-                <PiChatCircleTextDuotone fontSize={"1.5rem"} className='sm:mr-2 mr-0' />
-                Chat
+                <FaPerson fontSize={"1.5rem"} className='sm:mr-2 mr-0' />
+                Call Waiter
               </button>
             </div>
           </div>
-          <Modal
-            isOpen={showChatModal}
-            onClose={() => setShowChatModal(false)}
-            title="Chat"
-          >
-            <div className="flex flex-col items-end w-full h-52 overflow-scroll border border-sky-400 rounded-xl">
-              {sentMessages.map((msg, index) => (
-                <div key={index} className="right-0 px-3 py-1 bg-blue-400 rounded-xl my-2">{msg}</div>
-              ))}
-            </div>
-            <div className="flex flex-row items-center justify-between">
-              <textarea
-                className="w-full h-max border rounded p-2 mb-2"
-                placeholder="Type your message here..."
-                value={messageText}
-                onChange={(e) => setMessageText(e.target.value)}
-              />
-              <IoMdSend
-              fontSize={'2rem'}
-                onClick={sendMessage}
-              />
-            </div>
-          </Modal>
         </div>
       )}
     </>

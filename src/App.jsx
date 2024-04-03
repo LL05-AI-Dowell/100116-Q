@@ -7,9 +7,10 @@ import ErrorScreen from "./pages/ErrorScreen/ErrorScreen";
 import { PageUnderConstruction } from "./pages/PageUnderConstruction/PageUnderConstruction";
 import LandingPage2 from "./pages/LandingPage/LandingPage2";
 import QrCodeScreen from "./pages/QrCodeScreen/QrCodeScreen";
+import OnlineQrCodeScreen from "./pages/OnlineQrCodeScreen/OnlineQrCodeScreen";
 
 function App() {
-  // console.log = () => {};
+  console.log = () => {};
   useDowellLogin();
 
   // // USE ONLY WHEN APP IS BROKEN/UNDERGOING MAJOR CHANGES
@@ -25,6 +26,7 @@ function App() {
       <Route path='/success' Component={Success} />
       <Route path='/error' Component={ErrorScreen} />
       <Route path='/qrlink' Component={QrCodeScreen} />
+      <Route path='/onlineshoplink' Component={OnlineQrCodeScreen} />
     </Routes>
   );
 }
