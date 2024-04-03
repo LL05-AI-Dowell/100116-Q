@@ -19,12 +19,13 @@ import { FaPerson } from "react-icons/fa6";
 import { PiChatCircleTextDuotone } from "react-icons/pi";
 import Modal from "./ScreenData";
 import { IoMdSend } from "react-icons/io";
-
+import io from 'socket.io-client';
 
 const queryClient = new QueryClient();
-
+const ENDPOINT="https://www.dowellchat.uxlivinglab.online"
 const QrCodeScreen = () => {
   const navigate = useNavigate();
+
   //   const queryClient = new QueryClient();
   const currentDate = new Date();
   const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -59,10 +60,77 @@ const QrCodeScreen = () => {
     show: false,
     message: "",
   });
+  const [socket, setSocket] = useState(null);
   const [showChatModal, setShowChatModal] = useState(false);
   const [messageText, setMessageText] = useState("");
   const [sentMessages, setSentMessages] = useState([]);
+  const[ticketId,setTicketId]=useState("")
+  const[userId,setUserId]=useState("")
+  const[product,setProduct]=useState('SAMANTHA')
 
+  useEffect(() => {
+    const newSocket = io(ENDPOINT);
+    setSocket(newSocket);
+    return () => {
+    newSocket.disconnect();
+    };
+}, []);
+
+
+
+
+useEffect(()=>{
+    if (socket) {
+           socket.emit('create_ticket', {
+            product: "SAMANTHA",
+            workspace_id:"63cf89a0dcc2a171957b290b",
+            email:"reddypranai2017@gmail.com",
+            link_id:"25025148106687329435",
+            api_key: "1b834e07-c68b-4bf6-96dd-ab7cdc62f07f",
+            created_at: new Date().getTime()
+        });
+            socket.on('ticket_response', (data) => {
+                console.log(data);
+        });
+
+        const handleMessage = (data) => {
+            console.log("ticket_message_response")
+            console.log(data,_id);
+        }
+    socket.on('ticket_message_response', handleMessage);
+        
+}
+},[socket])
+
+
+
+
+
+function sendMessage(){
+    socket.emit('ticket_message_event', {
+        ticket_id:123,
+        product: "SAMANTHA",
+        message_data: "Hi from pranai",
+        user_id: 100,
+        reply_to: "None",
+        workspace_id: "63cf89a0dcc2a171957b290b",
+        api_key: "1b834e07-c68b-4bf6-96dd-ab7cdc62f07f",
+        created_at: new Date().getTime()
+    });
+
+}
+
+//workspace_id 
+function getAllMessages(){//not working
+    console.log("Hello")
+    socket.emit('get_ticket_messages', {
+        ticket_id: 123,
+        product: "SAMANTHA",
+        workspace_id: "63cf89a0dcc2a171957b290b",
+        api_key: "1b834e07-c68b-4bf6-96dd-ab7cdc62f07f",
+    });
+
+}
   const handleSendChatMessage = () => {
     if (messageText.trim() !== "") {
       console.log("Sending message:", messageText);
@@ -379,7 +447,7 @@ const QrCodeScreen = () => {
               />
               <IoMdSend
               fontSize={'2rem'}
-                onClick={handleSendChatMessage}
+                onClick={sendMessage}
               />
             </div>
           </Modal>
