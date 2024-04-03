@@ -50,6 +50,7 @@ import { HiOutlineStatusOnline } from "react-icons/hi";
 import { CiShop } from "react-icons/ci";
 import { MdCancel } from "react-icons/md";
 import { IoChatboxEllipsesOutline } from "react-icons/io5";
+import { IoMdSend } from "react-icons/io";
 
 const API_URLS = [
   "You're almost ready to use the app!",
@@ -104,6 +105,10 @@ const LandingPage = () => {
   const [amountEntered, setAmountEntered] = useState(null);
   const [showActivateSeat, setShowActivateSeat] = useState(false);
   const [showChat, setShowChat] = useState(false);
+  const [showChatModal, setShowChatModal] = useState(false);
+  const [selectedChat, setSelectedChat] = useState(null);
+  const [messageText, setMessageText] = useState("");
+  const [sentMessages, setSentMessages] = useState([]);
   const seatNumberRef = useRef(null);
   const amountRef = useRef(null);
 
@@ -497,12 +502,67 @@ const LandingPage = () => {
     setShowChat(!showChat);
   };
 
-  const DummyData = () => {
+  const handleChatOpen = (chatId) => {
+    setSelectedChat(chatId);
+  };
+
+  // const handleShowChat = (chatId) => {
+  //   setSelectedChat(chatId);
+  //   setShowChat(!showChat);
+  // };
+
+  const handleSendChatMessage = () => {
+    if (messageText.trim() !== "") {
+      console.log("Sending message:", messageText);
+      setSentMessages([...sentMessages, messageText]);
+      setMessageText("");
+    }
+  };
+
+  const handleCloseChat = () => {
+    setSelectedChat(null);
+  };
+
+  const ChatModal = ({ chat }) => {
     return (
-      <div className='flex flex-col items-start justify-center rounded-3xl pl-6 py-1 my-3 bg-slate-300 gap-y-1 '>
-        <span className='font-bold text-gray-700'>Jhon Doe</span>
+      <div className='fixed bottom-0 left-10 md:left-52 w-[300px]  md:w-[400px] h-[350px] flex items-center justify-center bg-opacity-75 mb-4'>
+        <div className='bg-gray-100 rounded-lg p-6 w-full h-full'>
+          <div className='flex justify-between'>
+            <h2 className='text-xl font-semibold mb-4'>
+              Chat with {chat && chat.name}
+            </h2>
+            <MdCancel
+              size={28}
+              className='text-red-500 cursor-pointer'
+              onClick={handleCloseChat}
+            />
+          </div>
+          <div>
+            {/* Your chat interface/component */}
+            <p>{chat ? chat.message : ""}</p>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const chatData = [
+    { id: 1, name: "John Doe", message: "Call me back ASAP!" },
+    { id: 2, name: "Jane Smith", message: "Hello, how are you?" },
+    // Add more chat objects as needed
+  ];
+
+  const DummyData = ({ chat }) => {
+    return (
+      <div
+        className='flex flex-col items-start justify-center rounded-3xl pl-6 py-1 my-3 bg-slate-300 gap-y-1 cursor-pointer'
+        onClick={() => {
+          handleChatOpen(chat.id);
+        }}
+      >
+        <span className='font-bold text-gray-700'>{chat.name}</span>
         <div className='h-[20px] overflow-hidden'>
-          <span>Call me back ASAP!</span>
+          <span>{chat.message}</span>
         </div>
       </div>
     );
@@ -806,20 +866,43 @@ const LandingPage = () => {
               />
             </div>
             <div className='mt-4 h-[470px] px-2 gap-y-4 overflow-auto'>
-              <DummyData />
-              <DummyData />
-              <DummyData />
-              <DummyData />
-              <DummyData />
-              <DummyData />
-              <DummyData />
-              <DummyData />
-              <DummyData />
-              <DummyData />
-              <DummyData />
-              <DummyData />
+              {chatData.map((chat) => (
+                <DummyData key={chat.id} chat={chat} />
+              ))}
             </div>
           </div>
+
+          {selectedChat && (
+            <ChatModal
+              chat={chatData.find((chat) => chat.id === selectedChat)}
+            />
+          )}
+
+          {/* <Modal
+            isOpen={showChatModal}
+            onClose={() => setShowChatModal(false)}
+            title='Chat'
+          >
+            <div className='flex flex-col items-end w-full h-52 overflow-scroll border border-sky-400 rounded-xl'>
+              {sentMessages.map((msg, index) => (
+                <div
+                  key={index}
+                  className='right-0 px-3 py-1 bg-blue-400 rounded-xl my-2'
+                >
+                  {msg}
+                </div>
+              ))}
+            </div>
+            <div className='flex flex-row items-center justify-between'>
+              <textarea
+                className='w-full h-max border rounded p-2 mb-2'
+                placeholder='Type your message here...'
+                value={messageText}
+                onChange={(e) => setMessageText(e.target.value)}
+              />
+              <IoMdSend fontSize={"2rem"} onClick={handleSendChatMessage} />
+            </div>
+          </Modal> */}
         </div>
       )}
     </>
