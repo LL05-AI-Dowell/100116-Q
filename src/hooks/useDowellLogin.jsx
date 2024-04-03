@@ -61,6 +61,7 @@ export default function useDowellLogin() {
         const localAPIKey = getSavedApiKey();
         const isSuccessScreen = view === 'success'
         const isqrCodeScreen = (pathname === '/qrlink' || pathname === '/qrlink/')
+        const isOnlineQrCodeScreen = (pathname === '/onlineshoplink' || pathname === '/onlineshoplink/')
 
         if (localAPIKey) {
             setCurrentUserApiKey(localAPIKey);
@@ -143,6 +144,7 @@ export default function useDowellLogin() {
         }
         if (isSuccessScreen) return
         if (isqrCodeScreen) return
+        if (isOnlineQrCodeScreen) return
         // redirecting to login
         sessionStorage.clear();
         window.location.replace(PRODUCT_LOGIN_URL);
