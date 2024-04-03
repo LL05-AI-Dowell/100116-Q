@@ -198,3 +198,36 @@ def format_datetime(time_string):
     formatted_datetime = f"{date_part}_{time_part}"
 
     return formatted_datetime
+
+
+def generate_store_data(store_id, workspace_id, user_id, timezone, store_type):
+
+    store_data = {
+        "_id": store_id,
+        "store_name": "",
+        "workspace_id": workspace_id,
+        "user_id": user_id,
+        "store_type": store_type,
+        "image_link": "",
+        "is_active": True,
+        "bill_genration_by": "MANAGER",
+        "session_starts_by": "PHONE_NUMBER",
+        "PAYMENT_METHOD": "PHONEPAY",
+        "created_at": dowell_time(timezone)["current_time"],
+        "updated_at": "",
+        "records": [{"record": "1", "type": "overall"}]
+    }
+
+    if store_type == "OFFLINE":
+        store_data["tables"] = [
+            {
+                "table_id": generate_store_id(),
+                "table_name": f"Table {i+1}",
+                "is_active": True,
+                "seat_data": [],
+                "created_at": dowell_time(timezone)["current_time"],
+                "updated_at": ""
+            } for i in range(2)
+        ]
+
+    return store_data

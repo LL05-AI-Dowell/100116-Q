@@ -211,6 +211,8 @@ class user_details_services(APIView):
 
         if type_request == "retrieve_user_details":
             return self.retrieve_user_details(request)
+        if type_request == "retrieve_user":
+            return self.retrieve_user(request)
         else: 
             return self.handle_error(request)
 
@@ -236,14 +238,16 @@ class user_details_services(APIView):
         if not serializer.is_valid():
             return CustomResponse(False, "Posting wrong data to API",serializer.errors, status.HTTP_400_BAD_REQUEST)
         
-        store_id = generate_store_id()
         user_data = {
-            "store_ids":[store_id],
+            "store_ids":[generate_store_id(), generate_store_id()],
             "name": name,
             "email":email,
             "bank_details":{},
             "username":username,
             "workspace_id":workspace_id,
+            "default_store_type": "ONLINE",
+            "ticket_link":"",
+            "product_name":"",
             "is_paid": False,
             "is_active": True,
             "address":"",
@@ -251,6 +255,7 @@ class user_details_services(APIView):
             "created_at": dowell_time(timezone)["current_time"],
             "records": [{"record": "1", "type": "overall"}]
         }
+
         response = json.loads(datacube_data_insertion(
             api_key,
             f'{workspace_id}_meta_data_q',
@@ -358,6 +363,35 @@ class user_details_services(APIView):
             return CustomResponse(False, "User login failed", None, status.HTTP_401_UNAUTHORIZED)
         
         return CustomResponse(True,"User logged in successfully",None,status.HTTP_200_OK)
+    
+    def retrieve_user(self, request):
+        """
+        Retrieve user details.
+
+        This method retrieves user details for the specified workspace ID.
+
+        :param request: The HTTP request object.
+        :param workspace_id: The ID of the workspace.
+        :param api_key: The API key for authorization.
+        """
+        workspace_id = request.GET.get('workspace_id')
+        
+        response = json.loads(datacube_data_retrieval(
+            "1b834e07-c68b-4bf6-96dd-ab7cdc62f07f",
+            f'{workspace_id}_meta_data_q',
+            f'{workspace_id}_user_details',
+            {
+                "workspace_id":workspace_id
+            },
+            1,
+            0,
+            False
+        ))
+
+        if not response.get("data"):
+            return CustomResponse(False,"User details not found", None,status.HTTP_404_NOT_FOUND)
+        
+        return CustomResponse(True,"User details retrieved successfully",response["data"], status.HTTP_302_FOUND)
 @method_decorator(csrf_exempt, name='dispatch')
 class store_services(APIView):
     """
@@ -404,64 +438,36 @@ class store_services(APIView):
         :param user_id: The ID of the user associated with the store.
         :param api_key: The API key for authorization.
         """
-        store_id = request.data.get("store_id",generate_store_id())
+        store_ids = request.data.get("store_id")
         workspace_id = request.data.get("workspace_id")
         timezone = request.data.get('timezone')
-        user_id= request.data.get('user_id')
+        user_id = request.data.get('user_id')
+
         try:
             api_key = authorization_check(request.headers.get('Authorization'))
         except InvalidTokenException as e:
             return CustomResponse(False, str(e), None, status.HTTP_401_UNAUTHORIZED)
 
-        serializer = CreateStoreSerializer(data={"store_id": store_id,"workspace_id": workspace_id,"timezone": timezone,"user_id": user_id})
+        if not isinstance(store_ids, list) or len(store_ids) != 2:
+            return CustomResponse(False, "Invalid store IDs provided", None, status.HTTP_400_BAD_REQUEST)
 
-        if not serializer.is_valid():
-            return CustomResponse(False, "Posting wrong data to API",serializer.errors, status.HTTP_400_BAD_REQUEST)
-        
-        store_data = {
-            "_id": store_id,
-            "store_name": "",
-            "workspace_id": workspace_id,
-            "user_id":user_id,
-            "image_link":"",
-            "is_active":True,
-            "bill_genration_by": "MANAGER",
-            "session_starts_by": "PHONE_NUMBER",
-            "PAYMENT_METHOD":"PHONEPAY" ,
-            "tables": [
-                {
-                    "table_id": generate_store_id(),
-                    "table_name": "Table 1",
-                    "is_active": True,
-                    "seat_data": [],
-                    "created_at": dowell_time(timezone)["current_time"],
-                    "updated_at":"",
-                },
-                {
-                    "table_id": generate_store_id(),
-                    "table_name": "Table 2",
-                    "is_active": True,
-                    "seat_data": [],
-                    "created_at": dowell_time(timezone)["current_time"],
-                    "updated_at":"",
-                }
-            ],
-            "created_at": dowell_time(timezone)["current_time"],
-            "updated_at":"",
-            "records": [{"record": "1", "type": "overall"}]
-        }
-        
-        response = json.loads(datacube_data_insertion(
-            api_key,
-            f'{workspace_id}_meta_data_q',
-            f'{workspace_id}_store_details',
-            store_data
-        ))
+        stores_data = [
+            generate_store_data(store_ids[0], workspace_id, user_id, timezone, "OFFLINE"),
+            generate_store_data(store_ids[1], workspace_id, user_id, timezone, "ONLINE")
+        ]
 
-        if not response["success"]:
-            return CustomResponse(False,"Failed to create a store",None,status.HTTP_400_BAD_REQUEST)
-        
-        return CustomResponse(True,"Store created successfully",store_data,status.HTTP_201_CREATED)
+        for store_data in stores_data:
+            response = json.loads(datacube_data_insertion(
+                api_key,
+                f'{workspace_id}_meta_data_q',
+                f'{workspace_id}_store_details',
+                store_data
+            ))
+            
+            if not response["success"]:
+                return CustomResponse(False, f"Failed to create {store_data['store_type']} store", None, status.HTTP_400_BAD_REQUEST)
+
+        return CustomResponse(True, "Stores created successfully", stores_data, status.HTTP_201_CREATED)
 
     def retrieve_store_details(self, request):
         """
@@ -478,6 +484,7 @@ class store_services(APIView):
         workspace_id = request.GET.get('workspace_id')
         limit = request.GET.get('limit')
         offset = request.GET.get('offset')
+        store_type = request.GET.get('store_type', None)
         try:
             api_key = authorization_check(request.headers.get('Authorization'))
         except InvalidTokenException as e:
@@ -502,7 +509,13 @@ class store_services(APIView):
         if not response["success"]:
             return CustomResponse(False,"Failed to retrieve store details", None, status.HTTP_404_NOT_FOUND)
         
-        return CustomResponse(True, "Store details retrieved successfully", response["data"], status.HTTP_200_OK)
+        data = response.get("data",[])
+        
+        if store_type is not None:
+            store = [store for store in data if store.get('store_type') == store_type]
+            return CustomResponse(True,f"Store details for {store_type}", store, status.HTTP_200_OK)
+        
+        return CustomResponse(True, "Store details retrieved successfully", data, status.HTTP_200_OK)
         
     def update_store_data(self, request):
         """
@@ -522,13 +535,14 @@ class store_services(APIView):
         update_data = request.data.get('update_data')
         workspace_id = request.GET.get('workspace_id')
         timezone = request.data.get('timezone')
+        store_type = request.data.get('store_type')
 
         try:
             api_key = authorization_check(request.headers.get('Authorization'))
         except InvalidTokenException as e:
             return CustomResponse(False, str(e), None, status.HTTP_401_UNAUTHORIZED)
 
-        serializer = UpdateStoreDataSerializer(data={"store_id": store_id,"update_data": update_data,"workspace_id":workspace_id,"timezone":timezone,'user_id':user_id})
+        serializer = UpdateStoreDataSerializer(data={"store_id": store_id,"update_data": update_data,"workspace_id":workspace_id,"timezone":timezone,'user_id':user_id,"store_type":store_type})
         if not serializer.is_valid():
             return CustomResponse(False, "Posting wrong data to API",serializer.errors, status.HTTP_400_BAD_REQUEST)
         
@@ -539,16 +553,17 @@ class store_services(APIView):
             f'{workspace_id}_meta_data_q',
             f'{workspace_id}_store_details',
             {
+                # "_id": store_id, # UNCOMMENT WHEN DATACUBE SOLVE THE ISSUE
+                "store_type": store_type,
                 "user_id": user_id
             },
             update_data
             
         ))
-        print(f'{workspace_id}_meta_data_q')
         if not response["success"]:
             return CustomResponse(False,"Failed to update Store data",None,status.HTTP_400_BAD_REQUEST)
         
-        return CustomResponse(True, "Store data updated successfully", None, status.HTTP_200_OK)
+        return CustomResponse(True, "Store data updated successfully", response, status.HTTP_200_OK)
 
     def create_menu(self , request):
         """
@@ -565,13 +580,14 @@ class store_services(APIView):
         menu_data = request.data.get('menu_data')
         timezone = request.data.get('timezone')
         user_id = request.GET.get('user_id')
+        store_type = request.data.get('store_type')
 
         try:
             api_key = authorization_check(request.headers.get('Authorization'))
         except InvalidTokenException as e:
             return CustomResponse(False, str(e), None, status.HTTP_401_UNAUTHORIZED)
         
-        serializer = CreateMenuSerializer(data={"store_id": store_id,"menu_data": menu_data,"workspace_id":workspace_id,"timezone":timezone,"user_id":user_id})
+        serializer = CreateMenuSerializer(data={"store_id": store_id,"menu_data": menu_data,"workspace_id":workspace_id,"timezone":timezone,"user_id":user_id,"store_type":store_type})
 
         if not serializer.is_valid():
             return CustomResponse(False, "Posting wrong data to API",serializer.errors, status.HTTP_400_BAD_REQUEST)
@@ -580,7 +596,8 @@ class store_services(APIView):
             "workspace_id":workspace_id,
             "store_id":store_id,
             "user_id":user_id,
-            "created_at": dowell_time(timezone)["current_time"],
+            "store_type":store_type,
+            "created_at": dowell_time(timezone)["current_time"],                                          
             "updated_at":"",
             "menu_data": menu_data,
             "records": [{"record": "1", "type": "overall"}]
@@ -613,6 +630,7 @@ class store_services(APIView):
         store_id = request.GET.get("store_id")
         limit = request.GET.get('limit')
         offset = request.GET.get('offset')
+        store_type = request.GET.get('store_type', None)
         try:
             api_key = authorization_check(request.headers.get('Authorization'))
         except InvalidTokenException as e:
@@ -633,6 +651,12 @@ class store_services(APIView):
 
         if not response["success"]:
             return CustomResponse(False,"Failed to retrieve menu details", None, status.HTTP_404_NOT_FOUND)
+        
+        data = response.get("data",[])
+        
+        if store_type is not None:
+            store = [store for store in data if store.get('store_type') == store_type]
+            return CustomResponse(True,f"Store details for {store_type}", store, status.HTTP_200_OK)
         
         return CustomResponse(True,"Menu retrived succefully", response["data"],status.HTTP_200_OK)
     def handle_error(self, request): 

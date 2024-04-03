@@ -5,14 +5,15 @@ from django.core.exceptions import ValidationError as DjangoValidationError
 
 class LimitedKeysDictField(serializers.DictField):
     def __init__(self, *args, **kwargs):
-        self.allowed_keys = kwargs.pop('allowed_keys')
+        self.allowed_keys = kwargs.pop('allowed_keys', [])
         super().__init__(*args, **kwargs)
 
     def to_internal_value(self, data):
-        data = super().to_internal_value(data)
+        if not isinstance(data, dict):
+            self.fail('invalid')
         for key in data.keys():
             if key not in self.allowed_keys:
-                raise serializers.ValidationError(f"Key '{key}' is not allowed")
+                self.fail('invalid_key', key=key)
         return data
     
 class UserDetailsSerializer(serializers.Serializer):
@@ -25,16 +26,14 @@ class UserDetailsSerializer(serializers.Serializer):
 class UpdateUserDetailsSerializer(serializers.Serializer):
     document_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
     workspace_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
-    update_data = LimitedKeysDictField(allowed_keys=['bank_details', 'address'])
+    update_data = LimitedKeysDictField(allowed_keys=['bank_details', 'address','ticket_link','product_name'])
     
-    def validate_update_data(self, value):
-        store_name = value.get('bank_details')
-        if not isinstance(store_name, dict):
+    def validate_bank_details(self, value):
+        if not isinstance(value, dict):
             raise serializers.ValidationError("bank_details must be a JSON object")
         return value
-
 class CreateStoreSerializer(serializers.Serializer):
-    store_id = serializers.CharField(max_length=100,allow_null= True, allow_blank=True)
+    store_id = serializers.ListField(child=serializers.CharField(max_length=100), allow_null=True, allow_empty=True)
     workspace_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
     user_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
 
@@ -44,10 +43,15 @@ class RetrieveStoreSerializer(serializers.Serializer):
     offset = serializers.IntegerField()
 
 class UpdateStoreDataSerializer(serializers.Serializer):
+    STORE_TYPE = (
+        ("ONLINE","ONLINE"),
+        ("OFFLINE","OFFLINE")
+    )
     workspace_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
     store_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
     user_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
     timezone = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
+    store_type = serializers.ChoiceField(allow_null=False, allow_blank=False, choices=STORE_TYPE)
     update_data = LimitedKeysDictField(allowed_keys=['store_name', 'image_link','bill_genration_by','session_starts_by','PAYMENT_METHOD','tables'])
 
     
@@ -125,7 +129,12 @@ class GetCustomerStatusSerializer(serializers.Serializer):
     offset = serializers.IntegerField()
 
 class CreateMenuSerializer(serializers.Serializer):
+    STORE_TYPE = (
+        ("ONLINE","ONLINE"),
+        ("OFFLINE","OFFLINE")
+    )
     workspace_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
+    store_type = serializers.ChoiceField(allow_null= False, choices=STORE_TYPE)
     user_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
     store_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
     timezone = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
