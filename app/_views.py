@@ -553,7 +553,7 @@ class store_services(APIView):
             f'{workspace_id}_meta_data_q',
             f'{workspace_id}_store_details',
             {
-                # "_id": store_id, # UNCOMMENT WHEN DATACUBE SOLVE THE ISSUE
+                # "id": store_id, # UNCOMMENT WHEN DATACUBE SOLVE THE ISSUE
                 "store_type": store_type,
                 "user_id": user_id
             },
@@ -563,7 +563,7 @@ class store_services(APIView):
         if not response["success"]:
             return CustomResponse(False,"Failed to update Store data",None,status.HTTP_400_BAD_REQUEST)
         
-        return CustomResponse(True, "Store data updated successfully", response, status.HTTP_200_OK)
+        return CustomResponse(True, "Store data updated successfully", None, status.HTTP_200_OK)
 
     def create_menu(self , request):
         """
@@ -627,7 +627,7 @@ class store_services(APIView):
         :rtype: CustomResponse
         """
         workspace_id = request.GET.get("workspace_id")
-        store_id = request.GET.get("store_id")
+        store_id = request.GET.get("store_id", None)
         limit = request.GET.get('limit')
         offset = request.GET.get('offset')
         store_type = request.GET.get('store_type', None)
@@ -635,15 +635,38 @@ class store_services(APIView):
             api_key = authorization_check(request.headers.get('Authorization'))
         except InvalidTokenException as e:
             return CustomResponse(False, str(e), None, status.HTTP_401_UNAUTHORIZED)
-        
+        print(store_type)
+        if store_id is None and store_type is None:
+            print("here 1")
+            data_to_query = {
+                "workspace_id": workspace_id
+            }
+        elif store_id is not None and store_type is None:
+            print("here 2")
+            data_to_query = {
+                "workspace_id": workspace_id,
+                "store_id": store_id
+            }
+        elif store_id is not None and store_type is not None:
+            print("here 3")
+            data_to_query = {
+                "workspace_id": workspace_id,
+                "store_id": store_id,
+                "store_type": store_type
+            }
+        elif store_id is None and store_type is not None:
+            print("here 4")
+            data_to_query = {
+                "workspace_id": workspace_id,
+                "store_type": store_type
+            }
+
+
         response = json.loads(datacube_data_retrieval(
             api_key,
             f'{workspace_id}_meta_data_q',
             f'{workspace_id}_menu_card',
-            {
-                "workspace_id": workspace_id,
-                "store_id": store_id
-            },
+            data_to_query,
             limit,
             offset,
             False
@@ -652,13 +675,8 @@ class store_services(APIView):
         if not response["success"]:
             return CustomResponse(False,"Failed to retrieve menu details", None, status.HTTP_404_NOT_FOUND)
         
-        data = response.get("data",[])
-        
-        if store_type is not None:
-            store = [store for store in data if store.get('store_type') == store_type]
-            return CustomResponse(True,f"Store details for {store_type}", store, status.HTTP_200_OK)
-        
         return CustomResponse(True,"Menu retrived succefully", response["data"],status.HTTP_200_OK)
+    
     def handle_error(self, request): 
         """
         Handle invalid request type.
