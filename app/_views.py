@@ -709,6 +709,8 @@ class qrcode_services(APIView):
 
         if type_request == "create_qrcode":
             return self.create_qrcode(request)
+        elif type_request == "create_master_qrcode":
+            return self.create_master_qrcode(request)
         else:
             return self.handle_error(request)
         
@@ -721,12 +723,14 @@ class qrcode_services(APIView):
             return self.retrieve_seat_details(request)
         elif type_request == "activate_seat":
             return self.activate_seat(request)
+        elif type_request == "get_master_qrcode_record":
+            return self.get_master_qrcode_record(request)
         else: 
             return self.handle_error(request)
         
     def create_qrcode(self,request):
         """
-        Create a QR code.
+        Create a seat(QR code) for store.
 
         This method creates a QR code based on the provided request data.
 
@@ -745,19 +749,29 @@ class qrcode_services(APIView):
         link = request.data.get("link")
         timezone = request.data.get('timezone')
         username = request.data.get('username')
-        seat_number = request.GET.get('seat_number')
-        print(workspace_id)
+        seat_number = request.GET.get('seat_number') 
+        store_type = request.data.get('store_type') 
 
         try:
             api_key = authorization_check(request.headers.get('Authorization'))
         except InvalidTokenException as e:
             return CustomResponse(False, str(e), None, status.HTTP_401_UNAUTHORIZED)
         
-        serializer = CreateQrCodeSerializer(data={"workspace_id": workspace_id,"user_id": user_id,"timezone": timezone,"link": link,"username":username,"seat_number":seat_number,"store_id":store_id})
+        serializer = CreateQrCodeSerializer(
+            data={
+                "workspace_id": workspace_id,
+                "user_id": user_id,
+                "timezone": timezone,
+                "link": link,
+                "username":username,
+                "seat_number":seat_number,
+                "store_id":store_id,
+                "store_type":store_type
+            })
 
         if not serializer.is_valid():
             return CustomResponse(False, "Posting wrong data to API",serializer.errors, status.HTTP_400_BAD_REQUEST)
-        generated_link = f'{link}&workspace_id={workspace_id}&store_id={store_id}&seat_number={seat_number}'
+        generated_link = f'{link}&type={store_type}&workspace_id={workspace_id}&store_id={store_id}&seat_number={seat_number}'
         
         qrcode = json.loads(generate_qrcode(
             workspace_id, 
@@ -777,12 +791,12 @@ class qrcode_services(APIView):
             generated_link,
             f'Qrcode_seat_{seat_number}',
             workspace_id,
-            username,
+            store_id,
             f'seat_number_{seat_number}',
         ))
 
         generate_updated_qr_code_data = update_qr_code_data.get('response',[])
-        print(generate_updated_qr_code_data)
+        # print(generate_updated_qr_code_data)
 
         if not generate_updated_qr_code_data:
             return CustomResponse(False, "Failed to update the links in qrcode server", None, status.HTTP_400_BAD_REQUEST)
@@ -797,6 +811,7 @@ class qrcode_services(APIView):
             "qrcode_image_url": generate_updated_qr_code_data["qrcode_image_url"],
             "workspace_id": workspace_id,
             "user_id":user_id,
+            "store_type": store_type,
             "seat_number":f'seat_number_{seat_number}',
             "created_at": dowell_time(timezone)["current_time"],
             "updated_at":"",
@@ -813,6 +828,86 @@ class qrcode_services(APIView):
         
         return CustomResponse(True,"Qrcode created successfully",qrcode_data,status.HTTP_201_CREATED)
 
+    def create_master_qrcode(self, request):
+
+        workspace_id = request.GET.get("workspace_id")
+        user_id = request.GET.get("user_id")
+        store_id = request.GET.get('store_id')
+        link = request.data.get("link")
+        timezone = request.data.get('timezone')
+        username = request.data.get('username')
+
+        try:
+            api_key = authorization_check(request.headers.get('Authorization'))
+        except InvalidTokenException as e:
+            return CustomResponse(False, str(e), None, status.HTTP_401_UNAUTHORIZED)
+        
+        serializer = CreateMasterQrCodeSerializer(
+            data={
+                "workspace_id": workspace_id,
+                "user_id": user_id,
+                "timezone": timezone,
+                "link": link,
+                "username":username,
+                "store_id":store_id
+            })
+
+        if not serializer.is_valid():
+            return CustomResponse(False, "Posting wrong data to API",serializer.errors, status.HTTP_400_BAD_REQUEST)
+        generated_link = f'{link}&workspace_id={workspace_id}&store_id={store_id}'
+        
+        qrcode = json.loads(generate_qrcode(
+            workspace_id, 
+            user_id,
+            generated_link,
+            f'{workspace_id}_master_qrcode'
+        ))
+
+        generate_qrcode_data = qrcode.get('qrcode',[])
+        
+
+        if not generate_qrcode_data:
+            return CustomResponse(False, "Failed to update the create qrcode in qrcode server", None, status.HTTP_400_BAD_REQUEST)
+
+        update_qr_code_data = json.loads(update_qr_code(
+            generate_qrcode_data["qrcode_id"],
+            generated_link,
+            f'{workspace_id}_master_qrcode',
+            workspace_id,
+            username,
+            f'{workspace_id}_master_qrcode',
+        ))
+
+        generate_updated_qr_code_data = update_qr_code_data.get('response',[])
+        print(generate_updated_qr_code_data)
+
+        if not generate_updated_qr_code_data:
+            return CustomResponse(False, "Failed to update the links in qrcode server", None, status.HTTP_400_BAD_REQUEST)
+
+        
+        qrcode_data = {
+            "qrcode_name": f'{workspace_id}_master_qrcode',
+            "qrcode_id": generate_qrcode_data["qrcode_id"],
+            "is_active": False,
+            "store_id": store_id,
+            "shorthand_url":generate_updated_qr_code_data["link"],
+            "qrcode_image_url": generate_updated_qr_code_data["qrcode_image_url"],
+            "workspace_id": workspace_id,
+            "user_id":user_id,
+            "created_at": dowell_time(timezone)["current_time"],
+            "updated_at":"",
+            "records": [{"record": "1", "type": "overall"}]
+        }
+        response = json.loads(datacube_data_insertion(
+            api_key,
+            f'{workspace_id}_meta_data_q',
+            f'{workspace_id}_qrcode_record',
+            qrcode_data
+        ))
+        if not response["success"]:
+            return CustomResponse(False,"Failed to create save qrcode data",None,status.HTTP_400_BAD_REQUEST)
+        
+        return CustomResponse(True,"Qrcode created successfully",qrcode_data,status.HTTP_201_CREATED)
     def retrieve_qrcoderecode_details(self, request):
         """
         Retrieve QR code record details.
@@ -830,6 +925,7 @@ class qrcode_services(APIView):
         user_id = request.GET.get('user_id')
         limit = request.GET.get('limit')
         offset = request.GET.get('offset')
+        store_type = request.GET.get('store_type')
         
         try:
             api_key = authorization_check(request.headers.get('Authorization'))
@@ -847,7 +943,8 @@ class qrcode_services(APIView):
             f'{workspace_id}_qrcode_record',
             {
                "workspace_id":workspace_id,
-               "user_id" : user_id
+               "user_id" : user_id,
+               "store_type": store_type,
             },
             limit,
             offset,
@@ -936,6 +1033,45 @@ class qrcode_services(APIView):
 
         return CustomResponse(True,f"Seat {seat_status_msg} successfully",None, status_code=status.HTTP_200_OK)
 
+    def get_master_qrcode_record(self,request):
+        """
+        Retrieve the master QR code record.
+
+        :param request: The HTTP request object.
+        :param workspace_id: The ID of the workspace.
+        :param user_id: The ID of the user.
+        :param limit: The maximum number of records to retrieve.
+        :param offset: The offset for pagination.
+        :param api_key: The API key for authorization.
+        """
+        workspace_id = request.GET.get('workspace_id')
+        user_id = request.GET.get('user_id')
+        limit = request.GET.get('limit')
+        offset = request.GET.get('offset')
+        
+        try:
+            api_key = authorization_check(request.headers.get('Authorization'))
+        except InvalidTokenException as e:
+            return CustomResponse(False, str(e), None, status.HTTP_401_UNAUTHORIZED)
+        
+        response = json.loads(datacube_data_retrieval(
+            api_key,
+            f'{workspace_id}_meta_data_q',
+            f'{workspace_id}_qrcode_record',
+            {
+                "workspace_id":workspace_id,
+                "user_id" : user_id,
+                "qrcode_name": f'{workspace_id}_master_qrcode'
+            },
+            limit,
+            offset,
+            False
+        ))
+
+        if not response["success"]:
+            return CustomResponse(False, "Failed to retrieve data from QRCode Record",None, status.HTTP_400_BAD_REQUEST)
+        
+        return CustomResponse(True, "Successfully retrieved data from QRCode Record",response["data"],status.HTTP_200_OK)
     def handle_error(self, request): 
         """
         Handle invalid request type.
@@ -1387,6 +1523,42 @@ class customer_services(APIView):
             return CustomResponse(False,"Failed to update the payment status",None, status.HTTP_400_BAD_REQUEST)
         
         return CustomResponse(True, "Payment successfully updated",None, status.HTTP_200_OK)   
+
+    def initiate_online_order(self,request):
+        """
+        Initiate an online order.
+
+        :param request: The HTTP request containing order details.
+        :type request: HttpRequest
+
+        :return: Response indicating the success or failure of the online order creation.
+        :rtype: CustomResponse
+        """
+        workspace_id = request.GET.get('workspace_id')
+        store_id= request.GET.get('store_id')
+        customer_user_id = request.data.get('customer_user_id')
+        ticket_id = request.data.get('ticket_id')
+        timezone = request.data.get('timezone')
+        date = request.data.get('date') 
+
+        try:
+            api_key = authorization_check(request.headers.get('Authorization'))
+        except InvalidTokenException as e:
+            return CustomResponse(False, str(e), None, status.HTTP_401_UNAUTHORIZED)
+        
+        serializer = OnlineOrderInitiateSerializer(data={
+            "workspace_id": workspace_id,
+            "timezone": timezone,
+            "customer_user_id":customer_user_id,
+            "date":date,
+            "store_id":store_id,
+            "ticket_id":ticket_id
+        })
+       
+        if not serializer.is_valid():
+            return CustomResponse(False, "Posting wrong data to API",serializer.errors, status.HTTP_400_BAD_REQUEST)
+        
+
         
     def handle_error(self, request): 
         """

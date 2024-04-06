@@ -91,7 +91,16 @@ class CreateQrCodeSerializer(serializers.Serializer):
     store_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
     timezone = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
     username = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
+    store_type = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
     seat_number = serializers.IntegerField()
+    link = serializers.URLField()
+    
+class CreateMasterQrCodeSerializer(serializers.Serializer):
+    workspace_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
+    user_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
+    store_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
+    timezone = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
+    username = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
     link = serializers.URLField()
 
 class RetrieveQRcodeRecordSerializer(serializers.Serializer):
@@ -148,6 +157,13 @@ class OrderInitiateSerializer(serializers.Serializer):
     phone_number = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
     timezone = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
     store_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
+    date = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
+class OnlineOrderInitiateSerializer(serializers.Serializer):
+    workspace_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
+    customer_user_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
+    timezone = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
+    store_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
+    ticket_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
     date = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
 
 class OldOrdersSerializer(serializers.Serializer):
