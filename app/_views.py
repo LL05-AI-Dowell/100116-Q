@@ -18,15 +18,6 @@ class health_check(APIView):
 
 @method_decorator(csrf_exempt, name='dispatch')
 class kitchen_sink_services(APIView):
-    """
-    Kitchen sink services to interact with the database.
-
-    This class provides endpoints for handling various database-related operations,
-    such as checking the existence of a database and creating a collection.
-
-    :get request to check the existence of the database
-    :post request to create collection
-    """
     def post(self, request):
         type_request = request.GET.get('type')
 
@@ -46,15 +37,7 @@ class kitchen_sink_services(APIView):
             return self.handle_error(request)
     
     def create_collection(self,request):
-        """
-        Create a new collection from the given database
-
-        This method helps to create a new collection in the specified database.
-
-        :param database_type: The type of the database, which can be META DATA or DATA.
-        :param workspace_id: The ID of the workspace where the collection will be created.
-        :param collection_name: The name of the collection to be created.
-        """
+        
         database_type = request.data.get('database_type')
         workspace_id = request.data.get('workspace_id')
         collection_name = request.data.get('collection_name')
@@ -86,15 +69,7 @@ class kitchen_sink_services(APIView):
         return CustomResponse(True,"Collection has been created successfully", None, status.HTTP_200_OK)
 
     def check_metedata_database_status(self, request):
-        """
-        Check the existence of the metadata database.
-
-        This method checks if the specified databases (meta data and data) are available for a given workspace.
         
-        :param request: The HTTP request object.
-        :param api_key: The API key for authorization.
-        :param workspace_id: The ID of the workspace.
-        """
         try:
             api_key = authorization_check(request.headers.get('Authorization'))
         except InvalidTokenException as e:
@@ -128,15 +103,7 @@ class kitchen_sink_services(APIView):
         return CustomResponse(True,"Meta Data are available to be used", None, status.HTTP_200_OK )
     
     def check_data_database_status(self, request):
-        """
-        Check the existence of the data database.
-
-        This method checks if the specified databases (meta data and data) are available for a given workspace.
         
-        :param request: The HTTP request object.
-        :param api_key: The API key for authorization.
-        :param workspace_id: The ID of the workspace.
-        """
         try:
             api_key = authorization_check(request.headers.get('Authorization'))
         except InvalidTokenException as e:
@@ -167,17 +134,7 @@ class kitchen_sink_services(APIView):
         return CustomResponse(True,"Databases are available to be used", None, status.HTTP_200_OK )
         
     def handle_error(self, request): 
-        """
-        Handle invalid request type.
-
-        This method is called when the requested type is not recognized or supported.
-
-        :param request: The HTTP request object.
-        :type request: HttpRequest
-
-        :return: Response indicating failure due to an invalid request type.
-        :rtype: Response
-        """
+       
         return Response({
             "success": False,
             "message": "Invalid request type"
@@ -185,15 +142,7 @@ class kitchen_sink_services(APIView):
 
 @method_decorator(csrf_exempt, name='dispatch')
 class user_details_services(APIView):
-    """
-    User details services for managing user information.
-
-    This class provides endpoints for saving, retrieving, and updating user details.
-
-    :post to save user details
-    :get to get user details
-    :update to update user details
-    """
+    
     def post(self, request):
         type_request = request.GET.get('type')
 
@@ -217,12 +166,7 @@ class user_details_services(APIView):
             return self.handle_error(request)
 
     def save_user_details(self, request):
-        """
-        Saves user details.
-
-        :param request: The request object containing user details.
-        :return: A custom error response if the data posted to the API is invalid, or a success response if the user details are saved successfully.
-        """
+        
         name = request.data.get('name')
         email = request.data.get('email')  
         username = request.data.get('username')
@@ -269,15 +213,7 @@ class user_details_services(APIView):
         return CustomResponse(True, "User details saved successfully",user_data, status.HTTP_201_CREATED)
 
     def retrieve_user_details(self, request):
-        """
-        Retrieve user details.
-
-        This method retrieves user details for the specified workspace ID.
-
-        :param request: The HTTP request object.
-        :param workspace_id: The ID of the workspace.
-        :param api_key: The API key for authorization.
-        """
+        
         workspace_id = request.GET.get('workspace_id')
         try:
             api_key = authorization_check(request.headers.get('Authorization'))
@@ -302,18 +238,7 @@ class user_details_services(APIView):
         return CustomResponse(True,"User details retrieved successfully",response["data"], status.HTTP_302_FOUND)
     
     def update_user_details(self, request):
-        """
-        Update user details.
-
-        This method updates user details for the specified document ID and workspace ID.
-
-        :param request: The HTTP request object.
-        :param document_id: The ID of the document to be updated.
-        :param update_data: The data containing the updates to be applied.
-        :param workspace_id: The ID of the workspace.
-        :param timezone: The timezone to be used for updating the timestamp.
-        :param api_key: The API key for authorization.
-        """
+        
         document_id = request.data.get('document_id')
         update_data = request.data.get('update_data')
         workspace_id = request.data.get('workspace_id')
@@ -365,15 +290,7 @@ class user_details_services(APIView):
         return CustomResponse(True,"User logged in successfully",None,status.HTTP_200_OK)
     
     def retrieve_user(self, request):
-        """
-        Retrieve user details.
-
-        This method retrieves user details for the specified workspace ID.
-
-        :param request: The HTTP request object.
-        :param workspace_id: The ID of the workspace.
-        :param api_key: The API key for authorization.
-        """
+        
         workspace_id = request.GET.get('workspace_id')
         
         response = json.loads(datacube_data_retrieval(
@@ -394,15 +311,7 @@ class user_details_services(APIView):
         return CustomResponse(True,"User details retrieved successfully",response["data"], status.HTTP_302_FOUND)
 @method_decorator(csrf_exempt, name='dispatch')
 class store_services(APIView):
-    """
-    Store services for managing store information.
-
-    This class provides endpoints for creating, updating, and retrieving store details.
-
-    :post to create store
-    :post to update store data
-    :get to retrieve store details
-    """
+    
     def post(self, request):
         type_request = request.GET.get('type')
 
@@ -426,18 +335,7 @@ class store_services(APIView):
             return self.handle_error(request)
         
     def create_store(self,request):
-        """
-        Create a store.
-
-        This method creates a new store based on the provided request data.
-
-        :param request: The HTTP request object.
-        :param store_id: The ID of the store (optional).
-        :param workspace_id: The ID of the workspace associated with the store.
-        :param timezone: The timezone to be used for timestamp.
-        :param user_id: The ID of the user associated with the store.
-        :param api_key: The API key for authorization.
-        """
+        
         store_ids = request.data.get("store_id")
         workspace_id = request.data.get("workspace_id")
         timezone = request.data.get('timezone')
@@ -470,17 +368,7 @@ class store_services(APIView):
         return CustomResponse(True, "Stores created successfully", stores_data, status.HTTP_201_CREATED)
 
     def retrieve_store_details(self, request):
-        """
-        Retrieve store details.
-
-        This method retrieves store details for the specified workspace ID.
-
-        :param request: The HTTP request object.
-        :param workspace_id: The ID of the workspace.
-        :param limit: The maximum number of records to retrieve.
-        :param offset: The offset for pagination.
-        :param api_key: The API key for authorization.
-        """
+        
         workspace_id = request.GET.get('workspace_id')
         limit = request.GET.get('limit')
         offset = request.GET.get('offset')
@@ -518,18 +406,7 @@ class store_services(APIView):
         return CustomResponse(True, "Store details retrieved successfully", data, status.HTTP_200_OK)
         
     def update_store_data(self, request):
-        """
-        Update store data.
-
-        This method updates store data for the specified store ID and workspace ID.
-
-        :param request: The HTTP request object.
-        :param store_id: The ID of the store to be updated.
-        :param update_data: The data containing the updates to be applied.
-        :param workspace_id: The ID of the workspace.
-        :param timezone: The timezone to be used for updating the timestamp.
-        :param api_key: The API key for authorization.
-        """
+        
         store_id = request.GET.get('store_id')
         user_id = request.GET.get('user_id')
         update_data = request.data.get('update_data')
@@ -566,15 +443,7 @@ class store_services(APIView):
         return CustomResponse(True, "Store data updated successfully", None, status.HTTP_200_OK)
 
     def create_menu(self , request):
-        """
-        Create a menu for a specific store in a workspace.
-
-        :param request: The HTTP request containing data for creating the menu.
-        :type request: HttpRequest
-
-        :return: Response indicating the success or failure of the menu creation process.
-        :rtype: CustomResponse
-        """
+        
         workspace_id = request.GET.get('workspace_id')
         store_id = request.GET.get('store_id')
         menu_data = request.data.get('menu_data')
@@ -617,15 +486,7 @@ class store_services(APIView):
         return CustomResponse(True,"Menu Created Successfully", None,status.HTTP_201_CREATED)
 
     def retrieve_menu_details(self, request):
-        """
-        Retrieve menu details for a specific store in a workspace.
-
-        :param request: The HTTP request containing parameters for retrieving menu details.
-        :type request: HttpRequest
-
-        :return: Response containing menu details for the specified store.
-        :rtype: CustomResponse
-        """
+        
         workspace_id = request.GET.get("workspace_id")
         store_id = request.GET.get("store_id", None)
         limit = request.GET.get('limit')
@@ -678,17 +539,6 @@ class store_services(APIView):
         return CustomResponse(True,"Menu retrived succefully", response["data"],status.HTTP_200_OK)
     
     def handle_error(self, request): 
-        """
-        Handle invalid request type.
-
-        This method is called when the requested type is not recognized or supported.
-
-        :param request: The HTTP request object.
-        :type request: HttpRequest
-
-        :return: Response indicating failure due to an invalid request type.
-        :rtype: Response
-        """
         return Response({
             "success": False,
             "message": "Invalid request type"
@@ -696,14 +546,7 @@ class store_services(APIView):
 
 @method_decorator(csrf_exempt, name='dispatch')
 class qrcode_services(APIView):
-    """
-    QRCode services for managing Qrcode information.
-
-    This class provides endpoints for creating, updating, and retrieving qrcode details.
-
-    :post to create qrcode
-    :get to retrieve qrcode details
-    """
+    
     def post(self, request):
         type_request = request.GET.get('type')
 
@@ -729,20 +572,7 @@ class qrcode_services(APIView):
             return self.handle_error(request)
         
     def create_qrcode(self,request):
-        """
-        Create a seat(QR code) for store.
-
-        This method creates a QR code based on the provided request data.
-
-        :param request: The HTTP request object.
-        :param workspace_id: The ID of the workspace.
-        :param user_id: The ID of the user.
-        :param link: The link associated with the QR code.
-        :param timezone: The timezone to be used for timestamp.
-        :param username: The username associated with the QR code.
-        :param seat_number: The seat number associated with the QR code.
-        :param api_key: The API key for authorization.
-        """
+        
         workspace_id = request.GET.get("workspace_id")
         user_id = request.GET.get("user_id")
         store_id = request.GET.get('store_id')
@@ -909,18 +739,7 @@ class qrcode_services(APIView):
         
         return CustomResponse(True,"Qrcode created successfully",qrcode_data,status.HTTP_201_CREATED)
     def retrieve_qrcoderecode_details(self, request):
-        """
-        Retrieve QR code record details.
-
-        This method retrieves QR code record details for the specified workspace ID and user ID.
-
-        :param request: The HTTP request object.
-        :param workspace_id: The ID of the workspace.
-        :param user_id: The ID of the user.
-        :param limit: The maximum number of records to retrieve.
-        :param offset: The offset for pagination.
-        :param api_key: The API key for authorization.
-        """
+        
         workspace_id = request.GET.get('workspace_id')
         user_id = request.GET.get('user_id')
         limit = request.GET.get('limit')
@@ -957,11 +776,7 @@ class qrcode_services(APIView):
         return CustomResponse(True, "Successfully retrieved data from QRCode Record",response["data"],status.HTTP_200_OK)
 
     def retrieve_seat_details(self, request):
-        """
-        Retrieve details about a specific seat within a workspace.
-        :param workspace_id 
-        :param seat_number
-        """
+        
         workspace_id = request.GET.get("workspace_id")
         seat_number = request.GET.get("seat_number")
 
@@ -994,13 +809,7 @@ class qrcode_services(APIView):
         return CustomResponse(True,"Successfully retrieved data",data["qrcode_id"],status.HTTP_200_OK)
     
     def activate_seat(self, request):
-        """
-        Activate or deactivate a seat.
-
-        :param workspace_id: The ID of the workspace.
-        :param document_id: The MongoDB ID of the document representing the seat.
-        :param seat_status: A boolean indicating whether to activate (True) or deactivate (False) the seat.
-        """
+       
         workspace_id = request.GET.get("workspace_id")
         document_id = request.GET.get("document_id")
         seat_status = request.GET.get("seat_status")
@@ -1034,16 +843,7 @@ class qrcode_services(APIView):
         return CustomResponse(True,f"Seat {seat_status_msg} successfully",None, status_code=status.HTTP_200_OK)
 
     def get_master_qrcode_record(self,request):
-        """
-        Retrieve the master QR code record.
-
-        :param request: The HTTP request object.
-        :param workspace_id: The ID of the workspace.
-        :param user_id: The ID of the user.
-        :param limit: The maximum number of records to retrieve.
-        :param offset: The offset for pagination.
-        :param api_key: The API key for authorization.
-        """
+        
         workspace_id = request.GET.get('workspace_id')
         user_id = request.GET.get('user_id')
         limit = request.GET.get('limit')
@@ -1073,46 +873,17 @@ class qrcode_services(APIView):
         
         return CustomResponse(True, "Successfully retrieved data from QRCode Record",response["data"],status.HTTP_200_OK)
     def handle_error(self, request): 
-        """
-        Handle invalid request type.
-
-        This method is called when the requested type is not recognized or supported.
-
-        :param request: The HTTP request object.
-        :type request: HttpRequest
-
-        :return: Response indicating failure due to an invalid request type.
-        :rtype: Response
-        """
+        
         return Response({
             "success": False,
             "message": "Invalid request type"
         }, status=status.HTTP_400_BAD_REQUEST)
     
 @method_decorator(csrf_exempt, name='dispatch')
-class customer_services(APIView):
-    """
-    API view to handle various customer service operations.
-
-    This class defines API endpoints to handle different types of customer service operations.
-    It includes methods to create customer payments, retrieve seat customers, and update payment statuses.
-    """
+class customer_services_offline_store(APIView):
+    
     def post(self, request):
-        """
-        Handle POST requests.
-
-        This method is called to handle POST requests.
-        It determines the type of request and routes it to the appropriate method.
-        Supported request types:
-            - create_customer_payment
-            - retrieve_seat_customers
-
-        :param request: The HTTP request object.
-        :type request: HttpRequest
-
-        :return: Response based on the type of request.
-        :rtype: Response
-        """
+        
         type_request = request.GET.get('type')
 
         if type_request == "create_order":
@@ -1121,24 +892,13 @@ class customer_services(APIView):
             return self.initiate_order(request)
         elif type_request =="old_order":
             return self.old_order(request)
+        elif type_request == "initiate_online_order":
+            return self.initiate_online_order(request)
         else:
             return self.handle_error(request)
     
     def get(self, request):
-        """
-        Handle GET requests.
-
-        This method is called to handle GET requests.
-        It determines the type of request and routes it to the appropriate method.
-        Supported request type:
-            - update_payment_status
-
-        :param request: The HTTP request object.
-        :type request: HttpRequest
-
-        :return: Response based on the type of request.
-        :rtype: Response
-        """
+        
         type_request = request.GET.get('type')
 
         if type_request == "update_payment_status":
@@ -1147,19 +907,11 @@ class customer_services(APIView):
             return self.retrieve_orders_by_seat(request)
         elif type_request == "retrive_initiated_order":
             return self.retrive_initiated_order(request)
+        
         else:
             return self.handle_error(request)   
         
     def initiate_order(self,request):
-        """
-        Initiate an order for a seat in a store workspace.
-
-        :param request: The HTTP request containing data for initiating the order.
-        :type request: HttpRequest
-
-        :return: Response indicating the success or failure of the order initiation process.
-        :rtype: CustomResponse
-        """
         seat_number = request.data.get('seat_number')
         workspace_id = request.data.get('workspace_id')
         timezone = request.data.get('timezone')
@@ -1198,6 +950,7 @@ class customer_services(APIView):
             "payment_link": "",
             "date_customer_visited": date,
             "phone_number": phone_number,
+            "store_type": "OFFLINE",
             "amount":None,
             "payment_receipt_id":"",
             "receipt_id": "",
@@ -1221,18 +974,9 @@ class customer_services(APIView):
         if not response["success"]:
             return CustomResponse(False, "Failed to initiate order",None, status.HTTP_400_BAD_REQUEST)
 
-        return CustomResponse(True,"Order initiated successfully", session_token,status.HTTP_201_CREATED)
+        return CustomResponse(True,"Order initiated successfully", response["data"]["inserted_id"],status.HTTP_201_CREATED)
     
     def retrieve_orders_by_seat(self,request):
-        """
-        Retrieve orders for a specific store workspace.
-
-        :param request: The HTTP request containing parameters for retrieving orders.
-        :type request: HttpRequest
-
-        :return: Response containing retrieved orders for the specified workspace.
-        :rtype: CustomResponse
-        """
         workspace_id = request.GET.get('workspace_id')
         date= request.GET.get('date')
         store_id= request.GET.get('store_id')
@@ -1256,7 +1000,8 @@ class customer_services(APIView):
                 "workspace_id":workspace_id,
                 "date_customer_visited":date,
                 "seat_number":f"seat_number_{seat_number}",
-                "store_id":store_id
+                "store_id":store_id,
+                "store_type":"OFFLINE",
             },
             limit,
             offset,
@@ -1269,15 +1014,6 @@ class customer_services(APIView):
         return CustomResponse(True,"Retrieve initiated ordered",response["data"],status.HTTP_200_OK)
     
     def retrive_initiated_order(self,request):
-        """
-        Retrieve orders for a specific store workspace.
-
-        :param request: The HTTP request containing parameters for retrieving orders.
-        :type request: HttpRequest
-
-        :return: Response containing retrieved orders for the specified workspace.
-        :rtype: CustomResponse
-        """
         workspace_id = request.GET.get('workspace_id')
         date= request.GET.get('date')
         store_id= request.GET.get('store_id')
@@ -1317,15 +1053,7 @@ class customer_services(APIView):
         return CustomResponse(True,"Retrieve initiated ordered",response,status.HTTP_200_OK)
 
     def create_order(self,request):
-        """
-        Create an order for a seat in a store workspace.
-
-        :param request: The HTTP request containing data for creating the order.
-        :type request: HttpRequest
-
-        :return: Response indicating the success or failure of the order creation process.
-        :rtype: CustomResponse
-        """
+    
         seat_number = request.data.get('seat_number')
         qrcode_id = request.data.get('qrcode_id')
         workspace_id = request.data.get('workspace_id')
@@ -1398,15 +1126,6 @@ class customer_services(APIView):
         return CustomResponse(True,"The payment process has started, QRCode is ready to scan by customer",None, status.HTTP_201_CREATED)
 
     def old_order(self, request):
-        """
-        Retrieve information about an old order.
-
-        :param request: The HTTP request containing data for retrieving an old order.
-        :type request: HttpRequest
-
-        :return: Response containing information about the old order.
-        :rtype: CustomResponse
-        """
         workspace_id = request.data.get('workspace_id')
         store_id= request.data.get('store_id')
         phone_number = request.data.get('phone_number')
@@ -1472,15 +1191,7 @@ class customer_services(APIView):
         return CustomResponse(True, "Customer Data retrieved" ,data, status.HTTP_200_OK)
         
     def update_payment_status(self,request):
-        """
-        Update the payment status for a specific order.
-
-        :param request: The HTTP request containing payment details.
-        :type request: HttpRequest
-
-        :return: Response indicating the success or failure of the payment status update.
-        :rtype: CustomResponse
-        """
+        
         payment_receipt_id = request.GET.get('payment_receipt_id')
         date = request.GET.get('date')
         workspace_id = request.GET.get('workspace_id')
@@ -1523,19 +1234,44 @@ class customer_services(APIView):
             return CustomResponse(False,"Failed to update the payment status",None, status.HTTP_400_BAD_REQUEST)
         
         return CustomResponse(True, "Payment successfully updated",None, status.HTTP_200_OK)   
+        
+    def handle_error(self, request): 
+        return Response({
+            "success": False,
+            "message": "Invalid request type"
+        }, status=status.HTTP_400_BAD_REQUEST)
 
+@method_decorator(csrf_exempt, name='dispatch')
+class customer_services_online_store(APIView):
+    
+    def post(self, request):
+        type_request = request.GET.get('type')
+
+        if type_request == "create_online_order":
+            return self.create_online_order(request)
+        elif type_request == "initiate_online_order":
+            return self.initiate_online_order(request)
+        elif type_request == "retrieve_old_order":
+            return self.retrieve_old_order(request)
+        else:
+            return self.handle_error(request)
+    
+    def get(self, request):
+        
+        type_request = request.GET.get('type')
+
+        if type_request == "retieve_online_initiated_order":
+            return self.retieve_online_initiated_order(request)
+        elif type_request == "retrieve_online_orders_by_seat":
+            return self.retrieve_online_orders_by_seat(request)
+        
+        
+        else:
+            return self.handle_error(request)   
+        
     def initiate_online_order(self,request):
-        """
-        Initiate an online order.
-
-        :param request: The HTTP request containing order details.
-        :type request: HttpRequest
-
-        :return: Response indicating the success or failure of the online order creation.
-        :rtype: CustomResponse
-        """
-        workspace_id = request.GET.get('workspace_id')
-        store_id= request.GET.get('store_id')
+        workspace_id = request.data.get('workspace_id')
+        store_id= request.data.get('store_id')
         customer_user_id = request.data.get('customer_user_id')
         ticket_id = request.data.get('ticket_id')
         timezone = request.data.get('timezone')
@@ -1554,30 +1290,266 @@ class customer_services(APIView):
             "store_id":store_id,
             "ticket_id":ticket_id
         })
+
+        if not serializer.is_valid():
+            return CustomResponse(False, "Posting wrong data to API",serializer.errors, status.HTTP_400_BAD_REQUEST)
+        
+        session_token = generate_jwt_token({"workspace_id":workspace_id,"store_id":store_id,"ticket_id":ticket_id,"date":date})
+
+        data_to_insert = {
+            "seat_number":"",
+            "qrcode_id": "",
+            "is_paid": False,
+            "payment_status": "not_paid",
+            "order_status": "order_initiated",
+            "store_id": store_id,
+            "workspace_id": workspace_id,
+            "payment_link": "",
+            "date_customer_visited": date,
+            "ticket_id": ticket_id,
+            "customer_user_id":customer_user_id,
+            "store_type": "ONLINE",
+            "amount":None,
+            "payment_receipt_id":"",
+            "receipt_id": "",
+            "payment_details": None,
+            "session_token": session_token,
+            "created_at": dowell_time(timezone)["current_time"],
+            "updated_at": "",
+            "records": [{"record": "1", "type": "overall"}]
+        }
+        
+        database_name = f'{workspace_id}_data_q'
+        collection_name = f'{workspace_id}_{date}_q'
+
+        response = json.loads(datacube_data_insertion(
+            api_key,
+            database_name,
+            collection_name,
+            data_to_insert
+        ))
+        
+        if not response["success"]:
+            return CustomResponse(False, "Failed to initiate order",None, status.HTTP_400_BAD_REQUEST)
+
+        return CustomResponse(True,"Order initiated successfully", response["data"]["inserted_id"],status.HTTP_201_CREATED)
+    
+    def create_online_order(self,request):
+        seat_number = request.data.get('seat_number')
+        qrcode_id = request.data.get('qrcode_id')
+        workspace_id = request.data.get('workspace_id')
+        timezone = request.data.get('timezone')
+        date= request.data.get('date')
+        store_id= request.data.get('store_id')
+        amount = request.data.get('amount')
+        orderId = request.data.get('order_intiated_id')
+
+        try:
+            api_key = authorization_check(request.headers.get('Authorization'))
+        except InvalidTokenException as e:
+            return CustomResponse(False, str(e), None, status.HTTP_401_UNAUTHORIZED)
+        
+        serializer = SaveSeatDetailsSerializer(data={"workspace_id": workspace_id,"qrcode_id": qrcode_id,"timezone": timezone,"seat_number":seat_number,"date":date,"store_id":store_id,"amount":amount,"orderId":orderId})
        
         if not serializer.is_valid():
             return CustomResponse(False, "Posting wrong data to API",serializer.errors, status.HTTP_400_BAD_REQUEST)
         
-
+        payment_receipt_id = generate_store_id()
+        # callback_url =f"http://localhost:5173/success/?view=success&payment_receipt_id={payment_receipt_id}&date={date}&workspace_id={workspace_id}&qrcode_id={qrcode_id}&seat_number={seat_number}"
+        callback_url =f"https://www.q.uxlivinglab.online/success/?view=success&payment_receipt_id={payment_receipt_id}&date={date}&workspace_id={workspace_id}&qrcode_id={qrcode_id}&seat_number={seat_number}&store_id={store_id}"
         
+        # payment information will be changed later
+        
+        payment_response = generate_payment(amount, callback_url)
+        print(callback_url)
+        if payment_response.status_code != 200:
+            return CustomResponse(False, "Failed to initiate payment for the customer", status.HTTP_401_UNAUTHORIZED)
+        
+        create_payment = payment_response.json()
+       
+        database_name = f'{workspace_id}_data_q'
+        collection_name = f'{workspace_id}_{date}_q'
+        
+        qrcode_updation_response = update_qr_code_link(
+            qrcode_id,
+            create_payment["approval_url"],
+            f'seat_number_{seat_number}'
+        )
+       
+        if not qrcode_updation_response:
+            return CustomResponse(False, "Failed to update payment link to qr code server",None, status.HTTP_400_BAD_REQUEST)
+        
+
+        data_to_update = {
+            "seat_number":f'seat_number_{seat_number}',
+            "order_status":"payment_generated",
+            "qrcode_id": qrcode_id,
+            "payment_link": create_payment["approval_url"],
+            "amount":amount,
+            "payment_receipt_id":payment_receipt_id,
+            "receipt_id": create_payment["payment_id"],
+            "payment_details": None,
+            "updated_at": dowell_time(timezone)["current_time"]
+        }
+
+        response= json.loads(datacube_data_update(
+            api_key,
+            database_name,
+            collection_name,
+            {
+                "_id":orderId
+            },
+            data_to_update
+        ))
+
+        if not response["success"]:
+            return CustomResponse(False, "Failed to generate payment",None, status.HTTP_400_BAD_REQUEST)
+         
+        return CustomResponse(True,"The payment process has started, QRCode is ready to scan by customer",None, status.HTTP_201_CREATED)
+
+    def retieve_online_initiated_order(self,request):
+        workspace_id = request.GET.get('workspace_id')
+        date= request.GET.get('date')
+        store_id= request.GET.get('store_id')
+        limit = request.GET.get('limit')
+        offset = request.GET.get('offset')
+
+        try:
+            api_key = authorization_check(request.headers.get('Authorization'))
+        except InvalidTokenException as e:
+            return CustomResponse(False, str(e), None, status.HTTP_401_UNAUTHORIZED)
+        
+        database_name = f'{workspace_id}_data_q'
+        collection_name = f'{workspace_id}_{date}_q'
+
+        response = json.loads(datacube_data_retrieval(
+            api_key,
+            database_name,
+            collection_name,
+            {
+                "workspace_id":workspace_id,
+                "date_customer_visited":date,
+                "store_id":store_id,
+                "store_type":"ONLINE", 
+            },
+            limit,
+            offset,
+            False
+        ))
+
+        if not response["success"]:
+            return CustomResponse(False, "Failed to initiate order",None, status.HTTP_400_BAD_REQUEST)
+        
+        data = response["data"]
+        response = [{"order_initiated_id": entry["_id"], "order_status": entry["order_status"], "customer_user_id": entry["customer_user_id"]} for entry in data if entry["order_status"] == "order_initiated"]
+
+        return CustomResponse(True,"Retrieve initiated ordered",response,status.HTTP_200_OK)
+    
+    def retrieve_online_orders_by_seat(self,request):
+        workspace_id = request.GET.get('workspace_id')
+        date= request.GET.get('date')
+        store_id= request.GET.get('store_id')
+        seat_number = request.GET.get('seat_number')
+        limit = request.GET.get('limit')
+        offset = request.GET.get('offset')
+
+        try:
+            api_key = authorization_check(request.headers.get('Authorization'))
+        except InvalidTokenException as e:
+            return CustomResponse(False, str(e), None, status.HTTP_401_UNAUTHORIZED)
+        
+        database_name = f'{workspace_id}_data_q'
+        collection_name = f'{workspace_id}_{date}_q'
+
+        response = json.loads(datacube_data_retrieval(
+            api_key,
+            database_name,
+            collection_name,
+            {
+                "workspace_id":workspace_id,
+                "date_customer_visited":date,
+                "seat_number":f"seat_number_{seat_number}",
+                "store_id":store_id,
+                "store_type":"ONLINE"
+            },
+            limit,
+            offset,
+            False
+        ))
+
+        if not response["success"]:
+            return CustomResponse(False, "Failed to initiate order",None, status.HTTP_400_BAD_REQUEST)
+
+        return CustomResponse(True,"Retrieve initiated ordered",response["data"],status.HTTP_200_OK)
+    
+    def retrieve_old_order(self, request):
+        workspace_id = request.data.get('workspace_id')
+        store_id= request.data.get('store_id')
+        customer_user_id = request.data.get('customer_user_id',None)
+        order_intiated_id = request.data.get('order_intiated_id',None)
+        date = request.data.get('date')
+
+        try:
+            api_key = authorization_check(request.headers.get('Authorization'))
+        except InvalidTokenException as e:
+            return CustomResponse(False, str(e), None, status.HTTP_401_UNAUTHORIZED)
+        
+        serializer = OldOnlineOrdersSerializer(data={"workspace_id": workspace_id,"store_id": store_id,"date":date,"store_id":store_id,"customer_user_id":customer_user_id,"order_intiated_id":order_intiated_id})
+       
+        if not serializer.is_valid():
+            return CustomResponse(False, "Posting wrong data to API",serializer.errors, status.HTTP_400_BAD_REQUEST)
+        
+        database_name = f'{workspace_id}_data_q'
+        collection_name = f'{workspace_id}_{date}_q'
+
+        response = json.loads(datacube_data_retrieval(
+            api_key,
+            database_name,
+            collection_name,
+            {
+                "workspace_id": workspace_id,
+                "store_id": store_id,
+                "customer_user_id": customer_user_id,
+                "date_customer_visited": date
+            },
+            1,
+            0,
+            False
+        ))
+
+        if not response["success"]:
+            return CustomResponse(False, "Failed to retrieve customer data",None, status.HTTP_400_BAD_REQUEST)
+        
+        if response["data"] is None or len(response["data"]) == 0:
+            return CustomResponse(False, "No customer data found",None, status.HTTP_404_NOT_FOUND)
+        
+        data = response.get('data',[])[0]
+        if len(data) == 0:
+            return CustomResponse(False, "Kindly initiate a new order",None, status.HTTP_404_NOT_FOUND)
+        
+        if not data["is_paid"] and data["payment_status"] == "paid":
+            return CustomResponse(False, "Kindly initiate a new order, You have already paid the bill",None, status.HTTP_200_OK)
+
+        if data["order_status"] == "payment_generated":
+            return CustomResponse(False, "The bill is generated ,Kindly pay the bill",data, status.HTTP_402_PAYMENT_REQUIRED)
+
+        if data["order_status"] == "order_initiated":
+            return CustomResponse(False, "The bill is not yet generated ,Kindly wait for the bill",None, status.HTTP_200_OK)
+        
+        
+        if data["is_paid"] and data["payment_status"] == "paid" and data["order_status"] == "order_paid":
+            return CustomResponse(True, "Thank you for dining with us, visit next time again",None, status.HTTP_200_OK)
+        
+        check_session = decode_jwt_token(data["session_token"])
+        if check_session is None:
+            return CustomResponse(False, "Session has expired, Kindly initiate new order", None, status.HTTP_401_UNAUTHORIZED)
+        
+        return CustomResponse(True, "Customer Data retrieved" ,data, status.HTTP_200_OK)
+    
+
     def handle_error(self, request): 
-        """
-        Handle invalid request type.
-
-        This method is called when the requested type is not recognized or supported.
-
-        :param request: The HTTP request object.
-        :type request: HttpRequest
-
-        :return: Response indicating failure due to an invalid request type.
-        :rtype: Response
-        """
         return Response({
             "success": False,
             "message": "Invalid request type"
         }, status=status.HTTP_400_BAD_REQUEST)
-
-
-
-
 

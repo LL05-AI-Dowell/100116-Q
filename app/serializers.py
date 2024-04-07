@@ -168,5 +168,10 @@ class OnlineOrderInitiateSerializer(serializers.Serializer):
 
 class OldOrdersSerializer(serializers.Serializer):
     workspace_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
-    phone_number = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
+    phone_number = serializers.CharField(max_length=100,allow_null= True, allow_blank=True)
+    date = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
+class OldOnlineOrdersSerializer(serializers.Serializer):
+    workspace_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
+    customer_user_id = serializers.CharField(max_length=100,allow_null= True, allow_blank=True)
+    order_intiated_id = serializers.CharField(max_length=100,allow_null= True, allow_blank=True)
     date = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)

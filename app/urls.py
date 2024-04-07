@@ -7,5 +7,6 @@ urlpatterns = [
     path('user-services/',user_details_services.as_view()),
     path('store-services/',store_services.as_view()),
     path('qrcode-services/',qrcode_services.as_view()),
-    path('customer-services/',customer_services.as_view()),
+    path('offline-store-customer-services/',customer_services_offline_store.as_view()),
+    path('online-store-customer-services/',customer_services_online_store.as_view()),
 ]
