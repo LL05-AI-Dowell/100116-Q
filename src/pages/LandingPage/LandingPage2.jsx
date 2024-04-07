@@ -736,7 +736,7 @@ const LandingPage2 = () => {
                           .map((s, index) => (
                             <div className=''>
                               <button
-                                className='text-black bg-[#bbbcbe] rounded m-0.5 w-full h-full'
+                                className='text-black bg-[#bbbcbe] rounded m-0.5 w-full h-max py-2'
                                 onClick={() => {
                                   setSelectedTableNumber(
                                     index + tablePagination
