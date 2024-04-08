@@ -104,13 +104,19 @@ const LandingPage = () => {
   const [seatNumber, setSeatNumber] = useState(null);
   const [amountEntered, setAmountEntered] = useState(null);
   const [showActivateSeat, setShowActivateSeat] = useState(false);
-  const [showChat, setShowChat] = useState(false);
-  const [showChatModal, setShowChatModal] = useState(false);
-  const [selectedChat, setSelectedChat] = useState(null);
   const [messageText, setMessageText] = useState("");
   const [sentMessages, setSentMessages] = useState([]);
+  const [expandedChatId, setExpandedChatId] = useState(null);
   const seatNumberRef = useRef(null);
   const amountRef = useRef(null);
+
+  // ------------------------calculator--------------------
+  const [orderInitiatedForSeat, setOrderInitiatedForSeat] = useState([]);
+  const [seatPagination, setSeatPagination] = useState(0);
+  const [orderNumber, setOrderNumber] = useState(null);
+  const [orderInitiatedId, setOrderInitiatedId] = useState("");
+  const [retrievingOrders, setRetrievingOrders] = useState(false);
+  const [tableEntered, setTableEntered] = useState(null);
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -135,6 +141,23 @@ const LandingPage = () => {
       setCardPagination(0);
     } else if (cardPagination > 5) {
       setCardPagination(cardPagination - 5);
+    }
+  };
+
+  const decrementSeatPagination = () => {
+    if (seatPagination == 5) {
+      setSeatPagination(0);
+    } else if (seatPagination > 5) {
+      setSeatPagination(seatPagination - 5);
+    }
+  };
+
+  const incrementSeatPagination = (steps, length) => {
+    console.log(currentUser);
+    if (steps + 1 <= 100) {
+      if (steps + seatPagination !== 100) {
+        setSeatPagination(seatPagination + 5);
+      }
     }
   };
 
@@ -498,71 +521,50 @@ const LandingPage = () => {
     navigate("/");
   };
 
-  const handleShowChat = () => {
-    setShowChat(!showChat);
-  };
-
-  const handleChatOpen = (chatId) => {
-    setSelectedChat(chatId);
-  };
-
-  // const handleShowChat = (chatId) => {
-  //   setSelectedChat(chatId);
-  //   setShowChat(!showChat);
-  // };
-
-  const handleSendChatMessage = () => {
-    if (messageText.trim() !== "") {
-      console.log("Sending message:", messageText);
-      setSentMessages([...sentMessages, messageText]);
-      setMessageText("");
-    }
-  };
-
-  const handleCloseChat = () => {
-    setSelectedChat(null);
-  };
-
-  const ChatModal = ({ chat }) => {
-    return (
-      <div className='fixed bottom-0 left-10 md:left-52 w-[300px]  md:w-[400px] h-[350px] flex items-center justify-center bg-opacity-75 mb-4'>
-        <div className='bg-gray-100 rounded-lg p-6 w-full h-full'>
-          <div className='flex justify-between'>
-            <h2 className='text-xl font-semibold mb-4'>
-              Chat with {chat && chat.name}
-            </h2>
-            <MdCancel
-              size={28}
-              className='text-red-500 cursor-pointer'
-              onClick={handleCloseChat}
-            />
-          </div>
-          <div>
-            {/* Your chat interface/component */}
-            <p>{chat ? chat.message : ""}</p>
-          </div>
-        </div>
-      </div>
-    );
+  const toggleAccordion = (chatId) => {
+    setExpandedChatId(chatId === expandedChatId ? null : chatId);
   };
 
   const chatData = [
     { id: 1, name: "John Doe", message: "Call me back ASAP!" },
     { id: 2, name: "Jane Smith", message: "Hello, how are you?" },
-    // Add more chat objects as needed
+    { id: 3, name: "Jemal khalid", message: "What's up!" },
+    { id: 4, name: "Abraham Lincon", message: "How have you been." },
+    { id: 5, name: "Eric Davidson", message: "We will have a meeting" },
   ];
 
   const DummyData = ({ chat }) => {
+    const isExpanded = chat.id === expandedChatId;
     return (
-      <div
-        className='flex flex-col items-start justify-center rounded-3xl pl-6 py-1 my-3 bg-slate-300 gap-y-1 cursor-pointer'
-        onClick={() => {
-          handleChatOpen(chat.id);
-        }}
-      >
-        <span className='font-bold text-gray-700'>{chat.name}</span>
-        <div className='h-[20px] overflow-hidden'>
-          <span>{chat.message}</span>
+      <div className='overflow-auto bg-white rounded-xl mb-3'>
+        <div className='p-2'>
+          <div
+            className='w-full flex flex-col items-start justify-center p-2 gap-y-1 cursor-pointer'
+            onClick={() => toggleAccordion(chat.id)}
+          >
+            <span className='font-bold text-gray-700'>{chat.name}</span>
+          </div>
+          <div
+            className={`grid overflow-hidden transition-all duration-300 ease-in-out text-slate-600 ${
+              isExpanded
+                ? "grid-rows-[1fr] opacity-100"
+                : "grid-rows-[0fr] opacity-0"
+            }`}
+          >
+            <div className='overflow-hidden flex flex-col justify-between gap-y-2'>
+              <div className='h-[220px] rounded-md border-2 border-sky-500 p-2'>
+                This is the chat
+              </div>
+              <div className='flex items-center justify-between gap-x-2'>
+                <input
+                  className='w-full placeholder:italic placeholder:text-slate-400 placeholder:text-sm block bg-white border border-slate-300 py-2 shadow-sm focus:outline-none focus:border-sky-500 focus:ring-1 rounded-2xl px-2'
+                  type='text'
+                  placeholder='message'
+                />
+                <IoMdSend size={28} className='text-blue-600 cursor-pointer' />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -641,7 +643,7 @@ const LandingPage = () => {
         </div>
       ) : (
         <div className='h-screen m-0 p-0 gradient_ flex '>
-          <div className='w-full h-full bg-white margin_ shadow-black mt-3.5 p-4 pt-2 pb-6 rounded-md md:w-11/12 md:h-max'>
+          <div className='w-full h-full bg-white margin_ shadow-black mt-3.5 py-4 pl-4 pt-2 pb-6 rounded-md md:w-11/12 md:h-max'>
             {showBanner ? (
               <p className='text-rose-900 text-2xl text-center'>
                 Have you created a seat yet, No?{" "}
@@ -662,10 +664,7 @@ const LandingPage = () => {
               />
               {/* <p className="text-5xl font-bold">Q</p> */}
               <div className='flex items-center justify-center'>
-                <div
-                  className='mr-12 relative cursor-pointer'
-                  onClick={handleShowChat}
-                >
+                <div className='mr-12 relative cursor-pointer'>
                   <IoChatboxEllipsesOutline
                     size={36}
                     color='rgb(156 163 175)'
@@ -694,143 +693,301 @@ const LandingPage = () => {
                 </p>
               </div>
             ) : null}
-            <div className='flex h-[50%] items-center sm:h-[325px] my-4'>
-              <div className='flex flex-col justify-between h-full w-full py-8 shadow-2xl sm:flex-row'>
-                <QueryClientProvider client={queryClient}>
-                  <TableContainer
-                    component={Paper}
-                    sx={{ width: "98%", height: "max-content" }}
-                  >
-                    <Table sx={{ minWidth: "100%" }} aria-label='simple table'>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell
-                            sx={{
-                              width: "max-content",
-                              padding: "1%",
-                              fontWeight: "600",
-                            }}
-                            align='center'
-                          >
-                            Seat Number
-                          </TableCell>
-                          <TableCell
-                            sx={{
-                              width: "max-content",
-                              padding: "1%",
-                              fontWeight: "600",
-                            }}
-                            align='center'
-                          >
-                            Payment Requested
-                          </TableCell>
-                          <TableCell
-                            sx={{
-                              width: "max-content",
-                              padding: "1%",
-                              fontWeight: "600",
-                            }}
-                            align='left'
-                          >
-                            Payment Status
-                          </TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {qrCodeResponse
-                          .slice(cardPagination, cardPagination + 5)
-                          .map((row, index) => (
-                            <TableRow key={index + "_"}>
-                              <SeatRow
-                                key={index}
-                                seatNumber={index}
-                                pagination={cardPagination}
-                              />
-                            </TableRow>
-                          ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </QueryClientProvider>
-                <div className='w-full m-2 flex items-center justify-center sm:w-1/6 sm:m-0'>
-                  <div className='flex items-center rotate-0 sm:rotate-90'>
-                    <button
-                      className='cursor-pointer bg-inherit text-black border-solid border-2 border-sky-500 rounded-full flex items-center justify-center bg-sky-100 w-9 h-9'
-                      onClick={() => decrementStepPagination()}
+            <div className='flex items-start flex-col sm:flex-row my-4'>
+              <div className='flex flex-col justify-between h-full w-full sm:w-[35%] mt-16 py-8 shadow-2xl '>
+                <div className='flex flex-col justify-between h-full w-full sm:flex-row'>
+                  <QueryClientProvider client={queryClient}>
+                    <TableContainer
+                      component={Paper}
+                      sx={{ width: "98%", height: "max-content" }}
                     >
-                      <IoIosArrowBack />
-                    </button>
-                    {createArrayWithLength(100)
-                      .slice(cardPagination, cardPagination + 5)
-                      .map((s, index) => (
-                        <div className='rotate-0 sm:rotate-90'>
-                          <button
-                            className='rotate-0 bg-inherit text-black border-solid border border-sky-500 rounded-full m-0.5 w-9 h-9 sm:rotate-180'
-                            onClick={() => {
-                              setCardIndex(index);
-                            }}
-                            key={`${s}_button`}
-                          >
-                            {s + 1}
-                          </button>
-                        </div>
-                      ))}
+                      <Table
+                        sx={{ minWidth: "100%" }}
+                        aria-label='simple table'
+                      >
+                        <TableHead>
+                          <TableRow>
+                            <TableCell
+                              sx={{
+                                width: "max-content",
+                                padding: "1%",
+                                fontWeight: "600",
+                              }}
+                              align='center'
+                            >
+                              Seat Number
+                            </TableCell>
+                            <TableCell
+                              sx={{
+                                width: "max-content",
+                                padding: "1%",
+                                fontWeight: "600",
+                              }}
+                              align='center'
+                            >
+                              Payment Requested
+                            </TableCell>
+                            <TableCell
+                              sx={{
+                                width: "max-content",
+                                padding: "1%",
+                                fontWeight: "600",
+                              }}
+                              align='left'
+                            >
+                              Payment Status
+                            </TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {qrCodeResponse
+                            .slice(cardPagination, cardPagination + 5)
+                            .map((row, index) => (
+                              <TableRow key={index + "_"}>
+                                <SeatRow
+                                  key={index}
+                                  seatNumber={index}
+                                  pagination={cardPagination}
+                                />
+                              </TableRow>
+                            ))}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  </QueryClientProvider>
+                  <div className='w-full m-2 flex items-center justify-center sm:w-1/6 sm:m-0'>
+                    <div className='flex items-center rotate-0 sm:rotate-90'>
+                      <button
+                        className='cursor-pointer bg-inherit text-black border-solid border-2 border-sky-500 rounded-full flex items-center justify-center bg-sky-100 w-9 h-9'
+                        onClick={() => decrementStepPagination()}
+                      >
+                        <IoIosArrowBack />
+                      </button>
+                      {createArrayWithLength(100)
+                        .slice(cardPagination, cardPagination + 5)
+                        .map((s, index) => (
+                          <div className='rotate-0 sm:rotate-90'>
+                            <button
+                              className='rotate-0 bg-inherit text-black border-solid border border-sky-500 rounded-full m-0.5 w-9 h-9 sm:rotate-180'
+                              onClick={() => {
+                                setCardIndex(index);
+                              }}
+                              key={`${s}_button`}
+                            >
+                              {s + 1}
+                            </button>
+                          </div>
+                        ))}
+                      <button
+                        className='cursor-pointer bg-inherit text-black border-solid border-2 border-sky-500 rounded-full flex items-center justify-center bg-sky-100 w-9 h-9'
+                        onClick={() => incrementStepPagination(5, 100 / 5)}
+                      >
+                        <IoIosArrowForward />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div className='flex flex-col items-start justify-center ml-2 py-6 my-4'>
+                  <div className='flex items- justify-center'>
+                    <div className='flex flex-col items-center justify-center'>
+                      <input
+                        type='number'
+                        className='cursor-pointer p-0 text-4xl bg-inherit m-0 border-solid border  border-sky-500 rounded w-20 focus:outline-none sm:text-6xl sm:m-2 sm:p-1 sm:w-28'
+                        min='1'
+                        max='99'
+                        value={seatNumber}
+                        onChange={(event) => handleInputChange(event)}
+                        ref={seatNumberRef}
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter") {
+                            if (seatNumber) {
+                              amountRef.current.focus();
+                            }
+                          }
+                        }}
+                      ></input>
+                      <p className='text-sm mx-1 sm:text-lg sm:mx-2'>
+                        Seat Number:
+                      </p>
+                    </div>
+                    <div className='flex flex-col items-center justify-center'>
+                      <input
+                        ref={amountRef}
+                        value={amountEntered}
+                        type='number'
+                        className='cursor-pointer p-0 text-4xl bg-inherit m-0 border-solid border  border-sky-500 rounded w-20 focus:outline-none sm:text-6xl sm:m-2 sm:p-1 sm:w-28'
+                        onChange={(event) => handleAmountInputChange(event)}
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter") {
+                            if (amountEntered) {
+                              handleEnterDataClick();
+                            }
+                          }
+                        }}
+                      ></input>
+                      <p className='text-sm mx-1 sm:text-lg sm:mx-4'>Amount:</p>
+                    </div>
+                  </div>
+                  <div className='flex items-start'>
                     <button
-                      className='cursor-pointer bg-inherit text-black border-solid border-2 border-sky-500 rounded-full flex items-center justify-center bg-sky-100 w-9 h-9'
-                      onClick={() => incrementStepPagination(5, 100 / 5)}
+                      className='cursor-pointer flex items-center justify-center bg-white hover:bg-green-100 text-gray-800 font-semibold py-2 px-4 border border-green-400 rounded shadow m-2'
+                      onClick={handleEnterDataClick}
                     >
-                      <IoIosArrowForward />
+                      {enterPaymentRecordLoading ? (
+                        <CircularProgress size={20} />
+                      ) : (
+                        <>
+                          Enter{" "}
+                          <IoArrowForwardCircleSharp className='mx-2 text-xl' />
+                        </>
+                      )}
                     </button>
                   </div>
                 </div>
               </div>
+              {/* -------------------------------------calculator-------------------------------------- */}
+              <div className='w-full sm:w-[40%] flex flex-col items-center flex-wrap margin_ '>
+                {/* <p className='text-xl py-2 bg-[#1c8382] text-[#fff] w-3/5 rounded font-medium my-2 sm:my-4 shadow-xl'>
+                  {storeDetailsResponse[0]?.store_name
+                    ? storeDetailsResponse[0]?.store_name
+                    : "N/A"}
+                </p> */}
+                <div className='flex items-center justify-evenly flex-wrap sm:flex-row flex-col sm:w-full w-[90%] sm:m-2 m-0'>
+                  <p className='text-2xl font-medium mx-1'>
+                    {tableEntered ? tableEntered : "Table Number"}
+                  </p>
+                  <p className='text-2xl font-medium mx-1'>
+                    {seatNumber ? seatNumber : "Seat Number"}
+                  </p>
+                  <p className='text-2xl font-medium mx-1'>
+                    {orderNumber ? orderNumber : "Order"}
+                  </p>
+                  <p className='text-2xl font-medium mx-1'>
+                    {amountEntered ? amountEntered : "Amount"}
+                  </p>
+                </div>
+                <div className='flex w-full sm:mx-3 mx-0  mb-16 sm:mb-0'>
+                  <div className='w-2/6 p-2'>
+                    <p className='py-2 bg-[#1c8382] text-[#fff] text-lg font-medium w-full rounded m-3 shadow-xl'>
+                      Orders
+                    </p>
+                    {/* <div className="w-full m-2 flex items-center justify-center sm:w-1/6 sm:m-0"> */}
+
+                    {retrievingOrders ? (
+                      <CircularProgress />
+                    ) : (
+                      <div className='flex flex-col items-center justify-center mt-2 w-full'>
+                        <button
+                          className='rotate-90 cursor-pointer bg-inherit text-black flex items-center justify-center w-max h-max'
+                          onClick={() => decrementSeatPagination()}
+                        >
+                          <IoIosArrowBack />
+                        </button>
+                        {
+                          <ul>
+                            {orderInitiatedForSeat
+                              .slice(seatPagination, seatPagination + 5)
+                              .map((s, index) => (
+                                <div className=''>
+                                  <li
+                                    className='cursor-pointer flex flex-col items-center justify-start bg-[#bbbcbe] text-black rounded m-3 p-1 w-[100px] h-max'
+                                    onClick={() => {
+                                      setOrderNumber(s?.phone_number);
+                                      setOrderInitiatedId(
+                                        s?.order_initiated_id
+                                      );
+                                    }}
+                                    key={`${s?.order_initiated_id}_button`}
+                                  >
+                                    {s?.phone_number}
+                                  </li>
+                                </div>
+                              ))}
+                          </ul>
+                        }
+                        <button
+                          className='rotate-90 cursor-pointer bg-inherit text-black flex items-center justify-center w-max h-max'
+                          onClick={() => {
+                            incrementSeatPagination(5, 100 / 5);
+                            // handleInputChange(seatNumber);
+                          }}
+                        >
+                          <IoIosArrowForward />
+                        </button>
+                        {/* </div> */}
+                      </div>
+                    )}
+                  </div>
+                  <div className='w-3/5 mx-1 p-2'>
+                    <p className='px-3 py-2 bg-[#1c8382] text-[#fff] text-lg font-medium rounded w-[99%] m-3 shadow-xl'>
+                      Amount
+                    </p>
+                    <div className='flex-none items-center justify-evenly margin_ grid gap-3 grid-cols-3'>
+                      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 0, "."].map((index, s) => (
+                        <button
+                          className='text-black bg-[#bbbcbe] rounded w-full h-full m-3 text-2xl'
+                          onClick={() => {
+                            if (index === 0 && amountEntered === "0") {
+                              return;
+                            }
+                            if (amountEntered === "" && index === 0) {
+                              return;
+                            }
+                            if (index === "." && amountEntered.includes(".")) {
+                              return;
+                            }
+                            // setCardIndex(cardIndex + index);
+                            setAmountEntered(amountEntered + `${index}`);
+                          }}
+                          key={`${s}_button`}
+                        >
+                          {index}
+                        </button>
+                      ))}
+                      <button
+                        className='cursor-pointer flex items-center justify-center bg-white hover:bg-green-100 text-gray-800 border border-green-400 rounded shadow w-full h-full text-xl m-2'
+                        // onClick={handleEnterDataClick}
+                      >
+                        {enterPaymentRecordLoading ? (
+                          <CircularProgress size={20} />
+                        ) : (
+                          <>
+                            OK{" "}
+                            <IoArrowForwardCircleSharp className='mx-2 text-xl' />
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {/* -------------------------------------calculator-------------------------------------- */}
+              {/* -------------------------------------Chat Bar-------------------------------------- */}
+              <div className='w-full sm:w-[25%] mt-4 m-2  rounded-xl'>
+                <div className='h-[470px] bg-gray-200 rounded p-2 overflow-auto'>
+                  <div className='flex items-center justify-between p-2'>
+                    <span className='font-semibold text-2xl text-sky-500'>
+                      Chats
+                    </span>
+                  </div>
+                  {chatData.length > 0 ? (
+                    <div>
+                      {chatData.map((chat) => (
+                        <DummyData key={chat.id} chat={chat} />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className='flex items-center justify-center p-3'>
+                      <span className='font-semibold text-2xl'>
+                        No messages yet
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+              {/* -------------------------------------Chat Bar-------------------------------------- */}
             </div>
-            <div className='w-full h-20 flex items-center justify-center py-6 my-12'>
-              <p className='text-sm mx-1 sm:text-lg sm:mx-4'>Seat Number:</p>
-              <input
-                type='number'
-                className='cursor-pointer p-0 text-4xl bg-inherit m-0 border-solid border border-sky-500 rounded w-20 focus:outline-none sm:text-6xl sm:border-none sm:m-2 sm:p-1 sm:w-28'
-                min='1'
-                max='99'
-                value={seatNumber}
-                onChange={(event) => handleInputChange(event)}
-                ref={seatNumberRef}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") {
-                    if (seatNumber) {
-                      amountRef.current.focus();
-                    }
-                  }
-                }}
-              ></input>
-              <p className='text-sm mx-1 sm:text-lg sm:mx-4'>Amount:</p>
-              <input
-                ref={amountRef}
-                value={amountEntered}
-                type='number'
-                className='cursor-pointer p-0 bg-inherit text-4xl border-solid border border-sky-500 m-0 rounded w-20 focus:outline-none sm:text-6xl sm:w-44 sm:border-none sm:m-2 sm:p1 sm:w-28'
-                onChange={(event) => handleAmountInputChange(event)}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") {
-                    if (amountEntered) {
-                      handleEnterDataClick();
-                    }
-                  }
-                }}
-              ></input>
-              <button
-                className='cursor-pointer flex items-center justify-center bg-white hover:bg-green-100 text-gray-800 font-semibold py-2 px-4 border border-green-400 rounded shadow m-2'
-                onClick={handleEnterDataClick}
-              >
-                {enterPaymentRecordLoading ? (
-                  <CircularProgress size={20} />
-                ) : (
-                  <>
-                    Enter <IoArrowForwardCircleSharp className='mx-2 text-xl' />
-                  </>
-                )}
-              </button>
-            </div>
+
             <div className='sm:hidden h-[80px] sm:h-full shadow-black mt-3.5 mr-2 py-8 sm:py-0 px-2  w-full sm:w-32  bg-[#eeeef0] flex flex-row sm:flex-col items-center justify-center gap-y-24 gap-x-24'>
               <HiOutlineStatusOnline
                 size={40}
@@ -844,65 +1001,15 @@ const LandingPage = () => {
                                             <button class="cursor-pointer bg-white hover:bg-sky-100 text-gray-800 font-semibold py-2 px-4 border border-sky-400 rounded shadow m-2">Start Service to Selected Seat/Desk</button>
                                         </div> */}
           </div>
-          <div className='hidden h-[80px] sm:h-full shadow-black mt-3.5 mr-2 py-8 sm:py-0 px-2  w-full sm:w-32  bg-[#eeeef0] sm:flex flex-row sm:flex-col items-center justify-center gap-y-24 gap-x-24'>
+
+          <div className='hidden h-[80px] sm:h-full shadow-black mt-3.5 mr-2 py-8 sm:py-0 px-2  w-full sm:w-[70px]  bg-[#eeeef0] sm:flex flex-row sm:flex-col items-center justify-center gap-y-24 gap-x-24'>
+            <CiShop size={44} className=' cursor-pointer' />
             <HiOutlineStatusOnline
               size={40}
               className=' cursor-pointer'
               onClick={handleNavigateToShop}
             />
-            <CiShop size={44} className=' cursor-pointer' />
           </div>
-          <div
-            className={`fixed top-0 right-10 h-[550px] w-[350px] mt-4 px-4 bg-gray-200 rounded-md  ${
-              showChat ? "" : "hidden"
-            } `}
-          >
-            <div className='flex items-center justify-between pt-3'>
-              <span className='font-semibold text-2xl'>Chats</span>
-              <MdCancel
-                size={28}
-                className='text-red-500 cursor-pointer'
-                onClick={handleShowChat}
-              />
-            </div>
-            <div className='mt-4 h-[470px] px-2 gap-y-4 overflow-auto'>
-              {chatData.map((chat) => (
-                <DummyData key={chat.id} chat={chat} />
-              ))}
-            </div>
-          </div>
-
-          {selectedChat && (
-            <ChatModal
-              chat={chatData.find((chat) => chat.id === selectedChat)}
-            />
-          )}
-
-          {/* <Modal
-            isOpen={showChatModal}
-            onClose={() => setShowChatModal(false)}
-            title='Chat'
-          >
-            <div className='flex flex-col items-end w-full h-52 overflow-scroll border border-sky-400 rounded-xl'>
-              {sentMessages.map((msg, index) => (
-                <div
-                  key={index}
-                  className='right-0 px-3 py-1 bg-blue-400 rounded-xl my-2'
-                >
-                  {msg}
-                </div>
-              ))}
-            </div>
-            <div className='flex flex-row items-center justify-between'>
-              <textarea
-                className='w-full h-max border rounded p-2 mb-2'
-                placeholder='Type your message here...'
-                value={messageText}
-                onChange={(e) => setMessageText(e.target.value)}
-              />
-              <IoMdSend fontSize={"2rem"} onClick={handleSendChatMessage} />
-            </div>
-          </Modal> */}
         </div>
       )}
     </>
