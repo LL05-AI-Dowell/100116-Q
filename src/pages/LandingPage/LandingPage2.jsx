@@ -42,6 +42,7 @@ import { retrieveInitiatedOrder } from "../../../services/qServices";
 import { GiCancel } from "react-icons/gi";
 import { HiOutlineStatusOnline } from "react-icons/hi";
 import { CiShop } from "react-icons/ci";
+import {toast} from 'react-toastify';
 
 const API_URLS = [
   "You're almost ready to use the app!",
@@ -450,7 +451,17 @@ const LandingPage2 = () => {
   };
 
   const handleEnterDataClick = async () => {
-    setEnterPaymentRecordLoading(true);
+    if (!seatNumber){
+      return toast.warn('Please select a Seat.');
+    }
+    if (!orderInitiatedId){
+      return toast.warn('Please select an Order.');
+    }
+    if (!amountEntered){
+      return toast.warn('Please select an Amount.');
+    }
+
+      setEnterPaymentRecordLoading(true);
     const dataToPost = {
       workspace_id: currentUser?.userinfo?.client_admin_id,
       qrcode_id: qrCodeIdForSeatNumber,
@@ -569,8 +580,8 @@ const LandingPage2 = () => {
           </Modal>
         </div>
       ) : (
-        <div className='h-screen m-0 p-0 gradient_ flex '>
-          <div className='w-full h-full margin_ shadow-black mt-3.5 p-4 pt-2 pb-6 rounded-md md:w-[98%] sm:h-full bg-[#f6f6f6]'>
+        <div className='h-screen m-0 p-0 gradient_ flex'>
+          <div className='w-full h-max margin_ shadow-black mt-3.5 p-4 pt-2 pb-6 rounded-md md:w-[98%] sm:h-full bg-[#f6f6f6]'>
             {showBanner ? (
               <p className='text-rose-900 text-2xl text-center'>
                 Have you created a seat yet, No?{" "}
@@ -736,7 +747,7 @@ const LandingPage2 = () => {
                           .map((s, index) => (
                             <div className=''>
                               <button
-                                className='text-black bg-[#bbbcbe] rounded m-0.5 w-full h-full'
+                                className='text-black bg-[#bbbcbe] rounded m-0.5 w-full h-max py-2'
                                 onClick={() => {
                                   setSelectedTableNumber(
                                     index + tablePagination
@@ -754,6 +765,7 @@ const LandingPage2 = () => {
                                     ]?.seat_data.length === 0
                                   ) {
                                     setTableEntered("Table Number");
+                                    setSeatNumber('Seat Number');
                                   } else {
                                     setTableEntered(
                                       index + tablePagination + 1
@@ -785,7 +797,7 @@ const LandingPage2 = () => {
                       </div>
                     </div>
                   </div>
-                  <div className='sm:w-2/6 w-full mx-4 shadow-inner p-4'>
+                  <div className='sm:w-2/6 mx-4 shadow-inner sm:p-4 p-0'>
                     <p className='p-3 bg-[#1c8382] text-[#fff] text-xl font-medium rounded sm:w-[95%] w-[100%] shadow-md '>
                       Seats
                     </p>
@@ -844,7 +856,7 @@ const LandingPage2 = () => {
                     {amountEntered ? amountEntered : "Amount"}
                   </p>
                 </div>
-                <div className='flex w-full sm:mx-3 mx-0 p-4 mb-16 sm:mb-0'>
+                <div className='flex w-full sm:mx-3 mx-0 sm:p-4 p-0 mb-16 sm:mb-0'>
                   <div className='w-2/6 p-2'>
                     <p className='py-2 bg-[#1c8382] text-[#fff] text-lg font-medium w-full rounded m-3 shadow-xl'>
                       Orders
@@ -905,6 +917,9 @@ const LandingPage2 = () => {
                         <button
                           className='text-black bg-[#bbbcbe] rounded w-full h-full m-3 text-2xl'
                           onClick={() => {
+                            if (orderInitiatedForSeat.length === 0) {
+                              return toast.warn('Please select order first');
+                            }
                             if (index === 0 && amountEntered === "0") {
                               return;
                             }
@@ -942,10 +957,10 @@ const LandingPage2 = () => {
             </div>
           </div>
           <div className='fixed sm:relative flex bottom-0 sm:bottom-auto h-[80px] sm:h-full shadow-black mt-3.5 mr-2 py-8 sm:py-0 px-2  w-full sm:w-32  bg-[#eeeef0] sm:flex flex-row sm:flex-col items-center justify-center gap-y-24 gap-x-24'>
-            <HiOutlineStatusOnline size={40} className=' cursor-pointer' />
+            <HiOutlineStatusOnline size={40} className='cursor-pointer' />
             <CiShop
               size={44}
-              className=' cursor-pointer'
+              className='cursor-pointer'
               onClick={handleNavigateToShop}
             />
           </div>
