@@ -24,7 +24,7 @@ const Profile = () => {
   const { currentUser } = useCurrentUserContext();
   const navigate = useNavigate();
   const [value, setValue] = useState("1");
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(true);
   const [username, setUsername] = useState(currentUser?.userinfo?.username);
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);

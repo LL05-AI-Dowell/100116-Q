@@ -8,9 +8,11 @@ import { PageUnderConstruction } from "./pages/PageUnderConstruction/PageUnderCo
 import LandingPage2 from "./pages/LandingPage/LandingPage2";
 import QrCodeScreen from "./pages/QrCodeScreen/QrCodeScreen";
 import OnlineQrCodeScreen from "./pages/OnlineQrCodeScreen/OnlineQrCodeScreen";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
-  console.log = () => {};
+  console.log = () => { };
   useDowellLogin();
 
   // // USE ONLY WHEN APP IS BROKEN/UNDERGOING MAJOR CHANGES
@@ -19,15 +21,28 @@ function App() {
   // </Routes>
 
   return (
-    <Routes>
-      <Route path='/' Component={LandingPage2} />
-      <Route path='/view' Component={LandingPage} />
-      <Route path='/profile' Component={Profile} />
-      <Route path='/success' Component={Success} />
-      <Route path='/error' Component={ErrorScreen} />
-      <Route path='/qrlink' Component={QrCodeScreen} />
-      <Route path='/onlineshoplink' Component={OnlineQrCodeScreen} />
-    </Routes>
+    <>
+      <ToastContainer
+        position='top-right'
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
+      <Routes>
+        <Route path='/' Component={LandingPage2} />
+        <Route path='/view' Component={LandingPage} />
+        <Route path='/profile' Component={Profile} />
+        <Route path='/success' Component={Success} />
+        <Route path='/error' Component={ErrorScreen} />
+        <Route path='/qrlink' Component={QrCodeScreen} />
+        <Route path='/onlineshoplink' Component={OnlineQrCodeScreen} />
+      </Routes>
+    </>
   );
 }
 
