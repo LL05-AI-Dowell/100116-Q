@@ -42,7 +42,8 @@ import { retrieveInitiatedOrder } from "../../../services/qServices";
 import { GiCancel } from "react-icons/gi";
 import { HiOutlineStatusOnline } from "react-icons/hi";
 import { CiShop } from "react-icons/ci";
-import {toast} from 'react-toastify';
+import { toast } from 'react-toastify';
+import { IoIosNotifications } from "react-icons/io";
 
 const API_URLS = [
   "You're almost ready to use the app!",
@@ -74,7 +75,7 @@ const LandingPage2 = () => {
   const [orderNumber, setOrderNumber] = useState(null);
   const [cardIndex, setCardIndex] = useState(0);
   const navigate = useNavigate();
-  const [showModal, setShowModal] = useState(true);
+  const [showModal, setShowModal] = useState(false);
   const [loadingData, setLoadingData] = useState({
     isMetaDbLoading: false,
     isDataDbLoading: false,
@@ -105,6 +106,7 @@ const LandingPage2 = () => {
   const [orderInitiatedId, setOrderInitiatedId] = useState("");
   const [retrievingOrders, setRetrievingOrders] = useState(false);
   const [showChat, setShowChat] = useState(false);
+  const [showInfoModal, setShowInfoModal] = useState(false);
 
   const incrementStepPagination = (steps, length) => {
     console.log(currentUser);
@@ -319,12 +321,15 @@ const LandingPage2 = () => {
   const handlegetUserDetails = async () => {
     await getUserDetails(currentUser?.userinfo?.client_admin_id)
       .then((res) => {
-        console.log(res);
+        console.log(
+          "get user details resssss",
+          res?.response?.data?.response
+        );
       })
       .catch((err) => {
         if (err?.response?.status === 302) {
           console.log(
-            "get user details resssss",
+            "get user details resssss......",
             err?.response?.data?.response
           );
           setUserDetails(err?.response?.data?.response);
@@ -376,29 +381,26 @@ const LandingPage2 = () => {
   };
 
   const handleGetStoreData = async (passed_user_details) => {
-    console.log("1", passed_user_details);
+    console.log("1", passed_user_details[0]?.store_ids?.online_store_id);
     await getStoreData(currentUser?.userinfo?.client_admin_id)
       .then(async (res) => {
         console.log("get store data", res?.data?.response);
 
         if (res?.data?.response?.length === 0) {
-          const store_ids = passed_user_details[0].store_ids;
+          // if()
+          const dataToPost = {
+            store_id: [passed_user_details[0]?.store_ids?.online_store_id, passed_user_details[0]?.store_ids?.offline_store_id],
+            workspace_id: currentUser?.userinfo?.client_admin_id,
+            user_id: passed_user_details[0]?._id,
+            timezone: currentUser?.userinfo?.timezone,
+          };
 
-          const promises = store_ids.map((store) => {
-            const dataToPost = {
-              store_id: store,
-              workspace_id: currentUser?.userinfo?.client_admin_id,
-              user_id: passed_user_details[0]?._id,
-              timezone: currentUser?.userinfo?.timezone,
-            };
-            return createStore(dataToPost);
-          });
-          // console.log('promises', promises);
-          await Promise.all(promises)
+          await createStore(dataToPost)
             .then(() => {
-              console.log("store created");
+              console.log("online store created");
+              handleGetStoreData(passed_user_details);
             })
-            .catch(() => {
+            .catch((err) => {
               if (err?.response?.status === 400) {
                 navigate("/error");
               }
@@ -440,6 +442,8 @@ const LandingPage2 = () => {
         setShowModal(false);
         setQrCodeResponse(res?.data?.response);
         setIntialConfigurationLoaded(true);
+        navigate(`${passed_user_details[0]?.default_store_type?.toLocaleLowerCase()}-store`);
+        toast.success('Success');
         // handleGetPaymentDetailForSeat(passed_user_details,1);
       })
       .catch((err) => {
@@ -451,17 +455,17 @@ const LandingPage2 = () => {
   };
 
   const handleEnterDataClick = async () => {
-    if (!seatNumber){
+    if (!seatNumber) {
       return toast.warn('Please select a Seat.');
     }
-    if (!orderInitiatedId){
+    if (!orderInitiatedId) {
       return toast.warn('Please select an Order.');
     }
-    if (!amountEntered){
+    if (!amountEntered) {
       return toast.warn('Please select an Amount.');
     }
 
-      setEnterPaymentRecordLoading(true);
+    setEnterPaymentRecordLoading(true);
     const dataToPost = {
       workspace_id: currentUser?.userinfo?.client_admin_id,
       qrcode_id: qrCodeIdForSeatNumber,
@@ -507,7 +511,7 @@ const LandingPage2 = () => {
   };
 
   const handleNavigateToShop = () => {
-    navigate("/view");
+    navigate("/online-store");
   };
 
   const handleShowChat = () => {
@@ -582,7 +586,7 @@ const LandingPage2 = () => {
       ) : (
         <div className='h-screen m-0 p-0 gradient_ flex'>
           <div className='w-full h-max margin_ shadow-black mt-3.5 p-4 pt-2 pb-6 rounded-md md:w-[98%] sm:h-full bg-[#f6f6f6]'>
-            {showBanner ? (
+            {/* {showBanner ? (
               <p className='text-rose-900 text-2xl text-center'>
                 Have you created a seat yet, No?{" "}
                 <button
@@ -592,7 +596,7 @@ const LandingPage2 = () => {
                   Create One
                 </button>
               </p>
-            ) : null}
+            ) : null} */}
             <div className='h-24 border-b-2 border-zinc-400 m-2 flex items-center justify-between'>
               <img
                 src={DigitalQLogo}
@@ -600,8 +604,38 @@ const LandingPage2 = () => {
                 alt='Dowell Logo'
                 className='h-5/6 shadow-2xl mx-8'
               />
+
               {/* <p className="text-5xl font-bold">Q</p> */}
               <div className='flex items-center justify-center'>
+                {
+                  // showBanner?
+                  true ?
+                    <div>
+                      <IoIosNotifications
+                        color="red"
+                        fontSize={'30px'}
+                        onClick={() => setShowInfoModal(!showInfoModal)}
+                      />
+                      {
+                        showInfoModal ?
+                          // false?
+                          <div className="fixed left-48">
+                            <div className="w-max bg-rose-600">
+                              <p className='text-rose-900 text-2xl text-center'>
+                                Have you created a seat yet, No?{" "}
+                                <button
+                                  className='cursor-pointer bg-white text-xl hover:bg-orange-100 text-gray-800 font-semibold py-1 px-2 border border-orange-400 shadow rounded m-2'
+                                  onClick={() => navigate("/profile")}
+                                >
+                                  Create One
+                                </button>
+                              </p>
+                            </div>
+                          </div> : null
+                      }
+                    </div> : null
+                }
+
                 <img
                   src='https://t4.ftcdn.net/jpg/05/89/93/27/360_F_589932782_vQAEAZhHnq1QCGu5ikwrYaQD0Mmurm0N.jpg'
                   alt='Profile Photo'

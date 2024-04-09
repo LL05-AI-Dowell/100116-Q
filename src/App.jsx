@@ -10,6 +10,7 @@ import QrCodeScreen from "./pages/QrCodeScreen/QrCodeScreen";
 import OnlineQrCodeScreen from "./pages/OnlineQrCodeScreen/OnlineQrCodeScreen";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import InitialConfigurationScreen from "./pages/InitalConfigurationScreen/InitialConfiguration";
 
 function App() {
   console.log = () => { };
@@ -34,8 +35,9 @@ function App() {
         pauseOnHover
       />
       <Routes>
-        <Route path='/' Component={LandingPage2} />
-        <Route path='/view' Component={LandingPage} />
+        <Route path='/' Component={InitialConfigurationScreen} />
+        <Route path='/offline-store' Component={LandingPage2} />
+        <Route path='/online-store' Component={LandingPage} />
         <Route path='/profile' Component={Profile} />
         <Route path='/success' Component={Success} />
         <Route path='/error' Component={ErrorScreen} />

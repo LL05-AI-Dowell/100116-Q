@@ -42,8 +42,9 @@ const SeatDetails = () => {
                 "link": `${OPEN_PAGE_URL}qrlink/?view=qrlinks`,
                 "timezone": currentUser?.userinfo?.timezone,
                 "username": currentUser?.userinfo?.username,
+                "store_type":"ONLINE"
             }
-            await createQrCode(currentUser?.userinfo?.client_admin_id, user[0]?._id,getSavedNewUserDetails()[0].store_ids[0], 1, dataToPost).then(res => {
+            await createQrCode(currentUser?.userinfo?.client_admin_id, user[0]?._id,getSavedNewUserDetails()[0].store_ids.online_store_id, 1, dataToPost).then(res => {
                 console.log('qr code created', res)
                 setIsQrCodeLoading(false);
                 handleGetQrCode();
@@ -66,8 +67,9 @@ const SeatDetails = () => {
                 "link": `${OPEN_PAGE_URL}qrlink/?view=qrlinks`,
                 "timezone": currentUser?.userinfo?.timezone,
                 "username": currentUser?.userinfo?.username,
+                "store_type":"ONLINE"
             }
-            await createQrCode(currentUser?.userinfo?.client_admin_id, user[0]?._id,getSavedNewUserDetails()[0].store_ids[0], maxSeatNumber + 1, dataToPost).then(res => {
+            await createQrCode(currentUser?.userinfo?.client_admin_id, user[0]?._id,getSavedNewUserDetails()[0].store_ids.online_store_id, maxSeatNumber + 1, dataToPost).then(res => {
                 console.log('qr code created', res)
                 setIsQrCodeLoading(false);
                 handleGetQrCode();
