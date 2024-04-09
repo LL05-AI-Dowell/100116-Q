@@ -183,7 +183,10 @@ class user_details_services(APIView):
             return CustomResponse(False, "Posting wrong data to API",serializer.errors, status.HTTP_400_BAD_REQUEST)
         
         user_data = {
-            "store_ids":[generate_store_id(), generate_store_id()],
+            "store_ids":{
+                "offline_store_id":generate_store_id(), 
+                "online_store_id":generate_store_id()
+            },
             "name": name,
             "email":email,
             "bank_details":{},
