@@ -77,7 +77,7 @@ const LandingPage = () => {
   const [cardPagination, setCardPagination] = useState(0);
   const [cardIndex, setCardIndex] = useState(0);
   const navigate = useNavigate();
-  const [showModal, setShowModal] = useState(true);
+  const [showModal, setShowModal] = useState(false);
   const [loadingData, setLoadingData] = useState({
     isMetaDbLoading: false,
     isDataDbLoading: false,
@@ -518,7 +518,7 @@ const LandingPage = () => {
   };
 
   const handleNavigateToShop = () => {
-    navigate("/");
+    navigate("/offline-store");
   };
 
   const toggleAccordion = (chatId) => {
