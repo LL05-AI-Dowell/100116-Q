@@ -267,11 +267,43 @@ export const getMenuData = async (workspace_id, store_id) => {
   );
 };
 
-
 export const createOrder = async (dataToPost) => {
   const headers = {
     Authorization: `Bearer ${getSavedApiKey()}`,
   };
   return await qServicesAxiosInstance.post(
-    `/v3/customer-services/?type=create_order`,dataToPost,{ headers });
-}
+    `/v3/customer-services/?type=create_order`,
+    dataToPost,
+    { headers }
+  );
+};
+
+export const getQrCodeOnline = async (workspace_id, user_id) => {
+  const headers = {
+    Authorization: `Bearer ${getSavedApiKey()}`,
+  };
+  return await qServicesAxiosInstance.get(
+    `/v3/qrcode-services/?type=retrieve_qrcoderecode_details&workspace_id=${workspace_id}&user_id=${user_id}&limit=5&offset=0&store_type=ONLINE`,
+    { headers }
+  );
+};
+
+export const getQrCodeOffline = async (workspace_id, user_id) => {
+  const headers = {
+    Authorization: `Bearer ${getSavedApiKey()}`,
+  };
+  return await qServicesAxiosInstance.get(
+    `/v3/qrcode-services/?type=retrieve_qrcoderecode_details&workspace_id=${workspace_id}&user_id=${user_id}&limit=5&offset=0&store_type=OFFLINE`,
+    { headers }
+  );
+};
+
+export const retrieveMasterQr = async (workspace_id, user_id) => {
+  const headers = {
+    Authorization: `Bearer ${getSavedApiKey()}`,
+  };
+  return await qServicesAxiosInstance.get(
+    `/v3/qrcode-services/?type=get_master_qrcode_record&workspace_id=${workspace_id}&user_id=${user_id}&limit=10&offset=0`,
+    { headers }
+  );
+};

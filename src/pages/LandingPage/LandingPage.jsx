@@ -25,6 +25,9 @@ import {
   getPaymentDetailForSeat,
   getQrCodeIdBySeatNumber,
   createCustomerPayment,
+  getQrCodeOffline,
+  getQrCodeOnline,
+  retrieveMasterQr,
 } from "../../../services/qServices";
 import {
   Button,
@@ -51,6 +54,7 @@ import { CiShop } from "react-icons/ci";
 import { MdCancel } from "react-icons/md";
 import { IoChatboxEllipsesOutline } from "react-icons/io5";
 import { IoMdSend } from "react-icons/io";
+import { FaRegBell } from "react-icons/fa";
 
 const API_URLS = [
   "You're almost ready to use the app!",
@@ -61,6 +65,7 @@ const API_URLS = [
 ];
 
 const workspace_id = "6385c0f18eca0fb652c94558";
+const user_id = "660d7c78bdbc0038f13e0b2d";
 
 const LandingPage = () => {
   const queryClient = new QueryClient();
@@ -117,6 +122,12 @@ const LandingPage = () => {
   const [orderInitiatedId, setOrderInitiatedId] = useState("");
   const [retrievingOrders, setRetrievingOrders] = useState(false);
   const [tableEntered, setTableEntered] = useState(null);
+  const [showInfoModal, setShowInfoModal] = useState(false);
+  const [isTicketLink, setIsTicketLink] = useState(false);
+  const [isPaid, setIsPaid] = useState(false);
+  const [isActive, setIsActive] = useState(false);
+  const [onlineQr, setOnlineQr] = useState(false);
+  const [retrivedMasterQrCode, setRetrivedMasterQrCode] = useState(false);
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -517,6 +528,83 @@ const LandingPage = () => {
       });
   };
 
+  // console.debug("isTicketLink", isTicketLink);
+  // console.debug("isPaid", isPaid);
+  // console.debug("isActive", isActive);
+  // console.debug("OfflineQr", OfflineQr);
+  // console.debug("onlineQr", onlineQr);
+  // console.debug("retrivedMasterQrCode", retrivedMasterQrCode);
+
+  useEffect(() => {
+    const getUserDetailsFunc = async () => {
+      await getUserDetails(workspace_id)
+        .then((res) => {
+          console.log(res.status);
+        })
+        .catch((err) => {
+          if (err?.response?.status === 302) {
+            if (err?.data?.response.ticket_link === "") {
+              setIsTicketLink(false);
+            } else {
+              setIsTicketLink(true);
+            }
+
+            if (err?.data?.response.is_paid === false) {
+              setIsPaid(true);
+            } else {
+              setIsPaid(false);
+            }
+
+            if (err?.data?.response.is_active) {
+              setIsActive(false);
+            } else {
+              setIsActive(true);
+            }
+          }
+          if (err?.response?.status === 404) {
+            console.log(err.message);
+          }
+          if (err?.response?.status === 400) {
+            console.log(err.message);
+          }
+        });
+    };
+
+    const getUserQrcodeOnline = async () => {
+      await getQrCodeOnline(workspace_id, user_id)
+        .then((res) => {
+          console.debug(res?.data?.message);
+          if (res?.data?.response?.length === 0) {
+            setOnlineQr(true);
+          } else {
+            setOnlineQr(false);
+          }
+        })
+        .catch((err) => {
+          console.debug(err.message);
+        });
+    };
+
+    const getRetrievedMasterQrCode = async () => {
+      await retrieveMasterQr(workspace_id, user_id)
+        .then((res) => {
+          console.debug(res?.data?.message);
+          if (res?.data?.response?.length === 0) {
+            setRetrivedMasterQrCode(true);
+          } else {
+            setRetrivedMasterQrCode(false);
+          }
+        })
+        .catch((err) => {
+          console.debug(err.message);
+        });
+    };
+
+    getUserQrcodeOnline();
+    getRetrievedMasterQrCode();
+    getUserDetailsFunc();
+  }, []);
+
   const handleNavigateToShop = () => {
     navigate("/offline-store");
   };
@@ -663,16 +751,97 @@ const LandingPage = () => {
                 className='h-5/6 shadow-2xl mx-8'
               />
               {/* <p className="text-5xl font-bold">Q</p> */}
+
               <div className='flex items-center justify-center'>
-                <div className='mr-12 relative cursor-pointer'>
-                  <IoChatboxEllipsesOutline
-                    size={36}
-                    color='rgb(156 163 175)'
-                  />
-                  <div className='absolute top-[-5px] right-[-5px] bg-red-400  rounded-full text-white text-sm w-5 h-5 flex items-center justify-center '>
-                    2
-                  </div>
-                </div>
+                {
+                  // showBanner?
+                  true ? (
+                    <div>
+                      <div className='mr-12 relative cursor-pointer'>
+                        <FaRegBell
+                          size={32}
+                          color='rgb(156 163 175)'
+                          onClick={() => setShowInfoModal(!showInfoModal)}
+                        />
+                        <div className='absolute top-[-5px] right-[-5px] bg-red-400  rounded-full text-white text-sm w-5 h-5 flex items-center justify-center shadow-2xl'>
+                          2
+                        </div>
+                      </div>
+                      {showInfoModal ? (
+                        // false?
+                        <div className='fixed flex flex-col top-32 right-36 w-max '>
+                          <div className='fixed top-32 right-36 flex flex-col items-center justify-center bg-white shadow-xl rounded-md gap-y-1 mt-2 p-1'>
+                            {isTicketLink && (
+                              <div
+                                className='w-full flex items-center justify-between bg-green-200 cursor-pointer group hover:bg-white rounded-md p-2'
+                                onClick={() => navigate("/profile")}
+                              >
+                                <p className='text-sm text-center'>
+                                  Have you created a ticket link yet, No?{" "}
+                                </p>
+                                <button className='cursor-pointer  text-sm group-hover:bg-slate-200 duration-200 ease-in-out hover:scale-105 text-gray-800 font-semibold py-1 px-1 bg-white rounded m-2'>
+                                  Create One
+                                </button>
+                              </div>
+                            )}
+                            {isPaid && (
+                              <div
+                                className='w-full flex items-center justify-between bg-green-200 cursor-pointer group hover:bg-white rounded-md p-2'
+                                onClick={() => navigate("/profile")}
+                              >
+                                <p className='text-sm text-center'>
+                                  Have you paid yet, No?{" "}
+                                </p>
+                                <button className='cursor-pointer  text-sm group-hover:bg-slate-200 duration-200 ease-in-out hover:scale-105 text-gray-800 font-semibold py-1 px-1 bg-white rounded m-2'>
+                                  Create One
+                                </button>
+                              </div>
+                            )}
+                            {isActive && (
+                              <div
+                                className='w-full flex items-center justify-between bg-green-200 cursor-pointer group hover:bg-white rounded-md p-2'
+                                onClick={() => navigate("/profile")}
+                              >
+                                <p className='text-sm text-center'>
+                                  Is it active, No?{" "}
+                                </p>
+                                <button className='cursor-pointer  text-sm group-hover:bg-slate-200 duration-200 ease-in-out hover:scale-105 text-gray-800 font-semibold py-1 px-1 bg-white rounded m-2'>
+                                  Create One
+                                </button>
+                              </div>
+                            )}
+                            {onlineQr && (
+                              <div
+                                className='w-full flex items-center justify-between bg-green-200 cursor-pointer group hover:bg-white rounded-md p-2'
+                                onClick={() => navigate("/profile")}
+                              >
+                                <p className='text-sm text-center'>
+                                  Have you created an Online Qr, No?{" "}
+                                </p>
+                                <button className='cursor-pointer  text-sm group-hover:bg-slate-200 duration-200 ease-in-out hover:scale-105 text-gray-800 font-semibold py-1 px-1 bg-white rounded m-2'>
+                                  Create One
+                                </button>
+                              </div>
+                            )}
+                            {retrivedMasterQrCode && (
+                              <div
+                                className='w-full flex items-center justify-between bg-green-200 cursor-pointer group hover:bg-white rounded-md p-2'
+                                onClick={() => navigate("/profile")}
+                              >
+                                <p className='text-sm text-center'>
+                                  Have you created a Master qr code yet, No?{" "}
+                                </p>
+                                <button className='cursor-pointer  text-sm group-hover:bg-slate-200 duration-200 ease-in-out hover:scale-105 text-gray-800 font-semibold py-1 px-1 bg-white rounded m-2'>
+                                  Create One
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ) : null}
+                    </div>
+                  ) : null
+                }
                 <img
                   src='https://t4.ftcdn.net/jpg/05/89/93/27/360_F_589932782_vQAEAZhHnq1QCGu5ikwrYaQD0Mmurm0N.jpg'
                   alt='Profile Photo'
@@ -740,7 +909,7 @@ const LandingPage = () => {
                           </TableRow>
                         </TableHead>
                         <TableBody>
-                          {qrCodeResponse
+                          {/* {qrCodeResponse
                             .slice(cardPagination, cardPagination + 5)
                             .map((row, index) => (
                               <TableRow key={index + "_"}>
@@ -750,7 +919,7 @@ const LandingPage = () => {
                                   pagination={cardPagination}
                                 />
                               </TableRow>
-                            ))}
+                            ))} */}
                         </TableBody>
                       </Table>
                     </TableContainer>
@@ -787,7 +956,7 @@ const LandingPage = () => {
                     </div>
                   </div>
                 </div>
-                <div className='flex flex-col items-start justify-center ml-2 py-6 my-4'>
+                {/* <div className='flex flex-col items-start justify-center ml-2 py-6 my-4'>
                   <div className='flex items- justify-center'>
                     <div className='flex flex-col items-center justify-center'>
                       <input
@@ -843,7 +1012,40 @@ const LandingPage = () => {
                       )}
                     </button>
                   </div>
+                </div> */}
+                <div className='flex w-full my-2'>
+                  <div className=' w-full shadow-inner p-4'>
+                    <p className='p-3 bg-[#1c8382] text-[#fff] text-xl font-medium rounded sm:w-[98%] w-[100%] shadow-md'>
+                      Orders
+                    </p>
+                    <div className='flex flex-wrap flex-col justify-center'>
+                      <div className='flex-none grid gap-1 grid-cols-5 p-3'>
+                        <div className=''>
+                          <button className='text-black bg-[#bbbcbe] rounded m-0.5 w-full h-max py-2'>
+                            S
+                          </button>
+                        </div>
+                      </div>
+                      <div className='flex items-center m-2 w-full justify-center'>
+                        <button className='cursor-pointer bg-inherit text-black border-solid border-2 border-[#1c8382] rounded flex items-center justify-center bg-[#81d3d2] w-16 h-8 m-2'>
+                          <IoIosArrowBack />
+                        </button>
+                        <button className='cursor-pointer bg-inherit text-black border-solid border-2 border-[#1c8382] rounded flex items-center justify-center bg-[#81d3d2] w-16 h-8 m-2'>
+                          <IoIosArrowForward />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  {/* <div className='sm:w-2/6 mx-4 shadow-inner sm:p-4 p-0'>
+                    <p className='p-3 bg-[#1c8382] text-[#fff] text-xl font-medium rounded sm:w-[95%] w-[100%] shadow-md '>
+                      Seats
+                    </p>
+                    <div className='flex-none grid gap-3 grid-cols-2 margin_'>
+                      
+                    </div>
+                  </div> */}
                 </div>
+                {/* -------------------------------- tables and seats----------------------------------- */}
               </div>
               {/* -------------------------------------calculator-------------------------------------- */}
               <div className='w-full sm:w-[40%] flex flex-col items-center flex-wrap margin_ '>
@@ -869,7 +1071,7 @@ const LandingPage = () => {
                 <div className='flex w-full sm:mx-3 mx-0  mb-16 sm:mb-0'>
                   <div className='w-2/6 p-2'>
                     <p className='py-2 bg-[#1c8382] text-[#fff] text-lg font-medium w-full rounded m-3 shadow-xl'>
-                      Orders
+                      Seats
                     </p>
                     {/* <div className="w-full m-2 flex items-center justify-center sm:w-1/6 sm:m-0"> */}
 
@@ -885,7 +1087,7 @@ const LandingPage = () => {
                         </button>
                         {
                           <ul>
-                            {orderInitiatedForSeat
+                            {/* {orderInitiatedForSeat
                               .slice(seatPagination, seatPagination + 5)
                               .map((s, index) => (
                                 <div className=''>
@@ -902,7 +1104,7 @@ const LandingPage = () => {
                                     {s?.phone_number}
                                   </li>
                                 </div>
-                              ))}
+                              ))} */}
                           </ul>
                         }
                         <button
@@ -1003,12 +1205,15 @@ const LandingPage = () => {
           </div>
 
           <div className='hidden h-[80px] sm:h-full shadow-black mt-3.5 mr-2 py-8 sm:py-0 px-2  w-full sm:w-[70px]  bg-[#eeeef0] sm:flex flex-row sm:flex-col items-center justify-center gap-y-24 gap-x-24'>
-            <CiShop size={44} className=' cursor-pointer' />
-            <HiOutlineStatusOnline
-              size={40}
-              className=' cursor-pointer'
-              onClick={handleNavigateToShop}
-            />
+            <div className='flex flex-col items-center justify-center'>
+              <CiShop
+                size={44}
+                className=' cursor-pointer'
+                onClick={handleNavigateToShop}
+              />
+              <span>Offline</span>
+            </div>
+            <HiOutlineStatusOnline size={40} className=' cursor-pointer' />
           </div>
         </div>
       )}
