@@ -23,6 +23,9 @@ import {
   getQrCode,
   getQrCodeIdBySeatNumber,
   createOrder,
+  getQrCodeOffline,
+  retrieveMasterQr,
+  getQrCodeOnline,
 } from "../../../services/qServices";
 import { CircularProgress, Modal } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -42,8 +45,10 @@ import { retrieveInitiatedOrder } from "../../../services/qServices";
 import { GiCancel } from "react-icons/gi";
 import { HiOutlineStatusOnline } from "react-icons/hi";
 import { CiShop } from "react-icons/ci";
-import { toast } from 'react-toastify';
+import { toast } from "react-toastify";
 import { IoIosNotifications } from "react-icons/io";
+import { IoChatboxEllipsesOutline } from "react-icons/io5";
+import { FaRegBell } from "react-icons/fa";
 
 const API_URLS = [
   "You're almost ready to use the app!",
@@ -54,6 +59,7 @@ const API_URLS = [
 ];
 
 const workspace_id = "6385c0f18eca0fb652c94558";
+const user_id = "660d7c78bdbc0038f13e0b2d";
 
 const LandingPage2 = () => {
   const queryClient = new QueryClient();
@@ -107,6 +113,9 @@ const LandingPage2 = () => {
   const [retrievingOrders, setRetrievingOrders] = useState(false);
   const [showChat, setShowChat] = useState(false);
   const [showInfoModal, setShowInfoModal] = useState(false);
+  const [isTicketLink, setIsTicketLink] = useState(false);
+  const [isPaid, setIsPaid] = useState(false);
+  const [isActive, setIsActive] = useState(false);
 
   const incrementStepPagination = (steps, length) => {
     console.log(currentUser);
@@ -321,10 +330,7 @@ const LandingPage2 = () => {
   const handlegetUserDetails = async () => {
     await getUserDetails(currentUser?.userinfo?.client_admin_id)
       .then((res) => {
-        console.log(
-          "get user details resssss",
-          res?.response?.data?.response
-        );
+        console.log("get user details resssss", res?.response?.data?.response);
       })
       .catch((err) => {
         if (err?.response?.status === 302) {
@@ -389,7 +395,10 @@ const LandingPage2 = () => {
         if (res?.data?.response?.length === 0) {
           // if()
           const dataToPost = {
-            store_id: [passed_user_details[0]?.store_ids?.online_store_id, passed_user_details[0]?.store_ids?.offline_store_id],
+            store_id: [
+              passed_user_details[0]?.store_ids?.online_store_id,
+              passed_user_details[0]?.store_ids?.offline_store_id,
+            ],
             workspace_id: currentUser?.userinfo?.client_admin_id,
             user_id: passed_user_details[0]?._id,
             timezone: currentUser?.userinfo?.timezone,
@@ -442,8 +451,10 @@ const LandingPage2 = () => {
         setShowModal(false);
         setQrCodeResponse(res?.data?.response);
         setIntialConfigurationLoaded(true);
-        navigate(`${passed_user_details[0]?.default_store_type?.toLocaleLowerCase()}-store`);
-        toast.success('Success');
+        navigate(
+          `${passed_user_details[0]?.default_store_type?.toLocaleLowerCase()}-store`
+        );
+        toast.success("Success");
         // handleGetPaymentDetailForSeat(passed_user_details,1);
       })
       .catch((err) => {
@@ -456,13 +467,13 @@ const LandingPage2 = () => {
 
   const handleEnterDataClick = async () => {
     if (!seatNumber) {
-      return toast.warn('Please select a Seat.');
+      return toast.warn("Please select a Seat.");
     }
     if (!orderInitiatedId) {
-      return toast.warn('Please select an Order.');
+      return toast.warn("Please select an Order.");
     }
     if (!amountEntered) {
-      return toast.warn('Please select an Amount.');
+      return toast.warn("Please select an Amount.");
     }
 
     setEnterPaymentRecordLoading(true);
@@ -505,6 +516,64 @@ const LandingPage2 = () => {
         }
       });
   };
+
+  // console.debug("isTicketLink", isTicketLink);
+  // console.debug("isPaid", isPaid);
+  // console.debug("isActive", isActive);
+
+  useEffect(() => {
+    const getUserDetailsFunc = async () => {
+      await getUserDetails(workspace_id)
+        .then((res) => {
+          console.log(res.status);
+        })
+        .catch((err) => {
+          if (err?.response?.status === 302) {
+            if (err?.data?.response.ticket_link === "") {
+              setIsTicketLink(false);
+            } else {
+              setIsTicketLink(true);
+            }
+
+            if (err?.data?.response.is_paid === false) {
+              setIsPaid(true);
+            } else {
+              setIsPaid(false);
+            }
+
+            if (err?.data?.response.is_active) {
+              setIsActive(false);
+            } else {
+              setIsActive(true);
+            }
+          }
+          if (err?.response?.status === 404) {
+            console.log(err.message);
+          }
+          if (err?.response?.status === 400) {
+            console.log(err.message);
+          }
+        });
+    };
+
+    const getUserQrcodeOffline = async () => {
+      await getQrCodeOffline(workspace_id, user_id)
+        .then((res) => {
+          console.debug(res?.data?.message);
+          if (res?.data?.response?.length === 0) {
+            setOfflineQr(true);
+          } else {
+            setOfflineQr(false);
+          }
+        })
+        .catch((err) => {
+          console.debug(err.message);
+        });
+    };
+
+    getUserQrcodeOffline();
+    getUserDetailsFunc();
+  }, []);
 
   const handleCloseBanner = () => {
     setNoOrderInititatedForSeat(false);
@@ -609,31 +678,66 @@ const LandingPage2 = () => {
               <div className='flex items-center justify-center'>
                 {
                   // showBanner?
-                  true ?
+                  true ? (
                     <div>
-                      <IoIosNotifications
-                        color="red"
-                        fontSize={'30px'}
-                        onClick={() => setShowInfoModal(!showInfoModal)}
-                      />
-                      {
-                        showInfoModal ?
-                          // false?
-                          <div className="fixed left-48">
-                            <div className="w-max bg-rose-600">
-                              <p className='text-rose-900 text-2xl text-center'>
-                                Have you created a seat yet, No?{" "}
-                                <button
-                                  className='cursor-pointer bg-white text-xl hover:bg-orange-100 text-gray-800 font-semibold py-1 px-2 border border-orange-400 shadow rounded m-2'
-                                  onClick={() => navigate("/profile")}
-                                >
+                      <div className='mr-12 relative cursor-pointer'>
+                        <FaRegBell
+                          size={32}
+                          color='rgb(156 163 175)'
+                          onClick={() => setShowInfoModal(!showInfoModal)}
+                        />
+                        <div className='absolute top-[-5px] right-[-5px] bg-red-400  rounded-full text-white text-sm w-5 h-5 flex items-center justify-center '>
+                          2
+                        </div>
+                      </div>
+                      {showInfoModal ? (
+                        // false?
+                        <div className='fixed top-32 right-36 w-max h-max'>
+                          <div className='fixed top-32 right-36 flex flex-col items-center justify-center bg-white shadow-xl rounded-md gap-y-1 mt-2 p-1'>
+                            {isTicketLink && (
+                              <div
+                                className='w-full flex items-center justify-between bg-green-200 cursor-pointer group hover:bg-white rounded-md p-2'
+                                onClick={() => navigate("/profile")}
+                              >
+                                <p className='text-sm text-center'>
+                                  Have you created a ticket link yet, No?{" "}
+                                </p>
+                                <button className='cursor-pointer  text-sm group-hover:bg-slate-200 duration-200 ease-in-out hover:scale-105 text-gray-800 font-semibold py-1 px-1 bg-white rounded m-2'>
                                   Create One
                                 </button>
-                              </p>
-                            </div>
-                          </div> : null
-                      }
-                    </div> : null
+                              </div>
+                            )}
+                            {isPaid && (
+                              <div
+                                className='w-full flex items-center justify-between bg-green-200 cursor-pointer group hover:bg-white rounded-md p-2'
+                                onClick={() => navigate("/profile")}
+                              >
+                                <p className='text-sm text-center'>
+                                  Have you paid yet, No?{" "}
+                                </p>
+                                <button className='cursor-pointer  text-sm group-hover:bg-slate-200 duration-200 ease-in-out hover:scale-105 text-gray-800 font-semibold py-1 px-1 bg-white rounded m-2'>
+                                  Create One
+                                </button>
+                              </div>
+                            )}
+                            {isActive && (
+                              <div
+                                className='w-full flex items-center justify-between bg-green-200 cursor-pointer group hover:bg-white rounded-md p-2'
+                                onClick={() => navigate("/profile")}
+                              >
+                                <p className='text-sm text-center'>
+                                  Is it active, No?{" "}
+                                </p>
+                                <button className='cursor-pointer  text-sm group-hover:bg-slate-200 duration-200 ease-in-out hover:scale-105 text-gray-800 font-semibold py-1 px-1 bg-white rounded m-2'>
+                                  Create One
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ) : null}
+                    </div>
+                  ) : null
                 }
 
                 <img
@@ -720,7 +824,7 @@ const LandingPage2 = () => {
                           </TableRow>
                         </TableHead>
                         <TableBody>
-                          {qrCodeResponse
+                          {/* {qrCodeResponse
                             .slice(cardPagination, cardPagination + 5)
                             .map((row, index) => (
                               <TableRow key={index + "_"}>
@@ -730,7 +834,7 @@ const LandingPage2 = () => {
                                   pagination={cardPagination}
                                 />
                               </TableRow>
-                            ))}
+                            ))} */}
                         </TableBody>
                       </Table>
                     </TableContainer>
@@ -743,7 +847,7 @@ const LandingPage2 = () => {
                       >
                         <IoIosArrowBack />
                       </button>
-                      {createArrayWithLength(100)
+                      {/* {createArrayWithLength(100)
                         .slice(cardPagination, cardPagination + 5)
                         .map((s, index) => (
                           <div className='rotate-0 sm:rotate-90'>
@@ -757,7 +861,7 @@ const LandingPage2 = () => {
                               {s + 1}
                             </button>
                           </div>
-                        ))}
+                        ))} */}
                       <button
                         className='cursor-pointer bg-inherit text-black border-solid border-2 border-sky-500 rounded-full flex items-center justify-center bg-sky-100 w-7 h-7'
                         onClick={() => incrementStepPagination(5, 100 / 5)}
@@ -774,7 +878,7 @@ const LandingPage2 = () => {
                     </p>
                     <div className='flex flex-wrap flex-col justify-center'>
                       <div className='flex-none grid gap-1 grid-cols-5 p-3'>
-                        {createArrayWithLength(
+                        {/* {createArrayWithLength(
                           storeDetailsResponse[0].tables.length
                         )
                           .slice(tablePagination, tablePagination + 10)
@@ -799,7 +903,7 @@ const LandingPage2 = () => {
                                     ]?.seat_data.length === 0
                                   ) {
                                     setTableEntered("Table Number");
-                                    setSeatNumber('Seat Number');
+                                    setSeatNumber("Seat Number");
                                   } else {
                                     setTableEntered(
                                       index + tablePagination + 1
@@ -811,7 +915,7 @@ const LandingPage2 = () => {
                                 {s + 1}
                               </button>
                             </div>
-                          ))}
+                          ))} */}
                       </div>
                       <div className='flex items-center m-2 w-full justify-center'>
                         <button
@@ -909,7 +1013,7 @@ const LandingPage2 = () => {
                         </button>
                         {
                           <ul>
-                            {orderInitiatedForSeat
+                            {/* {orderInitiatedForSeat
                               .slice(seatPagination, seatPagination + 5)
                               .map((s, index) => (
                                 <div className=''>
@@ -926,7 +1030,7 @@ const LandingPage2 = () => {
                                     {s?.phone_number}
                                   </li>
                                 </div>
-                              ))}
+                              ))} */}
                           </ul>
                         }
                         <button
@@ -952,7 +1056,7 @@ const LandingPage2 = () => {
                           className='text-black bg-[#bbbcbe] rounded w-full h-full m-3 text-2xl'
                           onClick={() => {
                             if (orderInitiatedForSeat.length === 0) {
-                              return toast.warn('Please select order first');
+                              return toast.warn("Please select order first");
                             }
                             if (index === 0 && amountEntered === "0") {
                               return;
@@ -991,9 +1095,12 @@ const LandingPage2 = () => {
             </div>
           </div>
           <div className='fixed sm:relative flex bottom-0 sm:bottom-auto h-[80px] sm:h-full shadow-black mt-3.5 mr-2 py-8 sm:py-0 px-2  w-full sm:w-32  bg-[#eeeef0] sm:flex flex-row sm:flex-col items-center justify-center gap-y-24 gap-x-24'>
-            <HiOutlineStatusOnline size={40} className='cursor-pointer' />
-            <CiShop
-              size={44}
+            <div className='flex flex-col items-center justify-center'>
+              <CiShop size={44} className='cursor-pointer' />
+              <span>Offline</span>
+            </div>
+            <HiOutlineStatusOnline
+              size={40}
               className='cursor-pointer'
               onClick={handleNavigateToShop}
             />
