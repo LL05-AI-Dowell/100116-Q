@@ -17,7 +17,7 @@ const SeatOnline = () => {
   // const OPEN_PAGE_URL = 'http://localhost:5173/';
   const currentDate = new Date();
   const user = getSavedNewUserDetails();
-  const { currentUser, qrCodeResponse, setQrCodeResponse } =
+  const { currentUser, qrCodeResponse, setQrCodeResponse, qrCodeForOnlineStore, setQrCodeForOnlineStore, } =
     useCurrentUserContext();
   const [loading, setLoading] = useState(true);
   const [showBanner, setShowBanner] = useState(false);
@@ -159,7 +159,7 @@ const SeatOnline = () => {
             )}
           </div>
           <div className='flex flex-wrap overflow-y-scroll'>
-            {qrCodeResponse.map((qrCode) => (
+            {qrCodeForOnlineStore.map((qrCode) => (
               <Card key={qrCode._id} qrCodeResponse={qrCode} />
             ))}
           </div>

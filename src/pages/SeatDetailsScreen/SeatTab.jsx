@@ -6,6 +6,7 @@ import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
 import SeatOnline from "./SeatOnline";
 import SeatOffline from "./SeatOffline";
+import MasterQrCode from "./MasterQrCode";
 
 const SeatTab = () => {
   const [value, setValue] = useState("1");
@@ -29,14 +30,16 @@ const SeatTab = () => {
             }}
           >
             <TabList onChange={handleChange} aria-label='lab API tabs example'>
-              <Tab label='ONLINE' value='1' />
+              <Tab label='MASTER QR CODE' value='1' />
               <Tab label='OFFLINE' value='2' />
+              <Tab label='ONLINE' value='3' />
             </TabList>
           </Box>
-          <TabPanel value='1'>
+          <TabPanel value='3'>
             <SeatOnline />
           </TabPanel>
           <TabPanel value='2'>{<SeatOffline />}</TabPanel>
+          <TabPanel value='1'>{<MasterQrCode />}</TabPanel>
         </TabContext>
       </Box>
     </div>

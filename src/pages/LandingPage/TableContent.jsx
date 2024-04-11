@@ -1,16 +1,18 @@
 import TableCell from '@mui/material/TableCell';
-import {useQuery } from "react-query";
+import { useQuery } from "react-query";
 import {
     CircularProgress,
 } from "@mui/material";
 import {
     getPaymentDetailForSeat,
+    // getPaymentDetailsForOnlineStoreSeats,
+    getOnlineOrderBySeatNumber,
 } from '../../../services/qServices';
 import { getSavedNewUserDetails } from '../../hooks/useDowellLogin';
 import { useCurrentUserContext } from '../../contexts/CurrentUserContext';
 import { formatDateForAPI } from '../../helpers/helpers';
 
-const SeatRow = ({ seatNumber, pagination }) => {
+const SeatRow = ({ seatNumber, pagination, store }) => {
     const { currentUser } = useCurrentUserContext();
     const currentDate = new Date();
 
@@ -20,7 +22,23 @@ const SeatRow = ({ seatNumber, pagination }) => {
 
     const { isLoading, data, isError } = useQuery(
         ["seatData", seatNumber],
-        () => getPaymentDetailForSeat(currentUser?.userinfo?.client_admin_id, seatNumber + pagination + 1, formatDateForAPI(currentDate), getSavedNewUserDetails()[0]?.store_ids[0], dataToPost),
+        () => {
+            store === 'ONLINE'?
+            getOnlineOrderBySeatNumber(
+                currentUser?.userinfo?.client_admin_id,
+                formatDateForAPI(currentDate),
+                getSavedNewUserDetails()[0]?.store_ids?.online_store_id,
+                seatNumber + pagination + 1,
+            )
+            :
+            getPaymentDetailForSeat(
+                currentUser?.userinfo?.client_admin_id,
+                seatNumber + pagination + 1,
+                formatDateForAPI(currentDate),
+                getSavedNewUserDetails()[0]?.store_ids?.offline_store_id,
+                dataToPost
+            )
+        },
         {
             refetchInterval: 15000, // Refresh every 15 seconds
         }
@@ -84,7 +102,7 @@ const SeatRow = ({ seatNumber, pagination }) => {
                 <>
                     <TableCell align='center' sx={{ padding: '5px' }}>{amount}</TableCell>
                     <TableCell align='left' sx={{ display: "flex", padding: '5px' }}>
-                        {reversedArray.slice(0,5).map((item, index) => {
+                        {reversedArray.slice(0, 5).map((item, index) => {
                             const isPaid = item.is_paid;
                             const paymentStatus = item.payment_status;
                             return (
