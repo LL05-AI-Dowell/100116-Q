@@ -802,8 +802,10 @@ class qrcode_services(APIView):
             1,0,False
         ))
 
-        if not response["success"]:
+        if not response["success"] or not response["data"]:
            return CustomResponse(False,"Failed to retrieve data",None,status.HTTP_400_BAD_REQUEST)
+        
+        
         data = response.get("data",[])[0]
         
         if not data["is_active"]:
