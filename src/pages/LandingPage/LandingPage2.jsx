@@ -674,13 +674,15 @@ const LandingPage2 = () => {
                 className='h-5/6 shadow-2xl mx-8'
               />
 
-              {/* <p className="text-5xl font-bold">Q</p> */}
+              <p className='text-lg sm:text-2xl md:text-4xl lg:text-5xl font-bold'>
+                The Tiny Shop
+              </p>
               <div className='flex items-center justify-center'>
                 {
                   // showBanner?
                   true ? (
                     <div>
-                      <div className='mr-12 relative cursor-pointer'>
+                      <div className='mr-6 sm:mr-12 relative cursor-pointer'>
                         <FaRegBell
                           size={32}
                           color='rgb(156 163 175)'
@@ -746,9 +748,8 @@ const LandingPage2 = () => {
                   className='h-10 w-10 rounded-full shadow-2xl cursor-pointer'
                   onClick={() => navigate("/profile")}
                 />
-                <button className='cursor-pointer flex items-center justify-between bg-white hover:bg-rose-100 text-gray-800 font-semibold py-2 px-2 border border-rose-600 rounded shadow mx-4'>
-                  <CiLogout className='mx-1 text-xl' />
-                  Logout
+                <button className='cursor-pointer flex items-center justify-between bg-red-400 hover:bg-red-300 text-gray-800 font-semibold py-2 px-2 rounded-md shadow mx-4'>
+                  <CiLogout className='mx-1 text-2xl text-white' size={26} />
                 </button>
               </div>
             </div>
@@ -1094,16 +1095,18 @@ const LandingPage2 = () => {
               </div>
             </div>
           </div>
-          <div className='fixed sm:relative flex bottom-0 sm:bottom-auto h-[80px] sm:h-full shadow-black mt-3.5 mr-2 py-8 sm:py-0 px-2  w-full sm:w-32  bg-[#eeeef0] sm:flex flex-row sm:flex-col items-center justify-center gap-y-24 gap-x-24'>
-            <div className='flex flex-col items-center justify-center'>
-              <CiShop size={44} className='cursor-pointer' />
-              <span>Offline</span>
+          <div className='fixed sm:relative flex bottom-0 sm:bottom-auto h-[80px] sm:h-full shadow-black mt-3.5 mr-2 py-8 sm:py-0 w-full sm:w-[70px] md:w-[110px]  bg-[#eeeef0] sm:flex flex-row sm:flex-col items-center justify-center gap-y-24 gap-x-24'>
+            <div className='flex flex-col items-center justify-center bg-green-400 w-[100px] sm:w-full py-2 rounded-md cursor-pointer'>
+              <CiShop size={44} className=' text-white' />
+              <span className='text-white'>Offline</span>
             </div>
-            <HiOutlineStatusOnline
-              size={40}
-              className='cursor-pointer'
+            <div
+              className='flex flex-col items-center justify-center cursor-pointer'
               onClick={handleNavigateToShop}
-            />
+            >
+              <HiOutlineStatusOnline size={40} />
+              <span>Online</span>
+            </div>
           </div>
           {/* <div className='hidden h-[80px] sm:h-full shadow-black mt-3.5 mr-2 py-8 sm:py-0 px-2  w-full sm:w-32  bg-[#eeeef0] sm:flex flex-row sm:flex-col items-center justify-center gap-y-24 gap-x-24'>
             <HiOutlineStatusOnline

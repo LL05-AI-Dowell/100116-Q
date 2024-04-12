@@ -6,6 +6,7 @@ import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
 import SeatOnline from "./SeatOnline";
 import SeatOffline from "./SeatOffline";
+import SeatMaster from "./SeatMaster";
 
 const SeatTab = () => {
   const [value, setValue] = useState("1");
@@ -29,6 +30,7 @@ const SeatTab = () => {
             }}
           >
             <TabList onChange={handleChange} aria-label='lab API tabs example'>
+              <Tab label='MASTER' value='3' />
               <Tab label='ONLINE' value='1' />
               <Tab label='OFFLINE' value='2' />
             </TabList>
@@ -37,6 +39,9 @@ const SeatTab = () => {
             <SeatOnline />
           </TabPanel>
           <TabPanel value='2'>{<SeatOffline />}</TabPanel>
+          <TabPanel value='3'>
+            <SeatMaster />
+          </TabPanel>
         </TabContext>
       </Box>
     </div>
