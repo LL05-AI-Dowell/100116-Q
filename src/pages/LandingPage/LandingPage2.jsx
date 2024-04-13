@@ -76,7 +76,6 @@ const LandingPage2 = () => {
     setStoreDetailsResponse,
   } = useCurrentUserContext();
   const [cardPagination, setCardPagination] = useState(0);
-  const [tablePagination, setTablePagination] = useState(0);
   const [seatPagination, setSeatPagination] = useState(0);
   const [orderNumber, setOrderNumber] = useState(null);
   const [cardIndex, setCardIndex] = useState(0);
@@ -116,6 +115,7 @@ const LandingPage2 = () => {
   const [isTicketLink, setIsTicketLink] = useState(false);
   const [isPaid, setIsPaid] = useState(false);
   const [isActive, setIsActive] = useState(false);
+  const [tablePagination, setTablePagination] = useState(0);
 
   const incrementStepPagination = (steps, length) => {
     console.log(currentUser);
@@ -674,7 +674,7 @@ const LandingPage2 = () => {
                 className='h-5/6 shadow-2xl mx-8'
               />
 
-              <p className='text-lg sm:text-2xl md:text-4xl lg:text-5xl font-bold'>
+              <p className='text-lg sm:text-2xl md:text-4xl lg:text-5xl font-extrabold text-slate-500'>
                 The Tiny Shop
               </p>
               <div className='flex items-center justify-center'>
@@ -825,17 +825,19 @@ const LandingPage2 = () => {
                           </TableRow>
                         </TableHead>
                         <TableBody>
-                          {/* {qrCodeResponse
-                            .slice(cardPagination, cardPagination + 5)
-                            .map((row, index) => (
-                              <TableRow key={index + "_"}>
-                                <SeatRow
-                                  key={index}
-                                  seatNumber={index}
-                                  pagination={cardPagination}
-                                />
-                              </TableRow>
-                            ))} */}
+                          {qrCodeResponse
+                            ? qrCodeResponse
+                                .slice(cardPagination, cardPagination + 5)
+                                .map((row, index) => (
+                                  <TableRow key={index + "_"}>
+                                    <SeatRow
+                                      key={index}
+                                      seatNumber={index}
+                                      pagination={cardPagination}
+                                    />
+                                  </TableRow>
+                                ))
+                            : null}
                         </TableBody>
                       </Table>
                     </TableContainer>
@@ -848,7 +850,7 @@ const LandingPage2 = () => {
                       >
                         <IoIosArrowBack />
                       </button>
-                      {/* {createArrayWithLength(100)
+                      {createArrayWithLength(100)
                         .slice(cardPagination, cardPagination + 5)
                         .map((s, index) => (
                           <div className='rotate-0 sm:rotate-90'>
@@ -862,7 +864,7 @@ const LandingPage2 = () => {
                               {s + 1}
                             </button>
                           </div>
-                        ))} */}
+                        ))}
                       <button
                         className='cursor-pointer bg-inherit text-black border-solid border-2 border-sky-500 rounded-full flex items-center justify-center bg-sky-100 w-7 h-7'
                         onClick={() => incrementStepPagination(5, 100 / 5)}
@@ -879,7 +881,7 @@ const LandingPage2 = () => {
                     </p>
                     <div className='flex flex-wrap flex-col justify-center'>
                       <div className='flex-none grid gap-1 grid-cols-5 p-3'>
-                        {/* {createArrayWithLength(
+                        {createArrayWithLength(
                           storeDetailsResponse[0].tables.length
                         )
                           .slice(tablePagination, tablePagination + 10)
@@ -916,7 +918,7 @@ const LandingPage2 = () => {
                                 {s + 1}
                               </button>
                             </div>
-                          ))} */}
+                          ))}
                       </div>
                       <div className='flex items-center m-2 w-full justify-center'>
                         <button
@@ -1014,7 +1016,7 @@ const LandingPage2 = () => {
                         </button>
                         {
                           <ul>
-                            {/* {orderInitiatedForSeat
+                            {orderInitiatedForSeat
                               .slice(seatPagination, seatPagination + 5)
                               .map((s, index) => (
                                 <div className=''>
@@ -1031,7 +1033,7 @@ const LandingPage2 = () => {
                                     {s?.phone_number}
                                   </li>
                                 </div>
-                              ))} */}
+                              ))}
                           </ul>
                         }
                         <button

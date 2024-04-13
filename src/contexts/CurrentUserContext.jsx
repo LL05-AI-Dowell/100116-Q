@@ -13,6 +13,8 @@ const UserContextProvider = ({ children }) => {
     const [intialConfigurationLoaded, setIntialConfigurationLoaded] = useState(false);
     const [qrCodeResponse, setQrCodeResponse] = useState(null);
     const [storeDetailsResponse, setStoreDetailsResponse] = useState(null);
+    const [qrCodeForOnlineStore, setQrCodeForOnlineStore] = useState(null);
+    const [masterQrCodeCreated, setMasterQrCodeCreated] = useState(null); 
 
     return <>
         <UserContext.Provider
@@ -31,6 +33,10 @@ const UserContextProvider = ({ children }) => {
                 setQrCodeResponse,
                 storeDetailsResponse,
                 setStoreDetailsResponse,
+                qrCodeForOnlineStore, 
+                setQrCodeForOnlineStore,
+                masterQrCodeCreated, 
+                setMasterQrCodeCreated,
             }}
         >
             {children}

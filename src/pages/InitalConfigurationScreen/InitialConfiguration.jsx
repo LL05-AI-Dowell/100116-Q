@@ -15,6 +15,7 @@ import { CircularProgress, Modal } from "@mui/material";
 import { formatDateForAPI } from "../../helpers/helpers";
 import { NEW_USER_DETAILS_KEY_IN_SESSION_STORAGE, getSavedNewUserDetails } from "../../hooks/useDowellLogin";
 import { useNavigate } from "react-router-dom";
+import {toast} from "react-toastify";
 
 const API_URLS = [
     "You're almost ready to use the app!",

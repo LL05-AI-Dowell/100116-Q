@@ -4,12 +4,10 @@ import Tab from "@mui/material/Tab";
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
-import SeatOnline from "./SeatOnline";
-import SeatOffline from "./SeatOffline";
-import SeatMaster from "./SeatMaster";
-import MasterQrCode from "./MasterQrCode";
+import MenuScreen from "./MenuScreen";
+import ViewMenu from "./ViewMenu";
 
-const SeatTab = () => {
+const OfflineMenuTab = () => {
   const [value, setValue] = useState("1");
 
   const handleChange = (event, newValue) => {
@@ -31,20 +29,20 @@ const SeatTab = () => {
             }}
           >
             <TabList onChange={handleChange} aria-label='lab API tabs example'>
-              <Tab label='MASTER QR CODE' value='1' />
-              <Tab label='OFFLINE' value='2' />
-              <Tab label='ONLINE' value='3' />
+              <Tab label='ADD MENU' value='1' />
+              <Tab label='VIEW MENU' value='2' />
             </TabList>
           </Box>
-          <TabPanel value='3'>
-            <SeatOnline />
+          <TabPanel value='1'>
+            <MenuScreen type={"OFFLINE"} />
           </TabPanel>
-          <TabPanel value='2'>{<SeatOffline />}</TabPanel>
-          <TabPanel value='1'>{<MasterQrCode />}</TabPanel>
+          <TabPanel value='2'>
+            <ViewMenu type={"OFFLINE"} />
+          </TabPanel>
         </TabContext>
       </Box>
     </div>
   );
 };
 
-export default SeatTab;
+export default OfflineMenuTab;
