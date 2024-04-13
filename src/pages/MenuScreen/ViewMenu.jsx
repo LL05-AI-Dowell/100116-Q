@@ -1,21 +1,25 @@
 import { useState, useEffect } from "react";
 import { getSavedNewUserDetails } from "../../hooks/useDowellLogin";
-import { getMenuData } from "../../../services/qServices";
+import {
+  getMenuData,
+  getOfflineOnlineMenuData,
+} from "../../../services/qServices";
 import MenuCard from "../QrCodeScreen/MenuCard";
 import { CircularProgress } from "@mui/material";
 
-const ViewMenu = () => {
+const ViewMenu = ({ type }) => {
   const [loading, setLoading] = useState(false);
   const [menuData, setMenuData] = useState([]);
 
   useEffect(() => {
     setLoading(true);
-    getMenuData(
+    getOfflineOnlineMenuData(
       getSavedNewUserDetails()[0].workspace_id,
-      getSavedNewUserDetails()[0].store_ids[0]
+      getSavedNewUserDetails()[0].store_ids[0],
+      type
     )
       .then((res) => {
-        console.log("get Menu data ress", res.data);
+        console.log("get Menu data ress", res?.data?.response);
         setMenuData(res?.data?.response);
         setLoading(false);
       })
@@ -23,58 +27,7 @@ const ViewMenu = () => {
         console.log("get store data errrrrr", err);
         setLoading(false);
       });
-  }, []);
-
-  const mennnuData = [
-    {
-      name: "Tandoor",
-      items: ["chicken tikka", "chicken kalmi kebeba"],
-    },
-    {
-      name: "Biryani",
-      items: ["Veg Biriyani", "Chicken Biryani"],
-    },
-    {
-      name: "Biryani",
-      items: ["Veg Biriyani", "Chicken Biryani"],
-    },
-    {
-      name: "Biryani",
-      items: ["Veg Biriyani", "Chicken Biryani"],
-    },
-    {
-      name: "Biryani",
-      items: ["Veg Biriyani", "Chicken Biryani"],
-    },
-    {
-      name: "Biryani",
-      items: ["Veg Biriyani", "Chicken Biryani"],
-    },
-    {
-      name: "Biryani",
-      items: ["Veg Biriyani", "Chicken Biryani"],
-    },
-    {
-      name: "Biryani",
-      items: ["Veg Biriyani", "Chicken Biryani"],
-    },
-    {
-      name: "Biryani",
-      items: ["Veg Biriyani", "Chicken Biryani"],
-    },
-    {
-      name: "Biryani",
-      items: ["Veg Biriyani", "Chicken Biryani"],
-    },
-    {
-      name: "Biryani",
-      items: ["Veg Biriyani", "Chicken Biryani"],
-    },
-    {
-      name: "Biryani",
-      items: ["Veg Biriyani", "Chicken Biryani"],
-    },
-  ];
+  }, [type]);
 
   return (
     <div className='w-full bg-gray-100 rounded p-4 overflow-hidden'>
@@ -88,7 +41,6 @@ const ViewMenu = () => {
           <div className='w-full  p-1  items-center justify-start '>
             {menuData?.map((menu) => (
               <MenuCard key={menu?._id} menus={menu?.menu_data} />
-              //   <MenuCard key={menu?._id} menus={mennnuData} />
             ))}
           </div>
         )}{" "}

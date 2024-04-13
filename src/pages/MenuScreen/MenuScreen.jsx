@@ -6,7 +6,7 @@ import { icreateMenu } from "../../../services/qServices";
 import { IoIosAddCircle } from "react-icons/io";
 import { IoCloseCircle } from "react-icons/io5";
 
-const MenuScreen = () => {
+const MenuScreen = ({ type }) => {
   const [userInputCount, setUserInputCount] = useState(1);
   const [itemInputCounts, setItemInputCounts] = useState([0]);
   const [loading, setLoading] = useState(false);
@@ -60,6 +60,7 @@ const MenuScreen = () => {
 
     const dataToPost = {
       timezone: currentUser?.userinfo?.timezone,
+      store_type: type,
       menu_data: newData,
     };
 

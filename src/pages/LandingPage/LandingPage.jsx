@@ -18,13 +18,8 @@ import {
   getInitiatedOrdersOnline,
   createOnlineOrder,
 } from "../../../services/qServices";
-import {
-  CircularProgress,
-  Modal,
-} from "@mui/material";
-import {
-  getSavedNewUserDetails,
-} from "../../hooks/useDowellLogin";
+import { CircularProgress, Modal } from "@mui/material";
+import { getSavedNewUserDetails } from "../../hooks/useDowellLogin";
 import { QueryClient, QueryClientProvider, useQuery } from "react-query";
 import { IoWarningOutline } from "react-icons/io5";
 import DigitalQLogo from "../../assets/Digital_Q.svg";
@@ -41,7 +36,7 @@ const user_id = "660d7c78bdbc0038f13e0b2d";
 
 const LandingPage = () => {
   const queryClient = new QueryClient();
-  const OPEN_PAGE_URL = 'https://www.q.uxlivinglab.online/';
+  const OPEN_PAGE_URL = "https://www.q.uxlivinglab.online/";
   // const OPEN_PAGE_URL = 'http://localhost:5173/';
   const {
     currentUser,
@@ -158,7 +153,10 @@ const LandingPage = () => {
     };
 
     const getUserQrcodeOnline = async () => {
-      await getQrCodeOnline(currentUser?.userinfo?.client_admin_id, getSavedNewUserDetails()[0]?._id)
+      await getQrCodeOnline(
+        currentUser?.userinfo?.client_admin_id,
+        getSavedNewUserDetails()[0]?._id
+      )
         .then((res) => {
           console.debug(res?.data?.message);
           if (res?.data?.response?.length === 0) {
@@ -174,7 +172,10 @@ const LandingPage = () => {
     };
 
     const getRetrievedMasterQrCode = async () => {
-      await retrieveMasterQr(currentUser?.userinfo?.client_admin_id, getSavedNewUserDetails()[0]?._id)
+      await retrieveMasterQr(
+        currentUser?.userinfo?.client_admin_id,
+        getSavedNewUserDetails()[0]?._id
+      )
         .then((res) => {
           console.debug(res?.data?.message);
           if (res?.data?.response?.length === 0) {
@@ -202,7 +203,6 @@ const LandingPage = () => {
     }
   };
 
-
   const incrementTablesPagination = (steps) => {
     if (steps + 1 <= 100) {
       if (steps + tablePagination !== 100) {
@@ -221,67 +221,79 @@ const LandingPage = () => {
 
   const { isLoading, data, isError } = useQuery(
     ["menuData"],
-    () =>
-      handleGetOldInitiatedOrders(),
+    () => handleGetOldInitiatedOrders(),
     {
       refetchInterval: 15000, // Refresh every 15 seconds
     }
   );
 
-
   const handleGetOldInitiatedOrders = async () => {
-    await getInitiatedOrdersOnline().then(res => {
-      console.log('initiated oreders online res >>>', res.data.response);
-      const oldInitiatedOrders = res.data.response;
-      const reversedInitiatedOrders = oldInitiatedOrders.reverse();
-      setOnlineOrdersRetrieved(reversedInitiatedOrders);
-    }).catch(err => {
-      console.log('initiated oreders online err >>>', err);
-    });
-  }
+    await getInitiatedOrdersOnline()
+      .then((res) => {
+        console.log("initiated oreders online res >>>", res.data.response);
+        const oldInitiatedOrders = res.data.response;
+        const reversedInitiatedOrders = oldInitiatedOrders.reverse();
+        setOnlineOrdersRetrieved(reversedInitiatedOrders);
+      })
+      .catch((err) => {
+        console.log("initiated oreders online err >>>", err);
+      });
+  };
 
   const handleEnterDataClick = async () => {
     if (orderNumber === null) {
-      return toast.error('Please select order number first');
+      return toast.error("Please select order number first");
     }
     if (seatNumber === null) {
-      return toast.error('Please select seat first');
+      return toast.error("Please select seat first");
     }
     if (amountEntered === "") {
-      return toast.error('Please enter amount first');
+      return toast.error("Please enter amount first");
     }
     // setEnterPaymentRecordLoading(true);
     const dataToPost = {
-      "workspace_id": currentUser?.userinfo?.client_admin_id,
-      "qrcode_id": qrCodeIdForSelectedSeat,
-      "date": formatDateForAPI(currentDate),
-      "timezone": currentUser?.userinfo?.timezone ? currentUser?.userinfo?.timezone : getTimeZone(),
-      "seat_number": seatNumber,
-      "store_id": getSavedNewUserDetails()[0]?.store_ids?.online_store_id,
-      "order_intiated_id": orderNumber,
-      "amount": amountEntered
-    }
+      workspace_id: currentUser?.userinfo?.client_admin_id,
+      qrcode_id: qrCodeIdForSelectedSeat,
+      date: formatDateForAPI(currentDate),
+      timezone: currentUser?.userinfo?.timezone
+        ? currentUser?.userinfo?.timezone
+        : getTimeZone(),
+      seat_number: seatNumber,
+      store_id: getSavedNewUserDetails()[0]?.store_ids?.online_store_id,
+      order_intiated_id: orderNumber,
+      amount: amountEntered,
+    };
 
-    console.log('data to post for creating online ordder', dataToPost);
-    await createOnlineOrder(dataToPost).then(res => {
-      console.log('res >>>', res.data.response);
-      toast.success('Online order created successfully');
+    console.log("data to post for creating online ordder", dataToPost);
+    await createOnlineOrder(dataToPost)
+      .then((res) => {
+        console.log("res >>>", res.data.response);
+        toast.success("Online order created successfully");
 
+        //creating link after order being created for pranai
+        const link = `${OPEN_PAGE_URL}&store_type=ONLINE&workspace_id=${
+          currentUser?.userinfo?.client_admin_id
+        }&store_id=${
+          getSavedNewUserDetails()[0]?.store_ids?.online_store_id
+        }&seat_number=${seatNumber}&order_intiated_id=${orderNumber}&customer_user_id=${orderInitiatedCustomerId}`;
 
-      //creating link after order being created for pranai
-      const link = `${OPEN_PAGE_URL}&store_type=ONLINE&workspace_id=${currentUser?.userinfo?.client_admin_id}&store_id=${getSavedNewUserDetails()[0]?.store_ids?.online_store_id}&seat_number=${seatNumber}&order_intiated_id=${orderNumber}&customer_user_id=${orderInitiatedCustomerId}`;
+        setLinkToShareForPayment(link);
+      })
+      .catch((err) => {
+        console.log("err >>>", err);
+        toast.error("Unable to create online order, Please try again");
+      })
+      .finally(() => {
+        setEnterPaymentRecordLoading(false);
+      });
 
-      setLinkToShareForPayment(link);
-    }).catch(err => {
-      console.log('err >>>', err);
-      toast.error('Unable to create online order, Please try again');
-    }).finally(() => {
-      setEnterPaymentRecordLoading(false);
-    });
-
-    const link = `${OPEN_PAGE_URL}&type=ONLINE&workspace_id=${currentUser?.userinfo?.client_admin_id}&store_id=${getSavedNewUserDetails()[0]?.store_ids?.online_store_id}&seat_number=${seatNumber}&order_intiated_id=${orderNumber}&customer_user_id=${orderInitiatedCustomerId}`;
-    console.log('linkkkkkkkkkkkkkkkkkkkkkkk', link);
-  }
+    const link = `${OPEN_PAGE_URL}&type=ONLINE&workspace_id=${
+      currentUser?.userinfo?.client_admin_id
+    }&store_id=${
+      getSavedNewUserDetails()[0]?.store_ids?.online_store_id
+    }&seat_number=${seatNumber}&order_intiated_id=${orderNumber}&customer_user_id=${orderInitiatedCustomerId}`;
+    console.log("linkkkkkkkkkkkkkkkkkkkkkkk", link);
+  };
 
   const chatData = [
     { id: 1, name: "John Doe", message: "Call me back ASAP!" },
@@ -303,10 +315,11 @@ const LandingPage = () => {
             <span className='font-bold text-gray-700'>{chat.name}</span>
           </div>
           <div
-            className={`grid overflow-hidden transition-all duration-300 ease-in-out text-slate-600 ${isExpanded
-              ? "grid-rows-[1fr] opacity-100"
-              : "grid-rows-[0fr] opacity-0"
-              }`}
+            className={`grid overflow-hidden transition-all duration-300 ease-in-out text-slate-600 ${
+              isExpanded
+                ? "grid-rows-[1fr] opacity-100"
+                : "grid-rows-[0fr] opacity-0"
+            }`}
           >
             <div className='overflow-hidden flex flex-col justify-between gap-y-2'>
               <div className='h-[220px] rounded-md border-2 border-sky-500 p-2'>
@@ -349,7 +362,9 @@ const LandingPage = () => {
               alt='Dowell Logo'
               className='h-5/6 shadow-2xl mx-8'
             />
-            {/* <p className="text-5xl font-bold">Q</p> */}
+            <p className='text-lg sm:text-2xl md:text-4xl lg:text-5xl font-extrabold text-slate-500'>
+              The Tiny Shop
+            </p>
 
             <div className='flex items-center justify-center'>
               {
@@ -447,9 +462,8 @@ const LandingPage = () => {
                 className='h-10 w-10 rounded-full shadow-2xl cursor-pointer'
                 onClick={() => navigate("/profile")}
               />
-              <button className='cursor-pointer flex items-center justify-between bg-white hover:bg-rose-100 text-gray-800 font-semibold py-2 px-2 border border-rose-600 rounded shadow mx-4'>
-                <CiLogout className='mx-1 text-xl' />
-                Logout
+              <button className='cursor-pointer flex items-center justify-between bg-red-400 hover:bg-red-300 text-gray-800 font-semibold py-2 px-2 rounded-md shadow mx-4'>
+                <CiLogout className='mx-1 text-2xl text-white' size={26} />
               </button>
             </div>
           </div>
@@ -469,10 +483,7 @@ const LandingPage = () => {
                     component={Paper}
                     sx={{ width: "98%", height: "max-content" }}
                   >
-                    <Table
-                      sx={{ minWidth: "100%" }}
-                      aria-label='simple table'
-                    >
+                    <Table sx={{ minWidth: "100%" }} aria-label='simple table'>
                       <TableHead>
                         <TableRow>
                           <TableCell
@@ -508,9 +519,9 @@ const LandingPage = () => {
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                        {qrCodeForOnlineStore ?
-                          (
-                            qrCodeForOnlineStore.slice(cardPagination, cardPagination + 5)
+                        {qrCodeForOnlineStore
+                          ? qrCodeForOnlineStore
+                              .slice(cardPagination, cardPagination + 5)
                               .map((row, index) => (
                                 <TableRow key={index + "_"}>
                                   <SeatRow
@@ -520,8 +531,8 @@ const LandingPage = () => {
                                     store='ONLINE'
                                   />
                                 </TableRow>
-                              ))) : null
-                        }
+                              ))
+                          : null}
                       </TableBody>
                     </Table>
                   </TableContainer>
@@ -565,37 +576,38 @@ const LandingPage = () => {
                   </p>
                   <div className='flex flex-wrap flex-col justify-center'>
                     <div className='flex-none grid gap-1 grid-cols-2 p-3 sm:w-[98%] w-[100%]'>
-                      {
-                        onlineOrdersRetrieved ?
-                          (
-                            onlineOrdersRetrieved
-                              .slice(tablePagination, tablePagination + 4)
-                              .map((s, index) => (
-                                <div className=''>
-                                  <button
-                                    className='text-black text-sm bg-[#bbbcbe] rounded m-0.5 w-full h-max py-2 overflow-hidden'
-                                    onClick={() => {
-                                      setOrderNumber(s?.order_initiated_id);
-                                      setOrderInitiatedCustomerId(s?.customer_user_id);
-                                    }}
-                                    key={s.order_initiated_id}
-                                  >
-                                    {s.order_initiated_id}
-                                  </button>
-                                </div>
-                              ))
-                          ) : null
-                      }
+                      {onlineOrdersRetrieved
+                        ? onlineOrdersRetrieved
+                            .slice(tablePagination, tablePagination + 4)
+                            .map((s, index) => (
+                              <div className=''>
+                                <button
+                                  className='text-black text-sm bg-[#bbbcbe] rounded m-0.5 w-full h-max py-2 overflow-hidden'
+                                  onClick={() => {
+                                    setOrderNumber(s?.order_initiated_id);
+                                    setOrderInitiatedCustomerId(
+                                      s?.customer_user_id
+                                    );
+                                  }}
+                                  key={s.order_initiated_id}
+                                >
+                                  {s.order_initiated_id}
+                                </button>
+                              </div>
+                            ))
+                        : null}
                     </div>
                     <div className='flex items-center m-2 w-full justify-center'>
-                      <button className='cursor-pointer bg-inherit text-black border-solid border-2 border-[#1c8382] rounded flex items-center justify-center bg-[#81d3d2] w-16 h-8 m-2'
-                        onClick={() => decrementTablesPagination()}>
+                      <button
+                        className='cursor-pointer bg-inherit text-black border-solid border-2 border-[#1c8382] rounded flex items-center justify-center bg-[#81d3d2] w-16 h-8 m-2'
+                        onClick={() => decrementTablesPagination()}
+                      >
                         <IoIosArrowBack />
                       </button>
-                      <button className='cursor-pointer bg-inherit text-black border-solid border-2 border-[#1c8382] rounded flex items-center justify-center bg-[#81d3d2] w-16 h-8 m-2'
-                        onClick={() =>
-                          incrementTablesPagination(4, 100 / 4)
-                        }>
+                      <button
+                        className='cursor-pointer bg-inherit text-black border-solid border-2 border-[#1c8382] rounded flex items-center justify-center bg-[#81d3d2] w-16 h-8 m-2'
+                        onClick={() => incrementTablesPagination(4, 100 / 4)}
+                      >
                         <IoIosArrowForward />
                       </button>
                     </div>
@@ -634,25 +646,28 @@ const LandingPage = () => {
                     </button>
                     {
                       <ul>
-                        {qrCodeForOnlineStore ? (
-                          qrCodeForOnlineStore.slice(seatPagination, seatPagination + 5).map((s, index) => {
-                            const seatNumber = parseInt(s?.seat_number?.split("_").pop());
-                            return (
-                              <li
-                                className="cursor-pointer flex flex-col items-center justify-start bg-[#bbbcbe] text-black rounded m-3 p-1 w-[100px] h-max"
-                                onClick={() => {
-                                  setSeatNumber(seatNumber);
-                                  setQrCodeIdForSelectedSeat(s?.qrcode_id);
-                                }}
-                                key={`${index}_button`}
-                              >
-                                <span>{seatNumber}</span>
-                              </li>
-                            );
-                          })
-                        ) : null}
+                        {qrCodeForOnlineStore
+                          ? qrCodeForOnlineStore
+                              .slice(seatPagination, seatPagination + 5)
+                              .map((s, index) => {
+                                const seatNumber = parseInt(
+                                  s?.seat_number?.split("_").pop()
+                                );
+                                return (
+                                  <li
+                                    className='cursor-pointer flex flex-col items-center justify-start bg-[#bbbcbe] text-black rounded m-3 p-1 w-[100px] h-max'
+                                    onClick={() => {
+                                      setSeatNumber(seatNumber);
+                                      setQrCodeIdForSelectedSeat(s?.qrcode_id);
+                                    }}
+                                    key={`${index}_button`}
+                                  >
+                                    <span>{seatNumber}</span>
+                                  </li>
+                                );
+                              })
+                          : null}
                       </ul>
-
                     }
                     <button
                       className='rotate-90 cursor-pointer bg-inherit text-black flex items-center justify-center w-max h-max'
@@ -709,7 +724,7 @@ const LandingPage = () => {
             </div>
             {/* -------------------------------------calculator-------------------------------------- */}
             {/* -------------------------------------Chat Bar-------------------------------------- */}
-            <div className='w-full sm:w-[25%] mt-4 m-2  rounded-xl'>
+            <div className='w-full sm:w-[25%] mt-4 m-2 mb-28 sm:mb-0 rounded-xl'>
               <div className='h-[470px] bg-gray-200 rounded p-2 overflow-auto'>
                 <div className='flex items-center justify-between p-2'>
                   <span className='font-semibold text-2xl text-sky-500'>
@@ -734,13 +749,19 @@ const LandingPage = () => {
             {/* -------------------------------------Chat Bar-------------------------------------- */}
           </div>
 
-          <div className='sm:hidden h-[80px] sm:h-full shadow-black mt-3.5 mr-2 py-8 sm:py-0 px-2  w-full sm:w-32  bg-[#eeeef0] flex flex-row sm:flex-col items-center justify-center gap-y-24 gap-x-24'>
-            <HiOutlineStatusOnline
-              size={40}
-              className=' cursor-pointer'
-              onClick={handleNavigateToShop}
-            />
-            <CiShop size={44} className=' cursor-pointer' />
+          <div className='fixed sm:relative sm:hidden flex bottom-0 right-0 sm:bottom-auto h-[80px] sm:h-full shadow-black mt-3.5  px-2  w-full sm:w-32  bg-[#eeeef0] flex-row sm:flex-col items-center justify-center gap-y-24 gap-x-24'>
+            <div className='flex flex-col items-center justify-center'>
+              <CiShop
+                size={44}
+                className=' cursor-pointer'
+                onClick={handleNavigateToShop}
+              />
+              <span>Offline</span>
+            </div>
+            <div className='flex flex-col items-center justify-center h-full bg-green-400 w-[100px] rounded-md'>
+              <HiOutlineStatusOnline size={40} className=' cursor-pointer' />
+              <span>Online</span>
+            </div>
           </div>
           {/* <div className="flex flex-col m-1 items-center justify-center m-4 sm:flex-row sm:m-6">
                                             <button class="cursor-pointer bg-white hover:bg-orange-100 text-gray-800 font-semibold py-2 px-4 border border-orange-400 rounded shadow m-2">Close Seat/Service Desk</button>
@@ -748,16 +769,15 @@ const LandingPage = () => {
                                         </div> */}
         </div>
 
-        <div className='hidden h-[80px] sm:h-full shadow-black mt-3.5 mr-2 py-8 sm:py-0 px-2  w-full sm:w-[70px]  bg-[#eeeef0] sm:flex flex-row sm:flex-col items-center justify-center gap-y-24 gap-x-24'>
-          <div className='flex flex-col items-center justify-center'>
-            <CiShop
-              size={44}
-              className=' cursor-pointer'
-              onClick={handleNavigateToShop}
-            />
+        <div className='hidden h-[80px] sm:h-full shadow-black mt-3.5 mr-2 py-8 sm:py-0  w-full sm:w-[70px] md:w-[110px] bg-[#eeeef0] sm:flex flex-row sm:flex-col items-center justify-center gap-y-24 gap-x-24'>
+          <div className='flex flex-col items-center justify-center  cursor-pointer'>
+            <CiShop size={44} onClick={handleNavigateToShop} />
             <span>Offline</span>
           </div>
-          <HiOutlineStatusOnline size={40} className=' cursor-pointer' />
+          <div className='flex flex-col items-center justify-center w-full py-2 bg-green-400 rounded-md cursor-pointer '>
+            <HiOutlineStatusOnline size={40} className='  text-white' />
+            <span className='text-white'>Online</span>
+          </div>
         </div>
       </div>
     </>
