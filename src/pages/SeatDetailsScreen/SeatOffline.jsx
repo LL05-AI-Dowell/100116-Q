@@ -43,12 +43,12 @@ const SeatOffline = () => {
         link: `${OPEN_PAGE_URL}qrlink/?view=qrlinks`,
         timezone: currentUser?.userinfo?.timezone,
         username: currentUser?.userinfo?.username,
-        store_type: "ONLINE",
+        store_type: "OFFLINE",
       };
       await createQrCode(
         currentUser?.userinfo?.client_admin_id,
         user[0]?._id,
-        getSavedNewUserDetails()[0].store_ids.online_store_id,
+        getSavedNewUserDetails()[0]?.store_ids?.offline_store_id,
         1,
         dataToPost
       )
@@ -63,7 +63,7 @@ const SeatOffline = () => {
         });
     }
     if (qrCodeResponse.length > 0 && qrCodeResponse.length <= 5) {
-      if (qrCodeResponse.length === 5) return;
+      if (qrCodeResponse.length >= 5 && getSavedNewUserDetails()[0]?.is_paid === false) return;
       const seatNumbers = qrCodeResponse.map((item) =>
         parseInt(item.seat_number.split("_")[2])
       );
@@ -78,12 +78,12 @@ const SeatOffline = () => {
         link: `${OPEN_PAGE_URL}qrlink/?view=qrlinks`,
         timezone: currentUser?.userinfo?.timezone,
         username: currentUser?.userinfo?.username,
-        store_type: "ONLINE",
+        store_type: "OFFLINE",
       };
       await createQrCode(
         currentUser?.userinfo?.client_admin_id,
         user[0]?._id,
-        getSavedNewUserDetails()[0].store_ids.online_store_id,
+        getSavedNewUserDetails()[0]?.store_ids?.offline_store_id,
         maxSeatNumber + 1,
         dataToPost
       )

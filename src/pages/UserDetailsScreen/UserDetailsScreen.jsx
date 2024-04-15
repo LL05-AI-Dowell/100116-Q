@@ -245,7 +245,7 @@ const UserDetailsScreen = () => {
                   style={{ marginRight: "8px", whiteSpace: "nowrap" }}
                 >
                   <label className='text-xl font-semibold text-stone-700'>
-                    Image Url :
+                    Product Name :
                   </label>{" "}
                 </Typography>
                 {isImageUrlEditing ? (

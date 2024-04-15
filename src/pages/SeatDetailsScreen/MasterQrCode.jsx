@@ -39,7 +39,7 @@ const MasterQrCode = () => {
   const handleAddQrCode = async () => {
     setIsQrCodeLoading(true);
     const dataToPost = {
-      link: "http://localhost:5173/onlineshoplink/?",
+      link: "https://www.q.uxlivinglab.online/onlineshoplink/?",
       timezone: currentUser?.userinfo?.timezone
         ? currentUser?.userinfo?.timezone
         : getTimeZone(),
@@ -63,10 +63,10 @@ const MasterQrCode = () => {
       });
   };
 
-  const formattedCreatedAt = format(
-    new Date(masterQrCodeCreated[0].created_at),
-    "yyyy-MM-dd HH:mm:ss"
-  );
+  // const formattedCreatedAt = format(
+  //   new Date(masterQrCodeCreated[0].created_at),
+  //   "yyyy-MM-dd HH:mm:ss"
+  // );
 
   console.debug("master c date", masterQrCodeCreated);
 
@@ -92,33 +92,41 @@ const MasterQrCode = () => {
         </div>
       ) : (
         <>
-          <div className='w-full md:w-[500px] flex flex-col sm:flex-row items-start justify-center rounded-lg shadow-lg p-4 gap-x-4 '>
-            <div className='w-full h-[200px] flex items-center justify-center'>
-              <img
-                src={masterQrCodeCreated[0].qrcode_image_url}
-                alt='Profile Photo'
-                className='h-max w-full shadow-5xl mx-2'
-              />
-            </div>
+          {
+            !masterQrCodeCreated ?
+              (<CircularProgress />)
+              :
+              masterQrCodeCreated ?
+                (<div className='w-full md:w-[500px] flex flex-col sm:flex-row items-start justify-center rounded-lg shadow-lg p-4 gap-x-4 '>
+                  < div className='w-full h-[200px] flex items-center justify-center'>
+                    <img
+                      src={masterQrCodeCreated[0]?.qrcode_image_url}
+                      alt='Profile Photo'
+                      className='h-max w-full shadow-5xl mx-2'
+                    />
+                  </div>
 
-            <div className=' w-full h-[200px] flex flex-col items-start justify-center p-2 gap-y-2'>
-              <span className='text-sm'>
-                Shorthand url:{" "}
-                <a
-                  href={masterQrCodeCreated[0].shorthand_url}
-                  target='_blank'
-                  rel='noopener noreferrer'
-                  className='text-blue-700'
-                >
-                  <u>Click here!</u>
-                </a>
-              </span>
-              <span className='text-sm'>{`Created at:${" "} ${formattedCreatedAt}`}</span>
-              <span className='text-sm'>{`Is Active:${" "} ${
-                masterQrCodeCreated[0].is_active
-              }`}</span>
-            </div>
-          </div>
+                  <div className=' w-full h-[200px] flex flex-col items-start justify-center p-2 gap-y-2'>
+                    <span className='text-sm'>
+                      Shorthand url:{" "}
+                      <a
+                        href={masterQrCodeCreated[0]?.shorthand_url}
+                        target='_blank'
+                        rel='noopener noreferrer'
+                        className='text-blue-700'
+                      >
+                        <u>Click here!</u>
+                      </a>
+                    </span>
+                    <span className='text-sm'>{`Created at:${" "} ${format(
+                      new Date(masterQrCodeCreated[0]?.created_at),
+                      "yyyy-MM-dd HH:mm:ss"
+                    )}`}</span>
+                    <span className='text-sm'>{`Is Active:${" "} ${masterQrCodeCreated[0]?.is_active
+                      }`}</span>
+                  </div>
+                </div>) : <></>
+          }
         </>
       )}
     </>

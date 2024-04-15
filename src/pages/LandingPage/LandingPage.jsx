@@ -228,7 +228,7 @@ const LandingPage = () => {
   );
 
   const handleGetOldInitiatedOrders = async () => {
-    await getInitiatedOrdersOnline()
+    await getInitiatedOrdersOnline(currentUser?.userinfo?.client_admin_id, formatDateForAPI(currentDate), getSavedNewUserDetails()[0]?.store_ids?.online_store_id)
       .then((res) => {
         console.log("initiated oreders online res >>>", res.data.response);
         const oldInitiatedOrders = res.data.response;
@@ -271,11 +271,9 @@ const LandingPage = () => {
         toast.success("Online order created successfully");
 
         //creating link after order being created for pranai
-        const link = `${OPEN_PAGE_URL}&store_type=ONLINE&workspace_id=${
-          currentUser?.userinfo?.client_admin_id
-        }&store_id=${
-          getSavedNewUserDetails()[0]?.store_ids?.online_store_id
-        }&seat_number=${seatNumber}&order_intiated_id=${orderNumber}&customer_user_id=${orderInitiatedCustomerId}`;
+        const link = `${OPEN_PAGE_URL}&store_type=ONLINE&workspace_id=${currentUser?.userinfo?.client_admin_id
+          }&store_id=${getSavedNewUserDetails()[0]?.store_ids?.online_store_id
+          }&seat_number=${seatNumber}&order_intiated_id=${orderNumber}&customer_user_id=${orderInitiatedCustomerId}`;
 
         setLinkToShareForPayment(link);
       })
@@ -287,11 +285,9 @@ const LandingPage = () => {
         setEnterPaymentRecordLoading(false);
       });
 
-    const link = `${OPEN_PAGE_URL}&type=ONLINE&workspace_id=${
-      currentUser?.userinfo?.client_admin_id
-    }&store_id=${
-      getSavedNewUserDetails()[0]?.store_ids?.online_store_id
-    }&seat_number=${seatNumber}&order_intiated_id=${orderNumber}&customer_user_id=${orderInitiatedCustomerId}`;
+    const link = `${OPEN_PAGE_URL}&type=ONLINE&workspace_id=${currentUser?.userinfo?.client_admin_id
+      }&store_id=${getSavedNewUserDetails()[0]?.store_ids?.online_store_id
+      }&seat_number=${seatNumber}&order_intiated_id=${orderNumber}&customer_user_id=${orderInitiatedCustomerId}`;
     console.log("linkkkkkkkkkkkkkkkkkkkkkkk", link);
   };
 
@@ -315,11 +311,10 @@ const LandingPage = () => {
             <span className='font-bold text-gray-700'>{chat.name}</span>
           </div>
           <div
-            className={`grid overflow-hidden transition-all duration-300 ease-in-out text-slate-600 ${
-              isExpanded
+            className={`grid overflow-hidden transition-all duration-300 ease-in-out text-slate-600 ${isExpanded
                 ? "grid-rows-[1fr] opacity-100"
                 : "grid-rows-[0fr] opacity-0"
-            }`}
+              }`}
           >
             <div className='overflow-hidden flex flex-col justify-between gap-y-2'>
               <div className='h-[220px] rounded-md border-2 border-sky-500 p-2'>
@@ -521,17 +516,17 @@ const LandingPage = () => {
                       <TableBody>
                         {qrCodeForOnlineStore
                           ? qrCodeForOnlineStore
-                              .slice(cardPagination, cardPagination + 5)
-                              .map((row, index) => (
-                                <TableRow key={index + "_"}>
-                                  <SeatRow
-                                    key={index}
-                                    seatNumber={index}
-                                    pagination={cardPagination}
-                                    store='ONLINE'
-                                  />
-                                </TableRow>
-                              ))
+                            .slice(cardPagination, cardPagination + 5)
+                            .map((row, index) => (
+                              <TableRow key={index + "_"}>
+                                <SeatRow
+                                  key={index}
+                                  seatNumber={index}
+                                  pagination={cardPagination}
+                                  store='ONLINE'
+                                />
+                              </TableRow>
+                            ))
                           : null}
                       </TableBody>
                     </Table>
@@ -576,8 +571,9 @@ const LandingPage = () => {
                   </p>
                   <div className='flex flex-wrap flex-col justify-center'>
                     <div className='flex-none grid gap-1 grid-cols-2 p-3 sm:w-[98%] w-[100%]'>
-                      {onlineOrdersRetrieved
-                        ? onlineOrdersRetrieved
+                      {onlineOrdersRetrieved ?
+                        onlineOrdersRetrieved.length === 0 ? <p>No Order</p> :
+                          onlineOrdersRetrieved
                             .slice(tablePagination, tablePagination + 4)
                             .map((s, index) => (
                               <div className=''>
@@ -648,24 +644,24 @@ const LandingPage = () => {
                       <ul>
                         {qrCodeForOnlineStore
                           ? qrCodeForOnlineStore
-                              .slice(seatPagination, seatPagination + 5)
-                              .map((s, index) => {
-                                const seatNumber = parseInt(
-                                  s?.seat_number?.split("_").pop()
-                                );
-                                return (
-                                  <li
-                                    className='cursor-pointer flex flex-col items-center justify-start bg-[#bbbcbe] text-black rounded m-3 p-1 w-[100px] h-max'
-                                    onClick={() => {
-                                      setSeatNumber(seatNumber);
-                                      setQrCodeIdForSelectedSeat(s?.qrcode_id);
-                                    }}
-                                    key={`${index}_button`}
-                                  >
-                                    <span>{seatNumber}</span>
-                                  </li>
-                                );
-                              })
+                            .slice(seatPagination, seatPagination + 5)
+                            .map((s, index) => {
+                              const seatNumber = parseInt(
+                                s?.seat_number?.split("_").pop()
+                              );
+                              return (
+                                <li
+                                  className='cursor-pointer flex flex-col items-center justify-start bg-[#bbbcbe] text-black rounded m-3 p-1 w-[100px] h-max'
+                                  onClick={() => {
+                                    setSeatNumber(seatNumber);
+                                    setQrCodeIdForSelectedSeat(s?.qrcode_id);
+                                  }}
+                                  key={`${index}_button`}
+                                >
+                                  <span>{seatNumber}</span>
+                                </li>
+                              );
+                            })
                           : null}
                       </ul>
                     }

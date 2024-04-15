@@ -118,7 +118,7 @@ export const getPaymentDetailForSeat = async (
     Authorization: `Bearer ${getSavedApiKey()}`,
   };
   return await qServicesAxiosInstance.get(
-    `/v3/customer-services/?type=retrieve_orders_by_seat&workspace_id=${workspace_id}&seat_number=${seat_no}&date=${date}&store_id=${store_id}&limit=100&offset=0`,
+    `/v3/offline-store-customer-services/?type=retrieve_orders_by_seat&workspace_id=${workspace_id}&seat_number=${seat_no}&date=${date}&store_id=${store_id}&limit=100&offset=0`,
     { headers }
   );
 };
@@ -198,7 +198,7 @@ export const retrieveInitiatedOrder = async (
     Authorization: `Bearer ${getSavedApiKey()}`,
   };
   return await qServicesAxiosInstance.get(
-    `/v3/customer-services/?type=retrive_initiated_order&workspace_id=${workspace_id}&seat_number=${seat_no}&date=${date}&store_id=${store_id}&limit=100&offset=0`,
+    `/v3/offline-store-customer-services/?type=retrive_initiated_order&workspace_id=${workspace_id}&seat_number=${seat_no}&date=${date}&store_id=${store_id}&limit=100&offset=0`,
     { headers }
   );
 };
@@ -208,7 +208,7 @@ export const initiateNewOrder = async (dataToPost) => {
     Authorization: `Bearer ${getSavedApiKey()}`,
   };
   return await qServicesAxiosInstance.post(
-    `/v3/customer-services/?type=initiate_order`,
+    `/v3/offline-store-customer-services/?type=initiate_order`,
     dataToPost,
     { headers }
   );
@@ -219,7 +219,7 @@ export const initiateOlderOrder = async (dataToPost) => {
     Authorization: `Bearer ${getSavedApiKey()}`,
   };
   return await qServicesAxiosInstance.post(
-    `/v3/customer-services/?type=old_order`,
+    `/v3/offline-store-customer-services/?type=old_order`,
     dataToPost,
     { headers }
   );
@@ -272,7 +272,7 @@ export const createOrder = async (dataToPost) => {
     Authorization: `Bearer ${getSavedApiKey()}`,
   };
   return await qServicesAxiosInstance.post(
-    `/v3/customer-services/?type=create_order`,
+    `/v3/offline-store-customer-services/?type=create_order`,
     dataToPost,
     { headers }
   );
@@ -308,12 +308,12 @@ export const retrieveMasterQr = async (workspace_id, user_id) => {
   );
 };
 
-export const getInitiatedOrdersOnline = async (workspace_id, user_id) => {
+export const getInitiatedOrdersOnline = async (workspace_id, date, store_id) => {
   const headers = {
     Authorization: `Bearer ${getSavedApiKey()}`,
   };
   return await qServicesAxiosInstance.get(
-    `/v3/online-store-customer-services/?type=retieve_online_initiated_order&workspace_id=6385c0f18eca0fb652c94558&date=2024_02_29&store_id=660d7c76668a02ef5b274215&limit=100&offset=0`,
+    `/v3/online-store-customer-services/?type=retieve_online_initiated_order&workspace_id=${workspace_id}&date=${date}&store_id=${store_id}&limit=100&offset=0`,
     { headers }
   );
 };
@@ -365,7 +365,7 @@ export const getOnlineOrderBySeatNumber = async (
   const headers = {
     Authorization: `Bearer ${getSavedApiKey()}`,
   };
-  return await qServicesAxiosInstance.post(
+  return await qServicesAxiosInstance.get(
     `/v3/online-store-customer-services/?type=retrieve_online_orders_by_seat&workspace_id=${workspace_id}&store_id=${store_id}&date=${date}&seat_number=${seat_no}&limit=5&offset=0`,
     { headers }
   );

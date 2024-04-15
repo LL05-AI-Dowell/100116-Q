@@ -8,7 +8,7 @@ import { createQrCode } from "../../../services/qServices";
 import { getSavedNewUserDetails } from "../../hooks/useDowellLogin";
 import { MdOutlineErrorOutline } from "react-icons/md";
 import { formatDateForAPI } from "../../helpers/helpers";
-import { getQrCode } from "../../../services/qServices";
+import { getQrCodeOnline } from "../../../services/qServices";
 import { useNavigate } from "react-router-dom";
 
 const SeatOnline = () => {
@@ -17,27 +17,27 @@ const SeatOnline = () => {
   // const OPEN_PAGE_URL = 'http://localhost:5173/';
   const currentDate = new Date();
   const user = getSavedNewUserDetails();
-  const { currentUser, qrCodeResponse, setQrCodeResponse, qrCodeForOnlineStore, setQrCodeForOnlineStore, } =
+  const { currentUser, qrCodeForOnlineStore, setQrCodeForOnlineStore, } =
     useCurrentUserContext();
   const [loading, setLoading] = useState(true);
   const [showBanner, setShowBanner] = useState(false);
   const [isQrCodeLoading, setIsQrCodeLoading] = useState(false);
 
   useEffect(() => {
-    if (qrCodeResponse) {
+    if (qrCodeForOnlineStore) {
       setLoading(false);
     }
-  }, [qrCodeResponse]);
+  }, [qrCodeForOnlineStore]);
   // {console.log('URLLLLLL',process.env.Q_APP_URL)}
 
   const handleAddQrCode = async () => {
     setIsQrCodeLoading(true);
-    if (qrCodeResponse.length === 5) {
+    if (qrCodeForOnlineStore.length === 5) {
       setShowBanner(true);
       setIsQrCodeLoading(false);
     }
 
-    if (qrCodeResponse.length === 0) {
+    if (qrCodeForOnlineStore.length === 0) {
       const dataToPost = {
         // "link": "https://xvr8nq-5173.csb.app/",
         link: `${OPEN_PAGE_URL}qrlink/?view=qrlinks`,
@@ -62,9 +62,9 @@ const SeatOnline = () => {
           setIsQrCodeLoading(false);
         });
     }
-    if (qrCodeResponse.length > 0 && qrCodeResponse.length <= 5) {
-      if (qrCodeResponse.length === 5) return;
-      const seatNumbers = qrCodeResponse.map((item) =>
+    if (qrCodeForOnlineStore.length > 0 && qrCodeForOnlineStore.length <= 5) {
+      if (qrCodeForOnlineStore.length >= 5 && getSavedNewUserDetails()[0]?.is_paid === false) return;
+      const seatNumbers = qrCodeForOnlineStore.map((item) =>
         parseInt(item.seat_number.split("_")[2])
       );
       const maxSeatNumber = Math.max(...seatNumbers);
@@ -100,12 +100,12 @@ const SeatOnline = () => {
   };
 
   const handleGetQrCode = async () => {
-    await getQrCode(
+    await getQrCodeOnline(
       currentUser?.userinfo?.client_admin_id,
       getSavedNewUserDetails()[0]?._id
     )
       .then(async (res) => {
-        setQrCodeResponse(res?.data?.response);
+        setQrCodeForOnlineStore(res?.data?.response);
       })
       .catch((err) => {
         console.log("error qr code retrieval", err);
