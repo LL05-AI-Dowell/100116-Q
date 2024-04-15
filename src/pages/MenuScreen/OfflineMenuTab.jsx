@@ -4,10 +4,10 @@ import Tab from "@mui/material/Tab";
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
-import OnlineMenuTab from "./OnlineMenuTab";
-import OfflineMenuTab from "./OfflineMenuTab";
+import MenuScreen from "./MenuScreen";
+import ViewMenu from "./ViewMenu";
 
-const MenuTab = () => {
+const OfflineMenuTab = () => {
   const [value, setValue] = useState("1");
 
   const handleChange = (event, newValue) => {
@@ -29,18 +29,20 @@ const MenuTab = () => {
             }}
           >
             <TabList onChange={handleChange} aria-label='lab API tabs example'>
-              <Tab label='ONLINE MENU' value='1' />
-              <Tab label='OFFLINE MENU' value='2' />
+              <Tab label='ADD MENU' value='1' />
+              <Tab label='VIEW MENU' value='2' />
             </TabList>
           </Box>
           <TabPanel value='1'>
-            <OnlineMenuTab />
+            <MenuScreen type={"OFFLINE"} />
           </TabPanel>
-          <TabPanel value='2'>{<OfflineMenuTab />}</TabPanel>
+          <TabPanel value='2'>
+            <ViewMenu type={"OFFLINE"} />
+          </TabPanel>
         </TabContext>
       </Box>
     </div>
   );
 };
 
-export default MenuTab;
+export default OfflineMenuTab;

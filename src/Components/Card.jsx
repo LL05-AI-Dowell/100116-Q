@@ -4,7 +4,7 @@ import CardContent from '@mui/material/CardContent';
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import { format } from "date-fns";
-import { qrCodeActivationDeactivation } from "../../services/qServices";
+import { getQrCodeOnline, qrCodeActivationDeactivation } from "../../services/qServices";
 import { useNavigate } from 'react-router-dom';
 import {
   CircularProgress
@@ -12,9 +12,11 @@ import {
 import { getQrCode } from "../../services/qServices";
 import { getSavedNewUserDetails } from "../hooks/useDowellLogin";
 import { useCurrentUserContext } from "../contexts/CurrentUserContext";
+import { toast } from "react-toastify";
 
 const CardDetails = ({ qrCodeResponse }) => {
-  const { currentUser, setQrCodeResponse } = useCurrentUserContext()
+  // {console.log('qr codeeeeeeee responseeeeeeeee',qrCodeResponse)}
+  const { currentUser, setQrCodeResponse, setQrCodeForOnlineStore } = useCurrentUserContext()
   const [isImageClicked, setIsImageClicked] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -24,14 +26,23 @@ const CardDetails = ({ qrCodeResponse }) => {
   };
 
   const handleGetQrCode = async () => {
-    await getQrCode(currentUser?.userinfo?.client_admin_id, getSavedNewUserDetails()[0]?._id).then(async (res) => {
-      setQrCodeResponse(res?.data?.response);
-    }).catch(err => {
-      console.log('error qr code retrieval', err);
-      if (err?.response?.status === 400) {
-        navigate('/error');
-      }
-    })
+    qrCodeResponse?.store_type === "OFFLINE" ?
+      await getQrCode(currentUser?.userinfo?.client_admin_id, getSavedNewUserDetails()[0]?._id).then(async (res) => {
+        setQrCodeResponse(res?.data?.response);
+      }).catch(err => {
+        console.log('error qr code retrieval', err);
+        if (err?.response?.status === 400) {
+          navigate('/error');
+        }
+      }) :
+      await getQrCodeOnline(currentUser?.userinfo?.client_admin_id, getSavedNewUserDetails()[0]?._id).then(async (res) => {
+        setQrCodeForOnlineStore(res?.data?.response);
+      }).catch(err => {
+        console.log('error qr code retrieval', err);
+        if (err?.response?.status === 400) {
+          navigate('/error');
+        }
+      })
   }
 
   const formattedCreatedAt = format(
@@ -44,6 +55,7 @@ const CardDetails = ({ qrCodeResponse }) => {
     console.log('>>>>>>>>>>', qrCodeResponse.workspace_id, qrCodeResponse._id, status);
     await qrCodeActivationDeactivation(qrCodeResponse.workspace_id, qrCodeResponse._id, status).then(res => {
       console.log('res qr activateion de activation', res);
+      toast.success(`Qr code ${status === false ? 'deactivated' : 'activated'} successfully`);
       handleGetQrCode();
       setIsLoading(false);
     }).catch(err => {
@@ -73,10 +85,12 @@ const CardDetails = ({ qrCodeResponse }) => {
   }
 
   return (
-    <Card sx={{ display: 'flex', width: '46%', margin: '1rem', padding: '0.9%' ,
-    '@media (max-width: 1100px)': {
-      width: '100%',
-  } }}>
+    <Card sx={{
+      display: 'flex', width: '46%', margin: '1rem', padding: '0.9%',
+      '@media (max-width: 1100px)': {
+        width: '100%',
+      }
+    }}>
       <div className="w-2/5 flex items-center justify-center" onClick={handleImageClick}>
         <img
           src={qrCodeResponse.qrcode_image_url}
@@ -84,7 +98,7 @@ const CardDetails = ({ qrCodeResponse }) => {
           className="h-max w-full shadow-5xl mx-2"
         />
       </div>
-      <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'left', justifyContent: 'left',width:'60%' }}>
+      <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'left', justifyContent: 'left', width: '60%' }}>
         {/* <Typography variant="h6" component="h6" sx={{ fontSize: '1.3rem', textAlign: 'left', margin: '5px' }}>
           {changeName(qrCodeResponse.qrcode_name)}
         </Typography>
@@ -126,7 +140,7 @@ const CardDetails = ({ qrCodeResponse }) => {
           </a>
         </Typography>
         <Typography variant="body1" component="p" sx={{ textAlign: 'left', display: 'flex', alignItems: 'center', margin: '5px' }}>
-          <Typography component="span" sx={{ mx: 0.5, fontSize: '0.875rem' }}>Created At:</Typography> 
+          <Typography component="span" sx={{ mx: 0.5, fontSize: '0.875rem' }}>Created At:</Typography>
           <Typography component="span" variant="body2" sx={{ fontFamily: 'Roboto', fontWeight: 'light' }}>{formattedCreatedAt}</Typography>
         </Typography>
         {qrCodeResponse.is_active ? (

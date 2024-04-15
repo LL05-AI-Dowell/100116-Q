@@ -12,6 +12,8 @@ import Select from "react-select";
 import { IoIosAddCircle } from "react-icons/io";
 import { getSavedNewUserDetails } from "../../hooks/useDowellLogin";
 import { useNavigate } from "react-router-dom";
+import { getTimeZone } from "../../helpers/helpers";
+import { toast } from "react-toastify";
 
 const StoreDetailsScreen = () => {
     const navigate = useNavigate();
@@ -56,7 +58,8 @@ const StoreDetailsScreen = () => {
             update_data: {
                 PAYMENT_METHOD: event.target.value,
             },
-            timezone: currentUser?.userinfo?.timezone,
+            store_type: "OFFLINE",
+            timezone: currentUser?.userinfo?.timezone?currentUser?.userinfo?.timezone:getTimeZone(),
         };
 
         const existingIndex = dataToPostForAllPromises.findIndex((item) =>
@@ -135,15 +138,6 @@ const StoreDetailsScreen = () => {
         }
     }, [storeDataLoaded, initialSeatConfigured]);
 
-    // const handleSelectChange = (selectedOptions, table_name) => {
-    //     console.log('handleSelectChange', selectedOptions, table_name);
-    //     console.log('seat options',seatOptions);
-
-    //     setSelectedOption(selectedOptions);
-    //     const remainingOptions = seatOptions.filter(option => !selectedOptions.includes(option));
-    //     setSeatOption(remainingOptions);
-    // };
-
     const handleSelectChange = (selectedOptions, tableName) => {
         console.log("handleSelectChange", selectedOptions, tableName);
         console.log("qr", qrCodeResponse);
@@ -188,7 +182,8 @@ const StoreDetailsScreen = () => {
             update_data: {
                 tables: updatedTables,
             },
-            timezone: currentUser?.userinfo?.timezone,
+            store_type: "OFFLINE",
+            timezone: currentUser?.userinfo?.timezone?currentUser?.userinfo?.timezone:getTimeZone(),
         };
         const existingIndex = dataToPostForAllPromises.findIndex((item) =>
             Object.keys(item.update_data).includes("tables")
@@ -238,7 +233,8 @@ const StoreDetailsScreen = () => {
             update_data: {
                 bill_genration_by: event.target.value,
             },
-            timezone: currentUser?.userinfo?.timezone,
+            store_type: "OFFLINE",
+            timezone: currentUser?.userinfo?.timezone?currentUser?.userinfo?.timezone:getTimeZone(),
         };
 
         const existingIndex = dataToPostForAllPromises.findIndex((item) =>
@@ -278,7 +274,8 @@ const StoreDetailsScreen = () => {
             update_data: {
                 store_name: storeName,
             },
-            timezone: currentUser?.userinfo?.timezone,
+            store_type: "OFFLINE",
+            timezone: currentUser?.userinfo?.timezone?currentUser?.userinfo?.timezone:getTimeZone(),
         };
         // updatStoreDataAPI(currentUser?.userinfo?.client_admin_id, storeData[0]._id,getSavedNewUserDetails()[0]._id)
         // setAllPromises(prevPromises => [...prevPromises, updatStoreDataAPI(currentUser?.userinfo?.client_admin_id, storeData[0]._id, getSavedNewUserDetails()[0]._id, dataToPostForUpdatingStoreName)]);
@@ -309,7 +306,8 @@ const StoreDetailsScreen = () => {
             update_data: {
                 is_active: !isActive,
             },
-            timezone: currentUser?.userinfo?.timezone,
+            store_type: "OFFLINE",
+            timezone: currentUser?.userinfo?.timezone?currentUser?.userinfo?.timezone:getTimeZone(),
         };
         const existingIndex = dataToPostForAllPromises.findIndex((item) =>
             Object.keys(item.update_data).includes("is_active")
@@ -352,8 +350,11 @@ const StoreDetailsScreen = () => {
                 console.log("All requests succeeded:", results);
                 setIsUpdateLoading(false);
                 setStoreDetailsResponse(storeData);
+                showEditModal(false);
+                toast.success('Offline Store Details updated successfully');
             })
             .catch((error) => {
+                // toast.error('Unable to update Store Details');
                 console.error("Error occurred during requests:", error);
                 setIsUpdateLoading(false);
                 if (error?.response?.status === 400) {
@@ -364,39 +365,6 @@ const StoreDetailsScreen = () => {
 
     const new_dt_object = new Date(storeData[0]?.created_at);
     const newformattedDate = new_dt_object.toLocaleDateString("en-GB");
-
-    const checkObject = [
-        {
-            table_name: "Table 1",
-            created_at: "13/03/2024",
-            is_active: true,
-        },
-        {
-            table_name: "Table 1",
-            created_at: "13/03/2024",
-            is_active: true,
-        },
-        {
-            table_name: "Table 1",
-            created_at: "13/03/2024",
-            is_active: true,
-        },
-        {
-            table_name: "Table 1",
-            created_at: "13/03/2024",
-            is_active: true,
-        },
-        {
-            table_name: "Table 1",
-            created_at: "13/03/2024",
-            is_active: true,
-        },
-        {
-            table_name: "Table 1",
-            created_at: "13/03/2024",
-            is_active: true,
-        },
-    ];
 
     return (
         <>
