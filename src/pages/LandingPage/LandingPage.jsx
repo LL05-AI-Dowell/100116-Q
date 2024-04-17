@@ -523,7 +523,6 @@ const LandingPage = () => {
                                   key={index}
                                   seatNumber={index}
                                   pagination={cardPagination}
-                                  store='ONLINE'
                                 />
                               </TableRow>
                             ))

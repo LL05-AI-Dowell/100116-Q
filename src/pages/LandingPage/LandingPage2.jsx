@@ -24,7 +24,7 @@ import {
   getSavedNewUserDetails,
 } from "../../hooks/useDowellLogin";
 import { QueryClient, QueryClientProvider, useQuery } from "react-query";
-import SeatRow from "./TableContent";
+import SeatRowOnline from "./TableContentOnline";
 import DigitalQLogo from "../../assets/Digital_Q.svg";
 import { retrieveInitiatedOrder } from "../../../services/qServices";
 import { HiOutlineStatusOnline } from "react-icons/hi";
@@ -419,7 +419,7 @@ const LandingPage2 = () => {
                             .slice(cardPagination, cardPagination + 5)
                             .map((row, index) => (
                               <TableRow key={index + "_"}>
-                                <SeatRow
+                                <SeatRowOnline
                                   key={index}
                                   seatNumber={index}
                                   pagination={cardPagination}
