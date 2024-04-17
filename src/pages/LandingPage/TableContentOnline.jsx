@@ -12,7 +12,7 @@ import { getSavedNewUserDetails } from '../../hooks/useDowellLogin';
 import { useCurrentUserContext } from '../../contexts/CurrentUserContext';
 import { formatDateForAPI } from '../../helpers/helpers';
 
-const SeatRow = ({ seatNumber, pagination}) => {
+const SeatRowOnline = ({ seatNumber, pagination }) => {
     const { currentUser } = useCurrentUserContext();
     const currentDate = new Date();
 
@@ -23,11 +23,11 @@ const SeatRow = ({ seatNumber, pagination}) => {
     const { isLoading, data, isError } = useQuery(
         ["seatData", seatNumber],
         async () => {
-            const paymentData = getOnlineOrderBySeatNumber(
+            const paymentData = await getPaymentDetailForSeat(
                 currentUser?.userinfo?.client_admin_id,
-                formatDateForAPI(currentDate),
-                getSavedNewUserDetails()[0]?.store_ids?.online_store_id,
                 seatNumber + pagination + 1,
+                formatDateForAPI(currentDate),
+                getSavedNewUserDetails()[0]?.store_ids?.offline_store_id,
             );
             return paymentData;
         },
@@ -62,7 +62,7 @@ const SeatRow = ({ seatNumber, pagination}) => {
                 <TableCell align="left" sx={{ padding: '5px' }}>loading...</TableCell>
             </>
         );
-    if (isError || !data)
+    if (isError)
         // console.log(`Error fetching data seat number ${seatNumber + pagination + 1}`, !isError, data?.data?.response[0]);
         return (
             <>
@@ -124,4 +124,4 @@ const SeatRow = ({ seatNumber, pagination}) => {
     );
 };
 
-export default SeatRow;
+export default SeatRowOnline;
