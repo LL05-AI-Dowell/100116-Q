@@ -68,7 +68,7 @@ const MenuScreen = ({ type }) => {
       const response = await icreateMenu(
         currentUser?.userinfo?.client_admin_id,
         getSavedNewUserDetails()[0]._id,
-        getSavedNewUserDetails()[0].store_ids[0],
+        type === 'ONLINE' ? getSavedNewUserDetails()[0]?.store_ids?.online_store_id : getSavedNewUserDetails()[0]?.store_ids?.offline_store_id,
         dataToPost
       );
       console.log(response);

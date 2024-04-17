@@ -40,7 +40,7 @@ const SeatOnline = () => {
     if (qrCodeForOnlineStore.length === 0) {
       const dataToPost = {
         // "link": "https://xvr8nq-5173.csb.app/",
-        link: `${OPEN_PAGE_URL}qrlink/?view=qrlinks`,
+        link: `${OPEN_PAGE_URL}onlineshoplink/?`,
         timezone: currentUser?.userinfo?.timezone,
         username: currentUser?.userinfo?.username,
         store_type: "ONLINE",
@@ -75,7 +75,7 @@ const SeatOnline = () => {
       }
       const dataToPost = {
         // "link": `${OPEN_PAGE_URL}qrlink/?view=qrlinks`,
-        link: `${OPEN_PAGE_URL}qrlink/?view=qrlinks`,
+        link: `${OPEN_PAGE_URL}onlineshoplink/?`,
         timezone: currentUser?.userinfo?.timezone,
         username: currentUser?.userinfo?.username,
         store_type: "ONLINE",
