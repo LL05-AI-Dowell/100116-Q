@@ -257,12 +257,12 @@ export const icreateMenu = async (
   );
 };
 
-export const getMenuData = async (workspace_id, store_id) => {
+export const getMenuData = async (workspace_id, store_id,store_type) => {
   const headers = {
     Authorization: `Bearer ${getSavedApiKey()}`,
   };
   return await qServicesAxiosInstance.get(
-    `/v3/store-services/?type=retrieve_menu_details&workspace_id=${workspace_id}&store_id=${store_id}&limit=1&offset=0`,
+    `/v3/store-services/?type=retrieve_menu_details&workspace_id=${workspace_id}&store_id=${store_id}&limit=100&offset=0&store_type=${store_type}`,
     { headers }
   );
 };

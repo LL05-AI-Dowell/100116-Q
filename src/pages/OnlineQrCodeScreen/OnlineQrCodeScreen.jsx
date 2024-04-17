@@ -12,7 +12,7 @@ import { CircularProgress } from "@mui/material";
 import { QueryClient, QueryClientProvider, useQuery } from "react-query";
 import { GiTakeMyMoney } from "react-icons/gi";
 import { MdOutlinePayments } from "react-icons/md";
-import { getStoreData, getMenuData } from "../../../services/qServices";
+import { getStoreData, getMenuData ,getOfflineOnlineMenuData} from "../../../services/qServices";
 import MenuCard from "./MenuCard";
 import { useNavigate } from "react-router-dom";
 import { FaPerson } from "react-icons/fa6";
@@ -263,7 +263,7 @@ const QrCodeScreen = () => {
 
     useEffect(() => {
         setIsMenuDataLoading(true);
-        getMenuData(workspaceId, store_id)
+        getOfflineOnlineMenuData(workspaceId, store_id,'ONLINE')
             .then((res) => {
                 console.log("get Menu data ress", res.data);
                 setMenuData(res?.data?.response);
