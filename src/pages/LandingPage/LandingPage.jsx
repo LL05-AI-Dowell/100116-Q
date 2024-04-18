@@ -32,10 +32,10 @@ import SeatRow from "./TableContent";
 import { toast } from "react-toastify";
 import io from 'socket.io-client';
 import axios from "axios";
-const workspace_id = "6385c0f18eca0fb652c94558";
+const workspaceId = "6385c0f18eca0fb652c94558";
 const user_id = "660d7c78bdbc0038f13e0b2d";
 const apiKey="1b834e07-c68b-4bf6-96dd-ab7cdc62f07f"
-const productName='test_product'
+const productName='dowell_feedback_survey'
 const ENDPOINT = "https://www.dowellchat.uxlivinglab.online"
 const LandingPage = () => {
   const queryClient = new QueryClient();
@@ -79,12 +79,13 @@ const LandingPage = () => {
   const [selectedChat, setSelectedChat] = useState(null);
   const [messageText, setMessageText] = useState("");
   const [socket, setSocket] = useState(null);
-  const[ticketCount,setTicketCount]=useState(0)
+  // const[ticketCount,setTicketCount]=useState(0)
   const[ticketData,setTicketData]=useState([])
   const[messages,setMessages]=useState({})
-  const[openedChatDetails,setOpenedChatDetails]=useState()
+  const[openedChatDetails,setOpenedChatDetails]=useState({})
   const[managerId,setManagerId]=useState(null)
 
+  //workspaceId is hardcoded and dummydata is not working properly for messages
   useEffect(() => {
     const newSocket = io(ENDPOINT);
     setSocket(newSocket);
@@ -97,25 +98,29 @@ const LandingPage = () => {
     if (!socket) return;
     socket.emit('get_tickets', {
       product: productName,
-      workspace_id: "63cf89a0dcc2a171957b290b",
-      api_key: "1b834e07-c68b-4bf6-96dd-ab7cdc62f07f",
+      workspace_id:workspaceId,
+      api_key:apiKey,
     });
 
     socket.on('ticket_response', (res) => {
+      console.log(res)
       if (res.operation === "get_ticket") {
         const tickets = res.data.filter(data => !data.is_closed).map(arr => ({
           ticketId: arr._id,
           userId: arr.user_id,
           lineManager: arr.line_manager,
         }));
+
        tickets.map((ticket)=>{
+
           getAllMessages(ticket.ticketId)
        })
         setTicketData(tickets);
-        setTicketCount(tickets.length)
+      //  setTicketCount(tickets.length)
       }else if (res.operation === "close_ticket") {
         console.log(res)
         if(res.status=="failure"){
+          console.log(res)
           alert("failed! refresh and try again")
         }
       }else{
@@ -131,7 +136,7 @@ const LandingPage = () => {
     function getLineManagers(){
       if(socket){
       socket.emit('get_all_line_managers', {
-          workspace_id: "63cf89a0dcc2a171957b290b",
+          workspace_id:workspaceId,
           api_key: apiKey,
       });
       socket.on('setting_response', (res) => {
@@ -149,7 +154,7 @@ const LandingPage = () => {
 
   const listenToNewTickets=()=>{
     socket.emit('get_all_topics', {
-      workspace_id:"63cf89a0dcc2a171957b290b",
+      workspace_id:workspaceId,
       api_key:apiKey,
   });
   socket.on('new_ticket', (res) => {
@@ -160,7 +165,7 @@ const LandingPage = () => {
     }
     console.log(res.data)
     setTicketData((prev)=>[...prev,newTicket])
-    setTicketCount((prev)=>prev+1)
+   // setTicketCount((prev)=>prev+1)
     getAllMessages(res.data._id)
   });
   }
@@ -195,18 +200,18 @@ const updateMessages=(id,newMsg)=>{
 }
 
 
-function closeTicket(){
+function closeTicket(e){
     socket.emit('close_ticket', {
       ticket_id: openedChatDetails.ticketId,
       line_manager:openedChatDetails.lineManager,
       product: productName,
-      workspace_id: "63cf89a0dcc2a171957b290b",
-      api_key: "1b834e07-c68b-4bf6-96dd-ab7cdc62f07f",
+      workspace_id:workspaceId,
+      api_key:apiKey,
   });
 
-  handleCloseChat()
+ // handleCloseChat()
   setTicketData(prevData => prevData.filter(ticket => ticket.ticketId !== openedChatDetails.ticketId));
-  setTicketCount((prev)=>prev-1)
+ // setTicketCount((prev)=>prev-1)
   setMessages(prevMessages => {
     const msgs=prevMessages
     const index=openedChatDetails.ticketId
@@ -219,8 +224,8 @@ function getAllMessages(ticketId) {
     socket.emit('get_ticket_messages', {
         ticket_id: ticketId,
         product: productName,
-        workspace_id: "63cf89a0dcc2a171957b290b",
-        api_key: "1b834e07-c68b-4bf6-96dd-ab7cdc62f07f",
+        workspace_id:workspaceId,
+        api_key:apiKey,
     });
     
 }
@@ -232,10 +237,11 @@ const handleShowChat = () => {
 
   const handleChatOpen = (ticketId,userId,lineManager) => {
     setSelectedChat(ticketId);
-    setOpenedChatDetails({ticketId,userId,lineManager})
+   
   };
 
   const handleSendChatMessage = () => {
+    console.log("messageText",messageText)
     if (messageText.trim() !== "") {
     //   let obj={
     //     messageText,
@@ -248,8 +254,8 @@ const handleShowChat = () => {
         message_data:messageText,
         user_id:managerId,
         reply_to: "None",
-        workspace_id: "63cf89a0dcc2a171957b290b",
-        api_key: "1b834e07-c68b-4bf6-96dd-ab7cdc62f07f",
+        workspace_id:workspaceId,
+        api_key:apiKey,
         created_at: new Date()
     });
     
@@ -263,21 +269,21 @@ const handleShowChat = () => {
   };
 
 
-  const DummyData = ({ chat }) => {
-    return (
-      <div
-        className='flex flex-col items-start justify-center rounded-3xl pl-6 py-1 my-3 bg-slate-300 gap-y-1 cursor-pointer'
-        onClick={() => {
-          handleChatOpen(chat.ticketId,chat.userId,chat.lineManager);
-        }}
-      >
-        <span className='font-bold text-gray-700'>{chat.userId}</span>
-        <div className='h-[20px] overflow-hidden'>
-          {/* <span>{chat.messages[chat.messages.length-1]}</span> */}
-        </div>
-      </div>
-    );
-  };
+  // const DummyData = ({ chat }) => {
+  //   return (
+  //     <div
+  //       className='flex flex-col items-start justify-center rounded-3xl pl-6 py-1 my-3 bg-slate-300 gap-y-1 cursor-pointer'
+  //       onClick={() => {
+  //         handleChatOpen(chat.ticketId,chat.userId,chat.lineManager);
+  //       }}
+  //     >
+  //       <span className='font-bold text-gray-700'>{chat.userId}</span>
+  //       <div className='h-[20px] overflow-hidden'>
+  //         {/* <span>{chat.messages[chat.messages.length-1]}</span> */}
+  //       </div>
+  //     </div>
+  //   );
+  // };
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       if (seatNumberRef.current) {
@@ -420,6 +426,7 @@ const handleShowChat = () => {
   };
 
   const toggleAccordion = (chatId) => {
+    console.log(chatId)
     setExpandedChatId(chatId === expandedChatId ? null : chatId);
   };
 
@@ -503,41 +510,66 @@ const handleShowChat = () => {
   //   { id: 5, name: "Eric Davidson", message: "We will have a meeting" },
   // ];
 
-  // const DummyData = ({ chat }) => {
-  //   const isExpanded = chat.id === expandedChatId;
-  //   return (
-  //     <div className='overflow-auto bg-white rounded-xl mb-3'>
-  //       <div className='p-2'>
-  //         <div
-  //           className='w-full flex flex-col items-start justify-center p-2 gap-y-1 cursor-pointer'
-  //           onClick={() => toggleAccordion(chat.id)}
-  //         >
-  //           <span className='font-bold text-gray-700'>{chat.name}</span>
-  //         </div>
-  //         <div
-  //           className={`grid overflow-hidden transition-all duration-300 ease-in-out text-slate-600 ${isExpanded
-  //               ? "grid-rows-[1fr] opacity-100"
-  //               : "grid-rows-[0fr] opacity-0"
-  //             }`}
-  //         >
-  //           <div className='overflow-hidden flex flex-col justify-between gap-y-2'>
-  //             <div className='h-[220px] rounded-md border-2 border-sky-500 p-2'>
-  //               This is the chat
-  //             </div>
-  //             <div className='flex items-center justify-between gap-x-2'>
-  //               <input
-  //                 className='w-full placeholder:italic placeholder:text-slate-400 placeholder:text-sm block bg-white border border-slate-300 py-2 shadow-sm focus:outline-none focus:border-sky-500 focus:ring-1 rounded-2xl px-2'
-  //                 type='text'
-  //                 placeholder='message'
-  //               />
-  //               <IoMdSend size={28} className='text-blue-600 cursor-pointer' />
-  //             </div>
-  //           </div>
-  //         </div>
-  //       </div>
-  //     </div>
-  //   );
-  // };
+  console.log(messages)
+  console.log(openedChatDetails)
+  const DummyData = ({ chat }) => {
+    const isExpanded = chat.userId === expandedChatId;
+
+    return (
+      <div className='overflow-auto bg-white rounded-xl mb-3'>
+        <div className='p-2'>
+          <div
+            className='w-full flex  items-start justify-between p-2 gap-y-1 cursor-pointer'
+            onClick={() => {toggleAccordion(chat.userId)
+              setOpenedChatDetails({ticketId:chat.ticketId,
+                userId:chat.userId,
+                lineManager:chat.lineManager})
+            }}
+          >
+            <span className='font-bold text-gray-700'>{chat.userId}</span>
+            
+          </div>
+          <div
+            className={`grid overflow-hidden transition-all duration-300 ease-in-out text-slate-600 ${isExpanded
+                ? "grid-rows-[1fr] opacity-100"
+                : "grid-rows-[0fr] opacity-0"
+              }`}
+          >
+            <div className='overflow-hidden flex flex-col justify-between gap-y-2'>
+            
+              <div className='h-[220px] rounded-md border-2 border-sky-500 p-2'>
+              
+               
+              {openedChatDetails && messages[openedChatDetails.ticketId] && messages[openedChatDetails.ticketId].map((msg, index) => {
+               if(msg.message_data.length>0){
+                return (
+                  <div key={index} className={msg.author === `${managerId}` ? "flex justify-end mx-2" : "flex justify-start mx-2"}>
+                      <div className={msg.author === `${managerId}` ? "bg-blue-400 rounded-xl my-2 px-3 py-1" : "bg-green-400 rounded-xl my-2 px-3 py-1"}>
+                          {msg.message_data}
+                      </div>
+                  </div>
+                  )}
+                })}
+           
+              </div>
+              <div className='flex items-center justify-between gap-x-2'>
+                <input
+                  className='w-full placeholder:italic placeholder:text-slate-400 placeholder:text-sm block bg-white border border-slate-300 py-2 shadow-sm focus:outline-none focus:border-sky-500 focus:ring-1 rounded-2xl px-2'
+                  type='text'
+                  placeholder='message'
+                  value={messageText}
+                  onChange={(e)=>setMessageText(e.target.value)}
+                />
+                <IoMdSend size={28} className='text-blue-600 cursor-pointer' onClick={()=>{handleSendChatMessage()}}/>
+                
+              </div>
+              <button onClick={closeTicket} className='w-max flex justify-center items-center p-2 bg-red-600 rounded-lg'>Close Ticket</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <>
@@ -932,10 +964,90 @@ const handleShowChat = () => {
                 </div>
                 {ticketData.length > 0 ? (
                   <div>
-                   {ticketData.map((chat) => (
-                    <DummyData  chat={chat} />
-                   ))}
-                  </div>
+                  {ticketData.map((chat) => {
+                    const isExpanded = chat.userId === expandedChatId;
+                
+                    return (
+                      <div className='overflow-auto bg-white rounded-xl mb-3' key={chat.userId}>
+                        <div className='p-2'>
+                          <div
+                            className='w-full flex  items-start justify-between p-2 gap-y-1 cursor-pointer'
+                            onClick={() => {
+                              toggleAccordion(chat.userId);
+                              setOpenedChatDetails({
+                                ticketId: chat.ticketId,
+                                userId: chat.userId,
+                                lineManager: chat.lineManager
+                              });
+                            }}
+                          >
+                            <span className='font-bold text-gray-700'>{chat.userId}</span>
+                          </div>
+                          <div
+                            className={`grid overflow-hidden transition-all duration-300 ease-in-out text-slate-600 ${
+                              isExpanded
+                                ? "grid-rows-[1fr] opacity-100"
+                                : "grid-rows-[0fr] opacity-0"
+                            }`}
+                          >
+                            <div className='overflow-hidden flex flex-col justify-between gap-y-2'>
+                              <div className='h-[220px] rounded-md border-2 border-sky-500 p-2 overflow-scroll'>
+                                {messages[openedChatDetails.ticketId] &&
+                                  messages[openedChatDetails.ticketId].map((msg, index) => {
+                                    if (msg.message_data.length > 0) {
+                                      return (
+                                        <div
+                                          key={index}
+                                          className={
+                                            msg.author === `${managerId}`
+                                              ? "flex justify-end mx-2"
+                                              : "flex justify-start mx-2"
+                                          }
+                                        >
+                                          <div
+                                            className={
+                                              msg.author === `${managerId}`
+                                                ? "bg-blue-400 rounded-xl my-2 px-3 py-1"
+                                                : "bg-green-400 rounded-xl my-2 px-3 py-1"
+                                            }
+                                          >
+                                            {msg.message_data}
+                                          </div>
+                                        </div>
+                                      );
+                                    }
+                                  })}
+                              </div>
+                              <div className='flex items-center justify-between gap-x-2'>
+                                <input
+                                  className='w-full placeholder:italic placeholder:text-slate-400 placeholder:text-sm block bg-white border border-slate-300 py-2 shadow-sm focus:outline-none focus:border-sky-500 focus:ring-1 rounded-2xl px-2'
+                                  type='text'
+                                  placeholder='message'
+                                  value={messageText}
+                                  onChange={(e) => setMessageText(e.target.value)}
+                                />
+                                <IoMdSend
+                                  size={28}
+                                  className='text-blue-600 cursor-pointer'
+                                  onClick={() => {
+                                    handleSendChatMessage();
+                                  }}
+                                />
+                              </div>
+                              <button
+                                onClick={closeTicket}
+                                className='w-max flex justify-center items-center p-2 bg-red-600 rounded-lg'
+                              >
+                                Close Ticket
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                
                 ) : (
                   <div className='flex items-center justify-center p-3'>
                     <span className='font-semibold text-2xl'>
@@ -944,47 +1056,6 @@ const handleShowChat = () => {
                   </div>
                 )}
               </div>
-              {selectedChat && (
-          <div className='fixed bottom-0 left-10 md:left-52 w-[300px]  md:w-[400px] h-[400px] flex items-center justify-center bg-opacity-75 mb-4'>
-          <div className='bg-gray-100 rounded-lg p-6 w-full h-full'>
-            <div className='flex justify-between'>
-              <h2 className='text-xl font-semibold mb-4'>
-                Chat with {openedChatDetails.userId}
-              </h2>
-              <button
-                className='text-red-500 cursor-pointer'
-                onClick={handleCloseChat}
-              >close</button>
-            </div>
-            <div >
-              <div className="flex flex-col  w-full h-52 overflow-scroll border border-sky-400 rounded-xl">
-              {messages[openedChatDetails.ticketId] && messages[openedChatDetails.ticketId].map((msg, index) => {
-               if(msg.message_data.length>0){
-                return (
-                  <div key={index} className={msg.author === `${managerId}` ? "flex justify-end mx-2" : "flex justify-start mx-2"}>
-                      <div className={msg.author === `${managerId}` ? "bg-blue-400 rounded-xl my-2 px-3 py-1" : "bg-green-400 rounded-xl my-2 px-3 py-1"}>
-                          {msg.message_data}
-                      </div>
-                  </div>
-                  )}
-                })}
-              </div>
-              <div className="flex flex-row items-center justify-between ">
-                      <textarea
-                      className="w-full h-max border  p-2 m-2 rounded-lg"
-                      placeholder="Type your message here..."
-                      value={messageText}
-                      onChange={(e) => setMessageText(e.target.value)}
-                      />
-                      <button className='p-2  bg-blue-600 rounded-lg'
-                        onClick={handleSendChatMessage}
-                      >send</button>
-                </div>
-                <button onClick={closeTicket} className='w-max flex justify-center items-center p-2 bg-red-600 rounded-lg'>Close Ticket</button>
-            </div>
-          </div>
-        </div>
-          )}
             </div>
             {/* -------------------------------------Chat Bar-------------------------------------- */}
           </div>

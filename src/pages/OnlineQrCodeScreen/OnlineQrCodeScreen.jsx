@@ -23,7 +23,7 @@ import io from 'socket.io-client';
 import axios from "axios";
 const queryClient = new QueryClient();
 const apiKey="1b834e07-c68b-4bf6-96dd-ab7cdc62f07f"
-const productName='test_product'
+
 const ENDPOINT = "https://www.dowellchat.uxlivinglab.online"
 const QrCodeScreen = () => {
     const navigate = useNavigate();
@@ -70,7 +70,11 @@ const QrCodeScreen = () => {
     const [link, setLink] = useState("");
     const[linkId,setLinkId]=useState(null)
     const[orderId,setOrderId]=useState(null)
-    
+    const[productName,setProductName]=useState('test_product')
+//       localStorage.removeItem("ticketId")
+//   localStorage.removeItem("userId")
+// localStorage.removeItem("orderId")
+
     useEffect(() => {
         const getTicketLink=async()=>{//ticket_link is not present in api
              try {
@@ -81,9 +85,13 @@ const QrCodeScreen = () => {
                      }
                  });
                  const data = await response.json();
+                 console.log(data)
                  if (data && data.response && data.response[0] && data.response[0].ticket_link) {
                      setLink(data.response[0].ticket_link);
                  }
+                 if (data && data.response && data.response[0] && data.response[0].product_name) {
+                    setProductName(data.response[0].product_name);
+                }
              } catch (error) {
                  console.error("Error fetching data:", error);
              }
@@ -91,7 +99,7 @@ const QrCodeScreen = () => {
          getTicketLink();
      }, []);
      
-     console.log(userId)
+     console.log(linkId)
      useEffect(() => {
          const useQueryParams = () => {
              if (!link) {
@@ -113,7 +121,7 @@ const QrCodeScreen = () => {
              setLinkId(link_id)
          }
      }, [link]);
-     
+    //  console.log(linkId)
      const getOrderId=async(ticketId,orderId)=>{
      
          let body={
@@ -169,20 +177,26 @@ const QrCodeScreen = () => {
             socket.on('ticket_message_response', handleMessage);
         }
     },[socket])
-    
+    console.log(productName,workspaceId)
     const createTicket=()=>{
+        if(!linkId)
+        alert("Ticket Link is not present")
         if (socket) {
                socket.emit('create_ticket', {
+                // product:"dowell_feedback_survey",
                 product:productName,
-                workspace_id: "63cf89a0dcc2a171957b290b",
+                //workspace_id: "63cf89a0dcc2a171957b290b",
+                workspace_id: workspaceId,
                 email: "reddypranai2017@gmail.com",
-                link_id:"37324795525379026095",
+                //link_id:"37324795525379026095",
+                link_id:linkId,
                 api_key:apiKey,
                 created_at: new Date()
             }); 
             socket.on('ticket_response', (res) => {
-               
+               console.log(res)
                 if(res.data._id && res.data.user_id){
+                    console.log("Helloooo")
                     setTicketId(res.data._id)
                     setUserId(res.data.user_id)
                     localStorage.setItem("ticketId",res.data._id)
@@ -190,11 +204,19 @@ const QrCodeScreen = () => {
                     getOrderId(res.data._id,res.data.user_id)
                     setMessages([])
                 }
+                // }else{
+                //     setTicketId(null)
+                //     setUserId(null)
+                //     setOrderId(null)
+                //     localStorage.setItem("ticketId",null)
+                //     localStorage.setItem("userId",null)
+                //     localStorage.setItem("orderId",null)
+                // }
             }); 
           
        }
     }
-    
+    console.log(ticketId)
     
     const handleSendChatMessage = () => {
         if (messageText.trim() !== "") {
@@ -210,9 +232,9 @@ const QrCodeScreen = () => {
                 message_data: messageText,
                 user_id:userId,
                 reply_to: "None",
-                workspace_id: "63cf89a0dcc2a171957b290b",
+                workspace_id:workspaceId,
                 api_key: apiKey,
-                created_at: new Date().getTime()
+                created_at: new Date()
             });
             setMessageText("");
         }
@@ -225,7 +247,7 @@ const QrCodeScreen = () => {
         socket.emit('get_ticket_messages', {
             ticket_id: ticketId,
             product: productName,
-            workspace_id: "63cf89a0dcc2a171957b290b",
+            workspace_id: workspaceId,
             api_key:apiKey,
         });
        
