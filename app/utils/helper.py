@@ -231,3 +231,21 @@ def generate_store_data(store_id, workspace_id, user_id, timezone, store_type):
         ]
 
     return store_data
+
+def generate_cashfree_payment(price, callback_url):
+    """
+    Generate a payment request to the Stripe payment API.
+    
+    :param price: The price of the product.
+    :param callback_url: The URL to which the payment response will be sent.
+    :return: Response object containing the payment request result.
+    """
+    url = "https://100088.pythonanywhere.com/api/cashfree"
+    payload = {
+        "amount": price,
+        "description": "Payment for tiny little shop",
+        "currency": "INR",
+        "callback_url": callback_url
+    }
+    response = requests.post(url, json=payload)
+    return response  

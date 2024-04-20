@@ -604,6 +604,7 @@ class qrcode_services(APIView):
 
         if not serializer.is_valid():
             return CustomResponse(False, "Posting wrong data to API",serializer.errors, status.HTTP_400_BAD_REQUEST)
+        
         generated_link = f'{link}&type={store_type}&workspace_id={workspace_id}&store_id={store_id}&seat_number={seat_number}'
         
         qrcode = json.loads(generate_qrcode(
@@ -1080,14 +1081,20 @@ class customer_services_offline_store(APIView):
         
         payment_receipt_id = generate_store_id()
         # callback_url =f"http://localhost:5173/success/?view=success&payment_receipt_id={payment_receipt_id}&date={date}&workspace_id={workspace_id}&qrcode_id={qrcode_id}&seat_number={seat_number}"
-        callback_url =f"https://www.q.uxlivinglab.online/success/?view=success&payment_receipt_id={payment_receipt_id}&date={date}&workspace_id={workspace_id}&qrcode_id={qrcode_id}&seat_number={seat_number}&store_id={store_id}"
+        callback_url =f"https://www.q.uxlivinglab.online/success/?view=success&payment_receipt_id={payment_receipt_id}&date={date}&workspace_id={workspace_id}&qrcode_id={qrcode_id}&seat_number={seat_number}&store_id={store_id}&store_type=OFFLINE"
         
         # payment information will be changed later
         
-        payment_response = generate_payment(amount, callback_url)
-        print(callback_url)
+        # payment_response = generate_payment(amount, callback_url)
+        # print(callback_url)
+        # if payment_response.status_code != 200:
+        #     return CustomResponse(False, "Failed to initiate payment for the customer", status.HTTP_401_UNAUTHORIZED)
+
+        payment_response = generate_cashfree_payment(amount, callback_url)
+        print(payment_response)
         if payment_response.status_code != 200:
             return CustomResponse(False, "Failed to initiate payment for the customer", status.HTTP_401_UNAUTHORIZED)
+
         
         create_payment = payment_response.json()
 
@@ -1096,7 +1103,7 @@ class customer_services_offline_store(APIView):
         
         qrcode_updation_response = update_qr_code_link(
             qrcode_id,
-            create_payment["approval_url"],
+            create_payment["data"]["link_url"],
             f'seat_number_{seat_number}'
         )
        
@@ -1107,10 +1114,10 @@ class customer_services_offline_store(APIView):
         data_to_update = {
             "order_status":"payment_generated",
             "qrcode_id": qrcode_id,
-            "payment_link": create_payment["approval_url"],
+            "payment_link": create_payment["data"]["link_url"],
             "amount":amount,
             "payment_receipt_id":payment_receipt_id,
-            "receipt_id": create_payment["payment_id"],
+            "receipt_id": create_payment["data"]["payment_id"],
             "payment_details": None,
             "updated_at": dowell_time(timezone)["current_time"]
         }
@@ -1196,19 +1203,26 @@ class customer_services_offline_store(APIView):
         return CustomResponse(True, "Customer Data retrieved" ,data, status.HTTP_200_OK)
         
     def update_payment_status(self,request):
-        
+        # callback_url =f"https://www.q.uxlivinglab.online/success/?view=success&payment_receipt_id={payment_receipt_id}&date={date}&workspace_id={workspace_id}&qrcode_id={qrcode_id}&seat_number={seat_number}&store_id={store_id}"
+        # generated_link = f'{link}&type={store_type}&workspace_id={workspace_id}&store_id={store_id}&seat_number={seat_number}'
+        # &type={store_type}&workspace_id={workspace_id}&store_id={store_id}&seat_number={seat_number}
         payment_receipt_id = request.GET.get('payment_receipt_id')
         date = request.GET.get('date')
         workspace_id = request.GET.get('workspace_id')
         qrcode_id = request.GET.get('qrcode_id')
         seat_number = request.GET.get('seat_number')
         store_id = request.GET.get('store_id')
+        store_type = request.GET.get('store_type')
+        
 
         
         if not qrcode_id and not payment_receipt_id and not workspace_id and not date:
             return CustomResponse(False, "Payment Details are missing",None, status.HTTP_400_BAD_REQUEST)
         
-        generated_link = f'https://www.q.uxlivinglab.online/qrlink/?view=qrlinks&workspace_id={workspace_id}&store_id={store_id}&seat_number={seat_number}'
+        if store_type == 'OFFLINE':
+            generated_link = f'https://www.q.uxlivinglab.online/qrlink/?view=qrlinks&type={store_type}&workspace_id={workspace_id}&store_id={store_id}&seat_number={seat_number}'
+        elif store_type == 'ONLINE':
+            generated_link = f'https://www.q.uxlivinglab.online/onlineshoplink/?type={store_type}&workspace_id={workspace_id}&store_id={store_id}&seat_number={seat_number}'
         update_qr_code = update_qr_code_link(
             qrcode_id,
             generated_link,
@@ -1360,13 +1374,21 @@ class customer_services_online_store(APIView):
             return CustomResponse(False, "Posting wrong data to API",serializer.errors, status.HTTP_400_BAD_REQUEST)
         
         payment_receipt_id = generate_store_id()
+
+        # Payment logic 
+
         # callback_url =f"http://localhost:5173/success/?view=success&payment_receipt_id={payment_receipt_id}&date={date}&workspace_id={workspace_id}&qrcode_id={qrcode_id}&seat_number={seat_number}"
-        callback_url =f"https://www.q.uxlivinglab.online/success/?view=success&payment_receipt_id={payment_receipt_id}&date={date}&workspace_id={workspace_id}&qrcode_id={qrcode_id}&seat_number={seat_number}&store_id={store_id}"
+        callback_url =f"https://www.q.uxlivinglab.online/success/?view=success&payment_receipt_id={payment_receipt_id}&date={date}&workspace_id={workspace_id}&qrcode_id={qrcode_id}&seat_number={seat_number}&store_id={store_id}&store_type=ONLINE"
         
         # payment information will be changed later
         
-        payment_response = generate_payment(amount, callback_url)
-        print(callback_url)
+        # payment_response = generate_payment(amount, callback_url)
+        # print(callback_url)
+        # if payment_response.status_code != 200:
+        #     return CustomResponse(False, "Failed to initiate payment for the customer", status.HTTP_401_UNAUTHORIZED)
+        
+        payment_response = generate_cashfree_payment(amount, callback_url)
+        print(payment_response)
         if payment_response.status_code != 200:
             return CustomResponse(False, "Failed to initiate payment for the customer", status.HTTP_401_UNAUTHORIZED)
         
@@ -1377,7 +1399,7 @@ class customer_services_online_store(APIView):
         
         qrcode_updation_response = update_qr_code_link(
             qrcode_id,
-            create_payment["approval_url"],
+            create_payment["data"]["link_url"],
             f'seat_number_{seat_number}'
         )
        
@@ -1389,10 +1411,10 @@ class customer_services_online_store(APIView):
             "seat_number":f'seat_number_{seat_number}',
             "order_status":"payment_generated",
             "qrcode_id": qrcode_id,
-            "payment_link": create_payment["approval_url"],
+            "payment_link": create_payment["data"]["link_url"],
             "amount":amount,
             "payment_receipt_id":payment_receipt_id,
-            "receipt_id": create_payment["payment_id"],
+            "receipt_id": create_payment["data"]["payment_id"],
             "payment_details": None,
             "updated_at": dowell_time(timezone)["current_time"]
         }
