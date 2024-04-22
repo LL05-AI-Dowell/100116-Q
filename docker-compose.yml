@@ -15,9 +15,7 @@ services:
     volumes:
       - .:/usr/src/app
     
-
-  
-
 networks:
-    default:
-        name: queue-net
+  webnet:
+    external: true
+    name: webnet
