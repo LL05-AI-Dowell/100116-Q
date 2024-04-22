@@ -26,7 +26,7 @@ class UserDetailsSerializer(serializers.Serializer):
 class UpdateUserDetailsSerializer(serializers.Serializer):
     document_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
     workspace_id = serializers.CharField(max_length=100,allow_null= False, allow_blank=False)
-    update_data = LimitedKeysDictField(allowed_keys=['bank_details', 'address','ticket_link','product_name'])
+    update_data = LimitedKeysDictField(allowed_keys=['bank_details', 'address','ticket_link','product_name','default_store_type'])
     
     def validate_bank_details(self, value):
         if not isinstance(value, dict):
