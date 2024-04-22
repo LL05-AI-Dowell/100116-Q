@@ -32,12 +32,13 @@ import SeatRow from "./TableContent";
 import { toast } from "react-toastify";
 import io from 'socket.io-client';
 import axios from "axios";
-const workspaceId = "6385c0f18eca0fb652c94558";
+
 const user_id = "660d7c78bdbc0038f13e0b2d";
 const apiKey="1b834e07-c68b-4bf6-96dd-ab7cdc62f07f"
 const productName='dowell_feedback_survey'
 const ENDPOINT = "https://www.dowellchat.uxlivinglab.online"
 const LandingPage = () => {
+
   const queryClient = new QueryClient();
   const OPEN_PAGE_URL = "https://www.q.uxlivinglab.online/";
   // const OPEN_PAGE_URL = 'http://localhost:5173/';
@@ -84,7 +85,8 @@ const LandingPage = () => {
   const[messages,setMessages]=useState({})
   const[openedChatDetails,setOpenedChatDetails]=useState({})
   const[managerId,setManagerId]=useState(null)
-
+  const workspaceId = currentUser?.userinfo?.client_admin_id;
+  console.log(currentUser?.userinfo?.client_admin_id)
   //workspaceId is hardcoded and dummydata is not working properly for messages
   useEffect(() => {
     const newSocket = io(ENDPOINT);

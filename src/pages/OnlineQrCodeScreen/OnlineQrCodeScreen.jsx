@@ -2,7 +2,7 @@ import { React, useEffect, useState } from "react";
 import { FaHandPointUp } from "react-icons/fa";
 import { RiBillFill } from "react-icons/ri";
 import { IoPersonSharp } from "react-icons/io5";
-import { useLocation } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
 import {
     initiateNewOrder,
     initiateOlderOrder,
@@ -34,10 +34,12 @@ const QrCodeScreen = () => {
     const useQueryParams = () => {
         return new URLSearchParams(useLocation().search);
     };
+    const [params,setParams]=useSearchParams()
     const query = useQueryParams();
-    const workspaceId = query.get("workspace_id");
-    const store_id = query.get("store_id");
-
+    const workspaceId = params.get("workspace_id")
+    // const workspaceId = query.get("workspace_id");
+    //const store_id = query.get("store_id");
+    const store_id =  params.get("store_id")
     const [phoneModal, setPhoneModal] = useState(false);
     const [inputNumber, setInputValue] = useState("");
     const [showModal, setShowModal] = useState(false);
@@ -168,7 +170,6 @@ const QrCodeScreen = () => {
         if(socket){
             const handleMessage= (res) => {
                 if(res.operation=="get_ticket_messages"){
-                 if( res.data[0].message_data[0]!=="{")
                    setMessages(res.data)
                 }else{
                     setMessages((prev)=>[...prev,res.data])
