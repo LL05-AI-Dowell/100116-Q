@@ -16,5 +16,5 @@ services:
       - .:/usr/src/app
     
 networks:
-    default:
-        name: queue-net
+  default:
+    name: queue-net
