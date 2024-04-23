@@ -1093,7 +1093,7 @@ class customer_services_offline_store(APIView):
         payment_response = generate_cashfree_payment(amount, callback_url)
         print(payment_response)
         if payment_response.status_code != 200:
-            return CustomResponse(False, "Failed to initiate payment for the customer", status.HTTP_401_UNAUTHORIZED)
+            return CustomResponse(False, "Failed to initiate payment for the customer",payment_response, status.HTTP_401_UNAUTHORIZED)
 
         
         create_payment = payment_response.json()
