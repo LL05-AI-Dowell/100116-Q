@@ -1066,7 +1066,7 @@ class customer_services_offline_store(APIView):
         timezone = request.data.get('timezone')
         date= request.data.get('date')
         store_id= request.data.get('store_id')
-        amount = request.data.get('amount')
+        amount = int(request.data.get('amount'))
         orderId = request.data.get('order_intiated_id')
 
         try:
@@ -1360,7 +1360,7 @@ class customer_services_online_store(APIView):
         timezone = request.data.get('timezone')
         date= request.data.get('date')
         store_id= request.data.get('store_id')
-        amount = request.data.get('amount')
+        amount = int(request.data.get('amount'))
         orderId = request.data.get('order_intiated_id')
 
         try:
