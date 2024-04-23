@@ -16,6 +16,5 @@ services:
       - .:/usr/src/app
     
 networks:
-  webnet:
-    external: true
-    name: webnet
+    default:
+        name: queue-net
