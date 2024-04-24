@@ -257,7 +257,7 @@ export const icreateMenu = async (
   );
 };
 
-export const getMenuData = async (workspace_id, store_id,store_type) => {
+export const getMenuData = async (workspace_id, store_id, store_type) => {
   const headers = {
     Authorization: `Bearer ${getSavedApiKey()}`,
   };
@@ -308,7 +308,11 @@ export const retrieveMasterQr = async (workspace_id, user_id) => {
   );
 };
 
-export const getInitiatedOrdersOnline = async (workspace_id, date, store_id) => {
+export const getInitiatedOrdersOnline = async (
+  workspace_id,
+  date,
+  store_id
+) => {
   const headers = {
     Authorization: `Bearer ${getSavedApiKey()}`,
   };
@@ -381,6 +385,17 @@ export const getOfflineOnlineMenuData = async (
   };
   return await qServicesAxiosInstance.get(
     `/v3/store-services/?type=retrieve_menu_details&workspace_id=${workspace_id}&store_id=${store_id}&limit=1&offset=0&store_type=${store_type}`,
+    { headers }
+  );
+};
+
+export const updateUserDetails = async (dataToPost) => {
+  const headers = {
+    Authorization: `Bearer ${getSavedApiKey()}`,
+  };
+  return await qServicesAxiosInstance.post(
+    `/v3//user-services/?type=update_user_details`,
+    dataToPost,
     { headers }
   );
 };
