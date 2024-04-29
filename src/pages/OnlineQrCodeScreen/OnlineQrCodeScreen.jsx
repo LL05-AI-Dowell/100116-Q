@@ -12,7 +12,7 @@ import { CircularProgress } from "@mui/material";
 import { QueryClient, QueryClientProvider, useQuery } from "react-query";
 import { GiTakeMyMoney } from "react-icons/gi";
 import { MdOutlinePayments } from "react-icons/md";
-import { getStoreData, getMenuData ,getOfflineOnlineMenuData} from "../../../services/qServices";
+import { getStoreData, getMenuData, getOfflineOnlineMenuData } from "../../../services/qServices";
 import MenuCard from "./MenuCard";
 import { useNavigate } from "react-router-dom";
 import { FaPerson } from "react-icons/fa6";
@@ -21,8 +21,10 @@ import Modal from "./ScreenData";
 import { IoMdSend } from "react-icons/io";
 import io from 'socket.io-client';
 import axios from "axios";
+import { getTimeZone } from "../../helpers/helpers";
+
 const queryClient = new QueryClient();
-const apiKey="1b834e07-c68b-4bf6-96dd-ab7cdc62f07f"
+const apiKey = "1b834e07-c68b-4bf6-96dd-ab7cdc62f07f"
 
 const ENDPOINT = "https://www.dowellchat.uxlivinglab.online"
 const QrCodeScreen = () => {
@@ -34,12 +36,12 @@ const QrCodeScreen = () => {
     const useQueryParams = () => {
         return new URLSearchParams(useLocation().search);
     };
-    const [params,setParams]=useSearchParams()
+    const [params, setParams] = useSearchParams()
     const query = useQueryParams();
     const workspaceId = params.get("workspace_id")
     // const workspaceId = query.get("workspace_id");
     //const store_id = query.get("store_id");
-    const store_id =  params.get("store_id")
+    const store_id = params.get("store_id")
     const [phoneModal, setPhoneModal] = useState(false);
     const [inputNumber, setInputValue] = useState("");
     const [showModal, setShowModal] = useState(false);
@@ -66,88 +68,88 @@ const QrCodeScreen = () => {
     const [socket, setSocket] = useState(null);
     const [showChatModal, setShowChatModal] = useState(false);
     const [messageText, setMessageText] = useState("");
-    const[messages,setMessages]=useState([])
+    const [messages, setMessages] = useState([])
     const [ticketId, setTicketId] = useState(null)
     const [userId, setUserId] = useState(null)
     const [link, setLink] = useState("");
-    const[linkId,setLinkId]=useState(null)
-    const[orderId,setOrderId]=useState(null)
-    const[productName,setProductName]=useState('test_product')
-//       localStorage.removeItem("ticketId")
-//   localStorage.removeItem("userId")
-// localStorage.removeItem("orderId")
+    const [linkId, setLinkId] = useState(null)
+    const [orderId, setOrderId] = useState(null)
+    const [productName, setProductName] = useState('test_product')
+    //       localStorage.removeItem("ticketId")
+    //   localStorage.removeItem("userId")
+    // localStorage.removeItem("orderId")
 
     useEffect(() => {
-        const getTicketLink=async()=>{//ticket_link is not present in api
-             try {
-                 const response = await fetch(`https://www.q.uxlivinglab.online/api/v3/user-services/?type=retrieve_user&workspace_id=${workspaceId}`,{
-                     method:"GET",
-                     headers:{
-                         "Authorization":`Bearer 1af585c9-bf49-4f35-992a-26842de6bd00`
-                     }
-                 });
-                 const data = await response.json();
-                 console.log(data)
-                 if (data && data.response && data.response[0] && data.response[0].ticket_link) {
-                     setLink(data.response[0].ticket_link);
-                 }
-                 if (data && data.response && data.response[0] && data.response[0].product_name) {
+        const getTicketLink = async () => {//ticket_link is not present in api
+            try {
+                const response = await fetch(`https://www.q.uxlivinglab.online/api/v3/user-services/?type=retrieve_user&workspace_id=${workspaceId}`, {
+                    method: "GET",
+                    headers: {
+                        "Authorization": `Bearer 1af585c9-bf49-4f35-992a-26842de6bd00`
+                    }
+                });
+                const data = await response.json();
+                console.log(data)
+                if (data && data.response && data.response[0] && data.response[0].ticket_link) {
+                    setLink(data.response[0].ticket_link);
+                }
+                if (data && data.response && data.response[0] && data.response[0].product_name) {
                     setProductName(data.response[0].product_name);
                 }
-             } catch (error) {
-                 console.error("Error fetching data:", error);
-             }
-         }
-         getTicketLink();
-     }, []);
-     
-     console.log(linkId)
-     useEffect(() => {
-         const useQueryParams = () => {
-             if (!link) {
-                 console.log("Link is empty");
-                 return null;
-             }
-     
-             try {
-                
-                 return new URLSearchParams(new URL(link).search);
-             } catch (error) {
-                 console.error("Error constructing URL:", error);
-                 return null;
-             }
-         };
-         const queryParams = useQueryParams();
-         if (queryParams) {  
-             const link_id = queryParams.get("link_id");
-             setLinkId(link_id)
-         }
-     }, [link]);
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+        }
+        getTicketLink();
+    }, []);
+
+    console.log(linkId)
+    useEffect(() => {
+        const useQueryParams = () => {
+            if (!link) {
+                console.log("Link is empty");
+                return null;
+            }
+
+            try {
+
+                return new URLSearchParams(new URL(link).search);
+            } catch (error) {
+                console.error("Error constructing URL:", error);
+                return null;
+            }
+        };
+        const queryParams = useQueryParams();
+        if (queryParams) {
+            const link_id = queryParams.get("link_id");
+            setLinkId(link_id)
+        }
+    }, [link]);
     //  console.log(linkId)
-     const getOrderId=async(ticketId,orderId)=>{
-     
-         let body={
-                 workspace_id:"6385c0f18eca0fb652c94558",//this is present in api of v3
-                 date:"2024_02_29",
-                 timezone:"Asia/Calcutta",
-                 store_id:"662943e33cef44f6a23df182",
-                 ticket_id:ticketId,
-                 customer_user_id:orderId 
-         }
-         
-         const response = await axios.post(
-             "https://www.q.uxlivinglab.online/api/v3/online-store-customer-services/?type=initiate_online_order",
-             body, 
-             {
-                 headers: {
-                     "Authorization": `Bearer 1af585c9-bf49-4f35-992a-26842de6bd00`
-                 }
-             })
-             localStorage.setItem("orderId",response.data.response)
-             setOrderId(response.data.response)
-     }
-     
-    
+    const getOrderId = async (ticketId, orderId) => {
+
+        let body = {
+            workspace_id: workspaceId,//this is present in api of v3
+            date: formatDateForAPI(new Date()),
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            store_id: store_id,
+            ticket_id: ticketId,
+            customer_user_id: orderId
+        }
+
+        const response = await axios.post(
+            "https://www.q.uxlivinglab.online/api/v3/online-store-customer-services/?type=initiate_online_order",
+            body,
+            {
+                headers: {
+                    "Authorization": `Bearer 1af585c9-bf49-4f35-992a-26842de6bd00`
+                }
+            })
+        localStorage.setItem("orderId", response.data.response)
+        setOrderId(response.data.response)
+    }
+
+
     useEffect(() => {
         const newSocket = io(ENDPOINT);
         setSocket(newSocket);
@@ -155,54 +157,54 @@ const QrCodeScreen = () => {
             newSocket.disconnect();
         };
     }, []);
-    
-    
-    useEffect(()=>{
-        let storedTicketId=localStorage.getItem("ticketId")
-        let storeduserId=localStorage.getItem("userId")
-        let storedorderId=localStorage.getItem("orderId")
-            setTicketId(storedTicketId)
-            setUserId(storeduserId)
-            setOrderId(storedorderId)
-      },[])
-    
-    useEffect(()=>{
-        if(socket){
-            const handleMessage= (res) => {
-                if(res.operation=="get_ticket_messages"){
-                   setMessages(res.data)
-                }else{
-                    setMessages((prev)=>[...prev,res.data])
+
+
+    useEffect(() => {
+        let storedTicketId = localStorage.getItem("ticketId")
+        let storeduserId = localStorage.getItem("userId")
+        let storedorderId = localStorage.getItem("orderId")
+        setTicketId(storedTicketId)
+        setUserId(storeduserId)
+        setOrderId(storedorderId)
+    }, [])
+
+    useEffect(() => {
+        if (socket) {
+            const handleMessage = (res) => {
+                if (res.operation == "get_ticket_messages") {
+                    setMessages(res.data)
+                } else {
+                    setMessages((prev) => [...prev, res.data])
                 }
             };
             socket.on('ticket_message_response', handleMessage);
         }
-    },[socket])
-    console.log(productName,workspaceId)
-    const createTicket=()=>{
-        if(!linkId)
-        alert("Ticket Link is not present")
+    }, [socket])
+    console.log(productName, workspaceId)
+    const createTicket = () => {
+        if (!linkId)
+            alert("Ticket Link is not present")
         if (socket) {
-               socket.emit('create_ticket', {
+            socket.emit('create_ticket', {
                 // product:"dowell_feedback_survey",
-                product:productName,
+                product: productName,
                 //workspace_id: "63cf89a0dcc2a171957b290b",
                 workspace_id: workspaceId,
                 email: "reddypranai2017@gmail.com",
                 //link_id:"37324795525379026095",
-                link_id:linkId,
-                api_key:apiKey,
+                link_id: linkId,
+                api_key: apiKey,
                 created_at: new Date()
-            }); 
+            });
             socket.on('ticket_response', (res) => {
-               console.log(res)
-                if(res.data._id && res.data.user_id){
+                console.log(res)
+                if (res.data._id && res.data.user_id) {
                     console.log("Helloooo")
                     setTicketId(res.data._id)
                     setUserId(res.data.user_id)
-                    localStorage.setItem("ticketId",res.data._id)
-                    localStorage.setItem("userId",res.data.user_id)
-                    getOrderId(res.data._id,res.data.user_id)
+                    localStorage.setItem("ticketId", res.data._id)
+                    localStorage.setItem("userId", res.data.user_id)
+                    getOrderId(res.data._id, res.data.user_id)
                     setMessages([])
                 }
                 // }else{
@@ -213,12 +215,12 @@ const QrCodeScreen = () => {
                 //     localStorage.setItem("userId",null)
                 //     localStorage.setItem("orderId",null)
                 // }
-            }); 
-          
-       }
+            });
+
+        }
     }
     console.log(ticketId)
-    
+
     const handleSendChatMessage = () => {
         if (messageText.trim() !== "") {
             // let obj={
@@ -231,34 +233,34 @@ const QrCodeScreen = () => {
                 product: productName,
                 // message_data: JSON.stringify(obj),
                 message_data: messageText,
-                user_id:userId,
+                user_id: userId,
                 reply_to: "None",
-                workspace_id:workspaceId,
+                workspace_id: workspaceId,
                 api_key: apiKey,
                 created_at: new Date()
             });
             setMessageText("");
         }
     };
-    
-    
-    
-    
-    const getAllMessages=()=>{
+
+
+
+
+    const getAllMessages = () => {
         socket.emit('get_ticket_messages', {
             ticket_id: ticketId,
             product: productName,
             workspace_id: workspaceId,
-            api_key:apiKey,
+            api_key: apiKey,
         });
-       
+
     }
-    
-    
-    const showChat=()=>{
+
+
+    const showChat = () => {
         setShowChatModal(true)
-       
-         getAllMessages()
+
+        getAllMessages()
     }
 
     useEffect(() => {
@@ -277,7 +279,7 @@ const QrCodeScreen = () => {
 
     useEffect(() => {
         setIsMenuDataLoading(true);
-        getOfflineOnlineMenuData(workspaceId, store_id,'ONLINE')
+        getOfflineOnlineMenuData(workspaceId, store_id, 'ONLINE')
             .then((res) => {
                 console.log("get Menu data ress", res.data);
                 setMenuData(res?.data?.response);
@@ -433,12 +435,12 @@ const QrCodeScreen = () => {
                             </button>
                         </div>
                         {/* <div className='cursor-pointer min-h-[50px] rounded border border-sky-400 flex items-center justify-center'> */}
-                            {/* <button className='text-xs sm:text-base lg:text-2xl p-1 text-center flex sm:flex-row flex-col items-center justify-center' */}
-                                {/* onClick={() => setShowChatModal(true)}> */}
-                                {/* <IoPersonSharp className='text-2xl sm:text-4xl lg:text-4xl' /> */}
-                                {/* <PiChatCircleTextDuotone fontSize={"1.5rem"} className='sm:mr-2 mr-0' />
+                        {/* <button className='text-xs sm:text-base lg:text-2xl p-1 text-center flex sm:flex-row flex-col items-center justify-center' */}
+                        {/* onClick={() => setShowChatModal(true)}> */}
+                        {/* <IoPersonSharp className='text-2xl sm:text-4xl lg:text-4xl' /> */}
+                        {/* <PiChatCircleTextDuotone fontSize={"1.5rem"} className='sm:mr-2 mr-0' />
                                 Chat */}
-                            {/* </button> */}
+                        {/* </button> */}
                         {/* </div> */}
                     </div>
                     {/* <Modal
@@ -464,68 +466,68 @@ const QrCodeScreen = () => {
                             />
                         </div>
                     </Modal> */}
-                     {!showChatModal ?(
+                    {!showChatModal ? (
                         <div className='cursor-pointer min-h-[50px] w-max fixed right-4 bottom-[200px] rounded flex items-center justify-center'>
                             <button onClick={showChat}>
-                                           {/* <IoPersonSharp className='text-2xl sm:text-4xl lg:text-4xl' /> */}
-                            <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 16 16" 
-                             className="ml-1.5 w-10 h-10 text-green-700" height="1em"width="1em" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M16 8c0 3.866-3.582 7-8 7a9.06 9.06 0 0 1-2.347-.306c-.584.296-1.925.864-4.181 1.234-.2.032-.352-.176-.273-.362.354
+                                {/* <IoPersonSharp className='text-2xl sm:text-4xl lg:text-4xl' /> */}
+                                <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 16 16"
+                                    className="ml-1.5 w-10 h-10 text-green-700" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M16 8c0 3.866-3.582 7-8 7a9.06 9.06 0 0 1-2.347-.306c-.584.296-1.925.864-4.181 1.234-.2.032-.352-.176-.273-.362.354
                                 -.836.674-1.95.77-2.966C.744 11.37 0 9.76 0 8c0-3.866 3.582-7 8-7s8 3.134 8 7zM4.5 
                                 5a.5.5 0 0 0 0 1h7a.5.5 0 0 0 0-1h-7zm0 2.5a.5.5 0 0 0 0 1h7a.5.5 0 0 0 0-1h-7zm0 2.5a.5.5 0 0 0 0 1h4a.5.5 0 0 0 0-1h-4z"
-                                ></path></svg>
-                                </button>
+                                    ></path></svg>
+                            </button>
                         </div>
-                     ):(
-                       <>
-                       {ticketId ?(
-                            <Modal
-                                 isOpen={() => setShowChatModal(true)}
-                                 onClose={() => setShowChatModal(false)}
-                                 title="Chat"
-                            >
-                       <div className="flex flex-col  w-full h-52 overflow-scroll border border-sky-400 rounded-xl">
-                            {messages.map((msg, index) => {
-                              return (
-                                 <div key={index} className={msg.author ===`${userId}` ? "flex justify-end mx-2" : "flex justify-start mx-2"}>
-                                 <div className={msg.author ===`${userId}` ? "bg-blue-400 rounded-xl my-2 px-3 py-1" : "bg-green-400 rounded-xl my-2 px-3 py-1"}>
-                                    {msg.message_data}
-                                 </div>
-                                </div>
-                               );
-                              })}
-                                                      
-                        </div>
-                        <div className="flex flex-row items-center justify-between">
-                            <textarea
-                            className="w-full h-max border rounded p-2 mb-2"
-                            placeholder="Type your message here..."
-                            value={messageText}
-                            onChange={(e) => setMessageText(e.target.value)}
-                            />
-                            <IoMdSend
-                            fontSize={'2rem'}
-                             onClick={handleSendChatMessage}
-                            />
-                       </div>
-                        </Modal>
-                        ):(
-                         <>
-                          <Modal
-                             isOpen={() => setShowChatModal(true)}
-                            onClose={() => setShowChatModal(false)}
-                            title="Chat"
-                        >
-                       <div className="flex flex-row items-end justify-between h-52">
-                            <button className="p-2 bg-red-400 rounded-xl text-blue-700 font-medium"
-                             onClick={()=>{createTicket()}}>click here to open a ticket
-                             </button>
-                        </div>
-                        </Modal>
+                    ) : (
+                        <>
+                            {ticketId ? (
+                                <Modal
+                                    isOpen={() => setShowChatModal(true)}
+                                    onClose={() => setShowChatModal(false)}
+                                    title="Chat"
+                                >
+                                    <div className="flex flex-col  w-full h-52 overflow-scroll border border-sky-400 rounded-xl">
+                                        {messages.map((msg, index) => {
+                                            return (
+                                                <div key={index} className={msg.author === `${userId}` ? "flex justify-end mx-2" : "flex justify-start mx-2"}>
+                                                    <div className={msg.author === `${userId}` ? "bg-blue-400 rounded-xl my-2 px-3 py-1" : "bg-green-400 rounded-xl my-2 px-3 py-1"}>
+                                                        {msg.message_data}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+
+                                    </div>
+                                    <div className="flex flex-row items-center justify-between">
+                                        <textarea
+                                            className="w-full h-max border rounded p-2 mb-2"
+                                            placeholder="Type your message here..."
+                                            value={messageText}
+                                            onChange={(e) => setMessageText(e.target.value)}
+                                        />
+                                        <IoMdSend
+                                            fontSize={'2rem'}
+                                            onClick={handleSendChatMessage}
+                                        />
+                                    </div>
+                                </Modal>
+                            ) : (
+                                <>
+                                    <Modal
+                                        isOpen={() => setShowChatModal(true)}
+                                        onClose={() => setShowChatModal(false)}
+                                        title="Chat"
+                                    >
+                                        <div className="flex flex-row items-end justify-between h-52">
+                                            <button className="p-2 bg-red-400 rounded-xl text-blue-700 font-medium"
+                                                onClick={() => { createTicket() }}>click here to open a ticket
+                                            </button>
+                                        </div>
+                                    </Modal>
+                                </>
+                            )}
                         </>
                     )}
-                    </>
-                )}
                 </div>
             )}
         </>
