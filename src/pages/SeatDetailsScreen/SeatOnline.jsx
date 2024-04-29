@@ -62,7 +62,7 @@ const SeatOnline = () => {
           setIsQrCodeLoading(false);
         });
     }
-    if (qrCodeForOnlineStore.length > 0 && qrCodeForOnlineStore.length <= 5) {
+    if (qrCodeForOnlineStore.length > 0) {
       if (qrCodeForOnlineStore.length >= 5 && getSavedNewUserDetails()[0]?.is_paid === false) return;
       const seatNumbers = qrCodeForOnlineStore.map((item) =>
         parseInt(item.seat_number.split("_")[2])

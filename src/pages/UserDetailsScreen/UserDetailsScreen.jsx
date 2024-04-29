@@ -10,18 +10,28 @@ import {
 import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from "@mui/icons-material/Cancel";
+import { CircularProgress } from "@mui/material";
 import Badge from "@mui/joy/Badge";
 import { getSavedNewUserDetails } from "../../hooks/useDowellLogin";
+import { updateUserDetails } from "../../../services/qServices";
+import { useCurrentUserContext } from "../../contexts/CurrentUserContext";
+import { getTimeZone } from "../../helpers/helpers";
+import { toast } from "react-toastify";
 // import './styles.css';
 
 const UserDetailsScreen = () => {
   const user = getSavedNewUserDetails();
   const [isEditing, setIsEditing] = useState(false);
   const [isTicketEditing, setIsTicketEditing] = useState(false);
-  const [isImageUrlEditing, setIsImageUrlEditing] = useState(false);
+  const [isProductNameEditing, setIsProductNameEditing] = useState(false);
   const [editedBankDetails, setEditedBankDetails] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
+  const [productName, setProductName] = useState("");
+  const [productLoading, setProductLoading] = useState(false);
+  const [ticketLoading, setTicketLoading] = useState(false);
+  // const [imageUrl, setImageUrl] = useState("");
   const [ticketLink, setTicketLink] = useState("");
+
+  const { currentUser } = useCurrentUserContext();
 
   const handleEditClick = () => {
     setIsEditing(!isEditing);
@@ -45,9 +55,43 @@ const UserDetailsScreen = () => {
     setIsTicketEditing(!isTicketEditing);
   };
 
-  const handleSaveTicketClick = () => {
-    setTicketLink("");
-    setIsTicketEditing(false);
+  const handleSaveTicketClick = async () => {
+    if (ticketLink === "") {
+      return toast.warning("Please input your ticket link");
+    }
+
+    if (isUrlValid(ticketLink) === false) {
+      return toast.warning("Please enter correct Ticket URL");
+    }
+
+    setTicketLoading(true);
+
+    const dataToPost = {
+      document_id: getSavedNewUserDetails()[0]._id,
+      update_data: {
+        ticket_link: ticketLink,
+      },
+      workspace_id: currentUser?.userinfo?.client_admin_id,
+      timezone: currentUser?.userinfo?.timezone
+        ? currentUser?.userinfo?.timezone
+        : getTimeZone(),
+    };
+
+    await updateUserDetails(dataToPost)
+      .then((res) => {
+        console.debug(res);
+        toast.success("Ticket link updated successfully");
+        setTicketLoading(false);
+        // setTicketLink(ticketLink);
+        setIsTicketEditing(false);
+      })
+      .catch((e) => {
+        toast.error("Failed to update ticket link");
+        console.debug(e);
+        setTicketLoading(false);
+        setTicketLink("");
+        setIsTicketEditing(false);
+      });
   };
 
   const handleCanceTicketlClick = () => {
@@ -59,23 +103,62 @@ const UserDetailsScreen = () => {
     setTicketLink(event.target.value);
   };
 
-  const handleEditImageUrlClick = () => {
-    setIsImageUrlEditing(!isImageUrlEditing);
+  const handleEditProductNameClick = () => {
+    setIsProductNameEditing(!isProductNameEditing);
   };
 
-  const handleSaveImageUrlClick = () => {
-    setImageUrl("");
-    setIsImageUrlEditing(false);
+  const handleSaveProductName = async () => {
+    if (productName === "") {
+      return toast.warning("Please input your Product name");
+    }
+
+    setProductLoading(true);
+
+    const dataToPost = {
+      document_id: getSavedNewUserDetails()[0]._id,
+      update_data: {
+        product_name: productName,
+      },
+      workspace_id: currentUser?.userinfo?.client_admin_id,
+      timezone: currentUser?.userinfo?.timezone
+        ? currentUser?.userinfo?.timezone
+        : getTimeZone(),
+    };
+
+    await updateUserDetails(dataToPost)
+      .then((res) => {
+        console.debug(res);
+        toast.success("Product name updated successfully");
+        // setProductName("");
+        setProductLoading(false);
+        setIsProductNameEditing(false);
+      })
+      .catch((e) => {
+        toast.error("Failed to update product name");
+        console.debug(e);
+        setProductName("");
+        setProductLoading(false);
+        setIsProductNameEditing(false);
+      });
   };
 
-  const handleCancelImageUrlClick = () => {
-    setImageUrl("");
-    setIsImageUrlEditing(false);
+  const handleCancelProductName = () => {
+    setProductName("");
+    setIsProductNameEditing(false);
   };
 
-  const handleImageUrlChange = (event) => {
-    setImageUrl(event.target.value);
+  const handleProductNameChange = (event) => {
+    setProductName(event.target.value);
   };
+
+  function isUrlValid(string) {
+    try {
+      new URL(string);
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }
 
   return (
     <Card
@@ -199,6 +282,7 @@ const UserDetailsScreen = () => {
                   <TextField
                     variant='outlined'
                     value={ticketLink}
+                    autoComplete='false'
                     sx={{
                       width: { xs: "50%", sm: "50%", md: "30%" },
                       height: { xs: "40px", sm: "50px", md: "60px" },
@@ -222,7 +306,11 @@ const UserDetailsScreen = () => {
                 {isTicketEditing ? (
                   <>
                     <IconButton onClick={handleSaveTicketClick}>
-                      <SaveIcon style={{ color: "green" }} />
+                      {ticketLoading ? (
+                        <CircularProgress size={25} />
+                      ) : (
+                        <SaveIcon style={{ color: "green" }} />
+                      )}
                     </IconButton>
                     <IconButton onClick={handleCanceTicketlClick}>
                       <CancelIcon style={{ color: "red" }} />
@@ -248,10 +336,11 @@ const UserDetailsScreen = () => {
                     Product Name :
                   </label>{" "}
                 </Typography>
-                {isImageUrlEditing ? (
+                {isProductNameEditing ? (
                   <TextField
                     variant='outlined'
-                    value={imageUrl}
+                    autoComplete='false'
+                    value={productName}
                     sx={{
                       width: { xs: "50%", sm: "50%", md: "30%" },
                       height: { xs: "40px", sm: "50px", md: "60px" },
@@ -259,7 +348,7 @@ const UserDetailsScreen = () => {
                         color: "black",
                       },
                     }}
-                    onChange={handleImageUrlChange}
+                    onChange={handleProductNameChange}
                     InputProps={{
                       sx: { color: "black" },
                     }}
@@ -267,22 +356,26 @@ const UserDetailsScreen = () => {
                 ) : (
                   <TextField
                     sx={{ width: "30%" }}
-                    value={imageUrl}
+                    value={productName}
                     variant='standard'
                     disabled
                   />
                 )}
-                {isImageUrlEditing ? (
+                {isProductNameEditing ? (
                   <>
-                    <IconButton onClick={handleSaveImageUrlClick}>
-                      <SaveIcon style={{ color: "green" }} />
+                    <IconButton onClick={handleSaveProductName}>
+                      {productLoading ? (
+                        <CircularProgress size={25} />
+                      ) : (
+                        <SaveIcon style={{ color: "green" }} />
+                      )}
                     </IconButton>
-                    <IconButton onClick={handleCancelImageUrlClick}>
+                    <IconButton onClick={handleCancelProductName}>
                       <CancelIcon style={{ color: "red" }} />
                     </IconButton>
                   </>
                 ) : (
-                  <IconButton onClick={handleEditImageUrlClick}>
+                  <IconButton onClick={handleEditProductNameClick}>
                     <EditIcon style={{ color: "black" }} />
                   </IconButton>
                 )}

@@ -13,7 +13,7 @@ import "react-toastify/dist/ReactToastify.css";
 import InitialConfigurationScreen from "./pages/InitalConfigurationScreen/InitialConfiguration";
 
 function App() {
-  console.log = () => { };
+  //console.log = () => { };
   useDowellLogin();
 
   // // USE ONLY WHEN APP IS BROKEN/UNDERGOING MAJOR CHANGES
