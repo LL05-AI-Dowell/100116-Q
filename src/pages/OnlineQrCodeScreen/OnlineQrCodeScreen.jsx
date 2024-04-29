@@ -130,7 +130,7 @@ const QrCodeScreen = () => {
                  workspace_id:"6385c0f18eca0fb652c94558",//this is present in api of v3
                  date:"2024_02_29",
                  timezone:"Asia/Calcutta",
-                 store_id:"660d7c76668a02ef5b274215",
+                 store_id:"662943e33cef44f6a23df182",
                  ticket_id:ticketId,
                  customer_user_id:orderId 
          }
@@ -260,114 +260,6 @@ const QrCodeScreen = () => {
        
          getAllMessages()
     }
-    //   const dataToPostForQuery = {
-    //     workspace_id: workspaceId,
-    //     date: formatDateForAPI(currentDate),
-    //     store_id: store_id,
-    //     phone_number: inputNumber,
-    //   };
-
-    //   const { isLoading, data, isError } = useQuery(
-    //     ["menuData"],
-    //     () =>
-    //       // initiateOlderOrder(dataToPostForQuery),
-    //       handleOrder(),
-    //     {
-    //       refetchInterval: 15000,
-    //     }
-    //   );
-
-    //   const handleOlderOrder = () => {
-    //     setPhoneModal(true);
-    //     setIsNewOrder(false);
-    //   };
-
-    //   const handleNewOrderClick = async () => {
-    //     if (inputNumber.length === 0) {
-    //       return null;
-    //     }
-    //     const dataToPost = {
-    //       workspace_id: workspaceId,
-    //       date: formatDateForAPI(currentDate),
-    //       timezone: timeZone,
-    //       seat_number: seat_number,
-    //       store_id: store_id,
-    //       phone_number: inputNumber,
-    //     };
-    //     console.log(dataToPost);
-    //     setIsNewOrderLoading(true);
-    //     await initiateNewOrder(dataToPost)
-    //       .then((res) => {
-    //         console.log("initiate new order resss", res);
-    //         setIsNewOrderLoading(false);
-    //         setShowModal(false);
-    //       })
-    //       .catch((err) => {
-    //         setIsNewOrderLoading(false);
-    //         console.log("initiate new order err", err);
-    //       });
-    //   };
-
-    //   const handleNewOrder = () => {
-    //     setPhoneModal(true);
-    //     setIsNewOrder(true);
-    //   };
-
-    //   const handleOrder = async () => {
-    //     if (inputNumber.length === 0) {
-    //       return null;
-    //     }
-    //     setIsOlderOrderLoading(true);
-    //     const dataToPost = {
-    //       workspace_id: workspaceId,
-    //       date: formatDateForAPI(currentDate),
-    //       store_id: store_id,
-    //       phone_number: inputNumber,
-    //     };
-
-    //     // console.log(dataToPost);
-    //     await initiateOlderOrder(dataToPost)
-    //       .then(res => {
-    //         console.log("initiate older order resss", res?.data?.success);
-    //         console.log('>>>>>>>>>>>>>>>>>>>>>>>.');
-    //         if (res?.data?.success === false) {
-    //           setBillIsNotGenerated({
-    //             show: true,
-    //             message: res?.data?.message,
-    //           });
-    //         }
-    //         setIsOlderOrderLoading(false);
-    //         setShowModal(false);
-    //       })
-    //       .catch((err) => {
-    //         console.log("initiate older order err", err);
-    //         setIsOlderOrderLoading(false);
-    //         if (err?.response?.status === 400) {
-    //           navigate('/error');
-    //         }
-    //         if (err?.response?.status === 402) {
-    //           console.log('a gayaaaaaaaa');
-    //           setBillIsNotGenerated({
-    //             show: false,
-    //             message: "",
-    //           })
-    //           setBillIsGenerated({
-    //             show: true,
-    //             message: err?.response?.data?.message,
-    //           });
-    //           setOldOrderResponseForPayment(err?.response?.data?.response);
-    //           setShowModal(false);
-    //         }
-    //         if (err?.response?.status === 404) {
-    //           setRecordNotFound({
-    //             show: true,
-    //             message: err?.response?.data?.message,
-    //           });
-    //         }
-    //       });
-
-    //     // setShowModal(false);
-    //   };
 
     useEffect(() => {
         setIsStoreDataLoading(true);

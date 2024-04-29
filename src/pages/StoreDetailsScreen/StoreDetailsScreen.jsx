@@ -1,4 +1,4 @@
-import { getStoreData, updatStoreDataAPI } from "../../../services/qServices";
+import { getStoreData, updatStoreDataAPI, updateUserDetails } from "../../../services/qServices";
 import { useCurrentUserContext } from "../../contexts/CurrentUserContext";
 import { useState, useEffect } from "react";
 import { CircularProgress, FormControlLabel, Switch } from "@mui/material";
@@ -20,7 +20,6 @@ const StoreDetailsScreen = () => {
   const {
     currentUser,
     qrCodeResponse,
-    storeDetailsResponse,
     setStoreDetailsResponse,
   } = useCurrentUserContext();
   const [storeData, setStoreData] = useState([]);
@@ -28,14 +27,15 @@ const StoreDetailsScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpenOnline, setIsModalOpenOnline] = useState(false);
   const [billGeneratedBy, setBillGeneratedBy] = useState("");
   const [storeName, setStoreName] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("");
-  const [selectedSeatForTable, setSelectedSeatForTable] = useState([]);
+  const [isDefaultStoreTypeUpdating, setIsDefaultStoreTypeUpdating] = useState(false);
   const [selectedOption, setSelectedOption] = useState(null);
   const [seatOptions, setSeatOption] = useState([]);
   const [initialSeatConfigured, setInitialSeatConfigured] = useState(false);
-  const [allPromises, setAllPromises] = useState([]);
+  const [isLoadingForOnlineStore, setIsLoadingForOnlineStore] = useState(false);
   const [dataToPostForAllPromises, setDataToPostForAllPromises] = useState([]);
   const [isActive, setIsActive] = useState(false);
   const [isUpdateLoading, setIsUpdateLoading] = useState(false);
@@ -44,18 +44,9 @@ const StoreDetailsScreen = () => {
   const [btnColor, setBtnColor] = useState(false);
   const [showMenuModal, setShowMenuModal] = useState(false);
   const [checked, setChecked] = useState(false);
+  const [showOnlineModal, setShowOnlineModal] = useState(false);
+  const [showOnlineEditModal, setShowOnlinEditModal] = useState(false);
 
-  const handleSeatChangeForTable = (event) => {
-    const options = event.target.options;
-    const selectedSeats = [];
-    for (let i = 0; i < options.length; i++) {
-      if (options[i].selected) {
-        selectedSeats.push(options[i].value);
-      }
-    }
-    setSelectedSeatForTable(selectedSeats);
-    console.log(selectedSeats);
-  };
 
   const handlePaymentMethodChange = (event) => {
     setPaymentMethod(event.target.value);
@@ -234,6 +225,12 @@ const StoreDetailsScreen = () => {
     setIsModalOpen(true);
   };
 
+  const handleOpenOnlineEditModal = () => {
+    setShowOnlinEditModal(true);
+    setIsModalOpenOnline(true);
+    setStoreName('');
+  }
+
   const handleOpenMenuModal = () => {
     setShowMenuModal(true);
     setIsModalOpen(true);
@@ -354,8 +351,24 @@ const StoreDetailsScreen = () => {
     console.log("promisesssss", dataToPostForAllPromises);
   };
 
-  const handleSwitchToggle = () => {
+  const handleSwitchToggle = async () => {
     setChecked(!checked);
+
+    const dataToPost = {
+      "document_id": getSavedNewUserDetails()[0]?._id,
+      "update_data": {
+        default_store_type: checked ? "ONLINE" : "OFFLINE",
+      },
+      workspace_id: currentUser?.userinfo?.client_admin_id,
+      timezone: currentUser?.userinfo?.timezone ? currentUser?.userinfo?.timezone : getTimeZone()
+    }
+    setIsDefaultStoreTypeUpdating(true);
+    // console.log('data to post for updating default store type',dataToPost);
+    await updateUserDetails(dataToPost).then(() => {
+      toast.success(`Default store updated ${checked ? "OFFLINE" : "ONLINE"} successfully`);
+    }).catch(err => {
+      toast.error('Unable to update defaul store type. Please try again');
+    }).finally(() => { setIsDefaultStoreTypeUpdating(false) })
   };
 
   const handleSaveChangesClick = () => {
@@ -390,6 +403,30 @@ const StoreDetailsScreen = () => {
       });
   };
 
+  const updateOnlineStoreName = async () => {
+    setIsLoadingForOnlineStore(true);
+    const dataToPost = {
+      update_data: {
+        "store_name": storeName,
+      },
+      store_type: "ONLINE",
+      timezone: currentUser?.userinfo?.timezone ? currentUser?.userinfo?.timezone : getTimeZone()
+    }
+
+    await updatStoreDataAPI(
+      currentUser?.userinfo?.client_admin_id,
+      getSavedNewUserDetails()[0]?.store_ids?.online_store_id,
+      getSavedNewUserDetails()[0]._id,
+      dataToPost).then(() => {
+        toast.success('Name updated successfully');
+      }).catch(() => {
+        toast.error('Unable to update store name');
+      }).finally(() => {
+        setIsLoadingForOnlineStore(false);
+        setShowOnlinEditModal(false);
+      })
+  }
+
   const new_dt_object = new Date(storeData[0]?.created_at);
   const newformattedDate = new_dt_object.toLocaleDateString("en-GB");
 
@@ -397,10 +434,17 @@ const StoreDetailsScreen = () => {
     <>
       <div className='w-full h-max p-4 flex flex-col flex-wrap items-center justify-evenly'>
         <div className='flex w-full items-center justify-end'>
-          <FormControlLabel
-            label={checked ? "Online" : "Offline"}
-            control={<Switch checked={checked} onChange={handleSwitchToggle} />}
-          />
+          {
+            isDefaultStoreTypeUpdating ?
+              <CircularProgress /> :
+              <div className="flex items-center">
+                <p className="mr-3">Default store type:</p>
+                <FormControlLabel
+                  label={checked ? "Online" : "Offline"}
+                  control={<Switch checked={checked} onChange={handleSwitchToggle} />}
+                />
+              </div>
+          }
         </div>
         <div>
           {isLoading ? (
@@ -445,14 +489,22 @@ const StoreDetailsScreen = () => {
                   <div className='flex items-center p-2 w-full justify-center'>
                     <button
                       className='p-2 bg-orange-200 m-1 rounded px-4 flex items-center justify-center'
-                      onClick={handleOpenEditModal}
+                      onClick={() => index === 0 ? handleOpenEditModal() : handleOpenOnlineEditModal()}
                     >
                       <CiEdit fontSize={"1.2rem"} />
                       Edit
                     </button>
                     <button
                       className='p-2 bg-sky-200 m-1 rounded px-4 flex items-center justify-center'
-                      onClick={handleOpenMenuModal}
+                      onClick={() => {
+                        if (index === 1) {
+                          setShowOnlineModal(true);
+                          setIsModalOpenOnline(true);
+                        } else {
+                          setShowMenuModal(true);
+                          setIsModalOpen(true);
+                        }
+                      }}
                     >
                       <MdViewList fontSize={"1.2rem"} />
                       View
@@ -652,8 +704,7 @@ const StoreDetailsScreen = () => {
           <></>
         )}
         {showMenuModal ? (
-          <Dialog open={isModalOpen} onClose={false} className='w-[100%]'>
-            {/* <button onClick={check}>check</button> */}
+          <Dialog onClose={false} open={isModalOpen} className='w-[100%]'>
             <div className='p-4 w-full flex flex-col items-center justify-center rounded'>
               <div className='w-full flex items-center justify-end'>
                 <MdCancel
@@ -741,6 +792,103 @@ const StoreDetailsScreen = () => {
         ) : (
           <></>
         )}
+        {
+          // open={isModalOpenOnline}
+          showOnlineEditModal ? (
+            <Dialog open={true} onClose={() => setIsModalOpen(false)} className='w-full max-w-md mx-auto'>
+              <div className='w-full flex flex-col items-center justify-center rounded'>
+                <div className='w-full flex items-center justify-end'>
+                  <MdCancel
+                    fontSize={"1.2rem"}
+                    onClick={() => { setShowOnlinEditModal(false); setStoreName('') }}
+                    color='red'
+                    className="mt-2 mr-2"
+                  />
+                </div>
+              </div>
+              <div className='m-4 flex flex-col items-center p-4'>
+                <p className="border-b-2">ONLINE STORE</p>
+                <label
+                  htmlFor='storeName'
+                  className='block text-sm font-medium text-gray-700 mt-3'
+                >
+                  Store Name
+                </label>
+                <input
+                  type='text'
+                  id='storeName'
+                  className='m-4 p-4 focus:outline-none focus:border-sky-500 focus:ring-sky-500 border rounded-md block w-full text-sm'
+                  value={storeName}
+                  onChange={handleStoreNameChange}
+                />
+                <button
+                  className='px-2 py-3 flex items-center justify-center bg-green-300 m-4 rounded'
+                  disabled={storeBtn}
+                  onClick={updateOnlineStoreName}
+                >{isLoadingForOnlineStore ? <CircularProgress /> : 'Save Changes'}</button>
+              </div>
+            </Dialog>) : null
+        }
+        {
+          // true ? (
+          showOnlineModal ? (
+            <Dialog open={isModalOpenOnline} onClose={() => setIsModalOpen(false)} className='w-full max-w-md mx-auto'>
+              <div className='p-4 w-full flex flex-col items-center justify-center rounded'>
+                <div className='w-full flex items-center justify-end'>
+                  <MdCancel
+                    fontSize={"1.2rem"}
+                    onClick={() => setShowOnlineModal(false)}
+                    color='red'
+                  />
+                </div>
+              </div>
+              <div className='p-6 bg-white rounded-lg shadow-lg m-4'>
+                <h2 className='text-xl font-semibold mb-4 text-center border-b-2'>Store Details</h2>
+                <div className='grid grid-cols-1 gap-4'>
+                  <div className='flex flex-col space-y-4'>
+                    <div className='flex items-center justify-between border-b-2'>
+                      <span className='text-lg font-medium'>Store Name:</span>
+                      <span className='text-sm font-normal ml-4'>
+                        {storeData[1]?.store_name ? storeData[1]?.store_name : "N/A"}
+                      </span>
+                    </div>
+                    <div className='flex items-center justify-between border-b-2'>
+                      <span className='text-lg font-medium'>Activity Status:</span>
+                      <span className={`text-sm font-normal ${storeData[1]?.is_active ? 'text-green-600' : 'text-red-600'}`}>
+                        {storeData[1]?.is_active === true ? "OPEN" : "CLOSE"}
+                      </span>
+                    </div>
+                    <div className='flex items-center justify-between border-b-2'>
+                      <span className='text-lg font-medium'>Store Type:</span>
+                      <span className='text-sm font-normal'>
+                        {storeData[1]?.store_type ? storeData[1]?.store_type : "N/A"}
+                      </span>
+                    </div>
+                    <div className='flex items-center justify-between border-b-2'>
+                      <span className='text-lg font-medium'>Bill Generation By:</span>
+                      <span className='text-sm font-normal'>
+                        {storeData[1]?.bill_genration_by ? storeData[1]?.bill_genration_by : "N/A"}
+                      </span>
+                    </div>
+                    <div className='flex items-center justify-between border-b-2'>
+                      <span className='text-lg font-medium'>Session Starts By:</span>
+                      <span className='text-sm font-normal ml-8'>
+                        {storeData[1]?.session_starts_by ? storeData[1]?.session_starts_by : "N/A"}
+                      </span>
+                    </div>
+                    <div className='flex items-center justify-between border-b-2'>
+                      <span className='text-lg font-medium'>Payment Method:</span>
+                      <span className='text-sm font-normal'>
+                        {storeData[1]?.PAYMENT_METHOD ? storeData[1]?.PAYMENT_METHOD : "N/A"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Dialog>
+          ) : null
+        }
+
       </div>
     </>
   );
