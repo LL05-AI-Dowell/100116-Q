@@ -1,3 +1,4 @@
+# use smaller version of alpine
 FROM python:3.11-alpine
 
 # Set the working directory in the container
