@@ -28,6 +28,7 @@ const UserDetailsScreen = () => {
   const [productName, setProductName] = useState("");
   const [productLoading, setProductLoading] = useState(false);
   const [ticketLoading, setTicketLoading] = useState(false);
+  console.log("User Details Screen");
   // const [imageUrl, setImageUrl] = useState("");
   const [ticketLink, setTicketLink] = useState("");
 
