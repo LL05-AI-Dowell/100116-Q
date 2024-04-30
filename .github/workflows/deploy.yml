@@ -24,5 +24,5 @@ jobs:
           cd /home/100116q/
           git checkout main
           git pull
-          docker-compose -f docker-compose.prod.yml up -d --build
+          docker compose -f docker-compose.prod.yml up -d --build
         EOF
