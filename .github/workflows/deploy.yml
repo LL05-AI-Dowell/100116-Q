@@ -22,6 +22,7 @@ jobs:
       run: |
         sshpass -p $SSH_PASSWORD ssh -o StrictHostKeyChecking=no root@67.217.58.6 << 'EOF'
           cd /home/100116q/
-          git pull origin main
+          git checkout main
+          git pull
           docker-compose -f docker-compose.prod.yml up -d --build
         EOF
