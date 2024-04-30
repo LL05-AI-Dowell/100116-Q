@@ -14,3 +14,4 @@ COPY . /usr/src/app
 # Expose the port on which the Django app will run
 EXPOSE 8000
 
+# random comment to test fix
