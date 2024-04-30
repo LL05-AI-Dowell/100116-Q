@@ -1,0 +1,57 @@
+version: '3.8'
+services:
+
+  100116q-frontend:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+      args:
+        VITE_BACKEND_URL: http://100116q-backend:8000/
+    container_name: 100116q-frontend
+    ports:
+      - 454:443
+    volumes:
+      - ./frontend:/usr/src/app
+    environment:
+      VITE_BACKEND_URL: http://100116q-backend:8000
+    restart: always
+    networks:
+      - queue-net
+
+  100116q-backend:
+    build:
+      context: ./backend
+    container_name: 100116q-backend
+    restart: always
+    command: python3 manage.py runserver 0.0.0.0:8000
+    ports:
+      - "8008:8000"
+    expose:
+      - 8000
+    volumes:
+      - ./backend:/usr/src/app
+    networks:
+      - queue-net
+
+  100116q-nginx:
+    build: 
+      context: ./nginx
+      dockerfile: prod/Dockerfile
+    container_name: 100116q-nginx
+    ports:
+      - 80:80
+    volumes:
+      - ./nginx:/usr/src/app
+      - ./nginx/prod/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - /etc/letsencrypt/live/www.q.uxlivinglab.online/fullchain.pem:/etc/letsencrypt/live/www.q.uxlivinglab.online/fullchain.pem:ro
+      - /etc/letsencrypt/live/www.q.uxlivinglab.online/privkey.pem:/etc/letsencrypt/live/www.q.uxlivinglab.online/privkey.pem:ro
+    restart: always
+    networks:
+      - queue-net
+    depends_on:
+      - 100116q-backend
+      - 100116q-frontend
+
+networks:
+  queue-net:
+    external: true

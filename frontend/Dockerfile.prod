@@ -1,0 +1,31 @@
+# Step 1: Build the application in a Node.js environment
+FROM node:20-alpine as build
+
+# Accept the build argument
+ARG VITE_BACKEND_URL=https://www.q.uxlivinglab.online
+
+# Set the environment variable so it's available during the build
+ENV VITE_BACKEND_URL=$VITE_BACKEND_URL
+
+RUN mkdir -p /usr/src/app
+WORKDIR /usr/src/app
+COPY package*.json ./
+RUN npm install
+COPY . .
+RUN npm run build
+
+# Stage 2: Serve the app with serve
+FROM node:20-alpine
+
+# Install serve to run the application
+RUN npm install -g serve
+WORKDIR /app
+
+# Copy the build directory from the builder stage
+COPY --from=build /usr/src/app/dist /app
+
+# Expose the port serve uses
+EXPOSE 443
+
+# Run serve to serve the static files
+CMD ["serve", "-s", ".", "-l", "443"]

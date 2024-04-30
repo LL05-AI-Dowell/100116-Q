@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.margin_ {
+  margin: 1rem auto;
+}
+
+.gradient_ {
+  background: linear-gradient(rgba(255, 255, 255, 1) 0%, rgba(251, 251, 251, 0.1) 100%), linear-gradient(90deg, #84d2ff, #8d5acd);
+  /* background:
+    radial-gradient(ellipse at 20% 20%, #35234b 0%, transparent 70%),
+    radial-gradient(ellipse at 60% 20%, #2975bf 0%, transparent 70%),
+    radial-gradient(ellipse at 100% 20%, #3d54b1 0%, transparent 70%),
+    radial-gradient(ellipse at 100% 100%, #9f3c54 0%, transparent 70%),
+    radial-gradient(ellipse at 20% 100%, #362d6f 0%, transparent 70%); */
+}

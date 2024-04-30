@@ -1,0 +1,48 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+.App {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.container {
+  width: 90%;
+  max-width: 500px;
+  padding: 20px;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.loader-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.image-svg {
+  width: 350px;
+  height: 350px;
+  display: inline-block;
+}
+
+p {
+  margin-top: 20px;
+  font-size: 16px;
+  line-height: 1.5;
+  text-align: center;
+  font-weight: bold;
+}
+
+@media only screen and (min-width: 768px) {
+  .container {
+    max-width: 768px;
+  }
+}

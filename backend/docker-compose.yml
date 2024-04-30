@@ -1,0 +1,20 @@
+version: "3.8"
+
+
+services:
+  100116q-backend:
+    build:
+      context: .
+    container_name: 100116q-backend
+    restart: always
+    command: python3 manage.py runserver 0.0.0.0:8000
+    ports:
+      - "8008:8000"
+    expose:
+      - 8000
+    volumes:
+      - .:/usr/src/app
+    
+networks:
+  default:
+    name: queue-net
