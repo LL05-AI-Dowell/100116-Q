@@ -36,13 +36,62 @@ function App() {
       />
       <Routes>
         <Route path='/' Component={InitialConfigurationScreen} />
-        <Route path='/offline-store' Component={LandingPage2} />
-        <Route path='/online-store' Component={LandingPage} />
-        <Route path='/profile' Component={Profile} />
-        <Route path='/success' Component={Success} />
-        <Route path='/error' Component={ErrorScreen} />
-        <Route path='/qrlink' Component={QrCodeScreen} />
-        <Route path='/onlineshoplink' Component={OnlineQrCodeScreen} />
+        <Route 
+          path='/offline-store' 
+          element={
+            <InitialConfigurationScreen>
+              <LandingPage2 />
+            </InitialConfigurationScreen>
+          } 
+        />
+        <Route 
+          path='/online-store'
+          element={
+            <InitialConfigurationScreen>
+              <LandingPage />
+            </InitialConfigurationScreen>
+          } 
+        />
+        <Route 
+          path='/profile' 
+          element={
+            <InitialConfigurationScreen>
+              <Profile />
+            </InitialConfigurationScreen>
+          }  
+        />
+        <Route 
+          path='/success' 
+          element={
+            <InitialConfigurationScreen>
+              <Success />
+            </InitialConfigurationScreen>
+          }
+        />
+        <Route 
+          path='/error' 
+          element={
+            <InitialConfigurationScreen>
+              <ErrorScreen />
+            </InitialConfigurationScreen>
+          }
+        />
+        <Route 
+          path='/qrlink'
+          element={
+            <InitialConfigurationScreen>
+              <QrCodeScreen />
+            </InitialConfigurationScreen>
+          }
+        />
+        <Route 
+          path='/onlineshoplink' 
+          element={
+            <InitialConfigurationScreen>
+              <OnlineQrCodeScreen />
+            </InitialConfigurationScreen>
+          }
+        />
       </Routes>
     </>
   );

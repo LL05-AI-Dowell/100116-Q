@@ -14,7 +14,7 @@ import { useCurrentUserContext } from "../../contexts/CurrentUserContext";
 import { CircularProgress, Modal } from "@mui/material";
 import { formatDateForAPI } from "../../helpers/helpers";
 import { NEW_USER_DETAILS_KEY_IN_SESSION_STORAGE, getSavedNewUserDetails } from "../../hooks/useDowellLogin";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {toast} from "react-toastify";
 
 const API_URLS = [
@@ -25,7 +25,7 @@ const API_URLS = [
     "We're currently arranging seating.",
 ];
 
-const InitialConfigurationScreen = () => {
+const InitialConfigurationScreen = ({ children }) => {
     const navigate = useNavigate();
     const currentDate = new Date();
     const {
@@ -38,6 +38,8 @@ const InitialConfigurationScreen = () => {
         setQrCodeResponse,
         storeDetailsResponse,
         setStoreDetailsResponse,
+        qUserDetails,
+        setQUserDetails,
     } = useCurrentUserContext();
     const [showModal, setShowModal] = useState(true);
     const [showContactAdministration, setShowContactAdministration] = useState({
@@ -53,14 +55,32 @@ const InitialConfigurationScreen = () => {
     });
     const [open, setOpen] = useState(true);
     const [step, setStep] = useState(0);
-    const [userDetails, setUserDetails] = useState([]);
+    // const [userDetails, setUserDetails] = useState([]);
     const [showBanner, setShowBanner] = useState(false);
+
+    const { pathname } = useLocation();
 
     useEffect(() => {
         if (!currentUser || !currentUserApiKey) return;
         // currentUser?.userinfo?.client_admin_id
         console.log("curent userrrr>>>>>>>>>", currentUser);
-        if (intialConfigurationLoaded === true) return setShowModal(false);
+
+        if (intialConfigurationLoaded === true) {
+            setShowModal(false);
+            
+            if (qUserDetails) {
+                if (children && pathname && pathname !== '/') {
+                    return navigate(pathname);
+                }
+                
+                navigate(`${qUserDetails[0]?.default_store_type?.toLocaleLowerCase()}-store`);
+
+                return;
+            }
+
+            return;
+        }
+
         setLoadingData({
             isMetaDbLoading: true,
             isDataDbLoading: false,
@@ -183,7 +203,7 @@ const InitialConfigurationScreen = () => {
                         "get user details resssss......",
                         err?.response?.data?.response
                     );
-                    setUserDetails(err?.response?.data?.response);
+                    setQUserDetails(err?.response?.data?.response);
                     sessionStorage.setItem(
                         NEW_USER_DETAILS_KEY_IN_SESSION_STORAGE,
                         JSON.stringify(err?.response?.data?.response)
@@ -293,8 +313,13 @@ const InitialConfigurationScreen = () => {
                 setShowModal(false);
                 setQrCodeResponse(res?.data?.response);
                 setIntialConfigurationLoaded(true);
-                navigate(`${passed_user_details[0]?.default_store_type?.toLocaleLowerCase()}-store`);
                 toast.success('Success');
+
+                if (children && pathname && pathname !== '/') {
+                    return navigate(pathname);
+                }
+                
+                navigate(`${passed_user_details[0]?.default_store_type?.toLocaleLowerCase()}-store`);
                 // handleGetPaymentDetailForSeat(passed_user_details,1);
             })
             .catch((err) => {
@@ -371,6 +396,15 @@ const InitialConfigurationScreen = () => {
                     </Modal>
                 </div>
             ) : null
+            }
+
+            {
+                children && intialConfigurationLoaded ?
+                    <>
+                        {children}
+                    </>
+                :
+                <></>
             }
         </>
     );
