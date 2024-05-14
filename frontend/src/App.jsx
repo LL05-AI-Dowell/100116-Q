@@ -79,17 +79,17 @@ function App() {
         <Route 
           path='/qrlink'
           element={
-            <InitialConfigurationScreen>
+            // <InitialConfigurationScreen>
               <QrCodeScreen />
-            </InitialConfigurationScreen>
+            // </InitialConfigurationScreen>
           }
         />
         <Route 
           path='/onlineshoplink' 
           element={
-            <InitialConfigurationScreen>
+            // <InitialConfigurationScreen>
               <OnlineQrCodeScreen />
-            </InitialConfigurationScreen>
+            // </InitialConfigurationScreen>
           }
         />
       </Routes>
