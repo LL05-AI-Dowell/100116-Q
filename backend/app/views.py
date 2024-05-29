@@ -531,7 +531,7 @@ class store_services(APIView):
             f'{workspace_id}_meta_data_q',
             f'{workspace_id}_menu_card',
             data_to_query,
-            limit,
+            1000,
             offset,
             False
         ))
