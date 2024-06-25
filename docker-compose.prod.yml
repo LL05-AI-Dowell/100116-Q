@@ -7,8 +7,6 @@ services:
       args:
         VITE_BACKEND_URL: http://100116q-backend:8000/
     container_name: 100116q-frontend
-    ports:
-      - 454:443
     volumes:
       - ./frontend:/usr/src/app
     environment:
@@ -38,7 +36,7 @@ services:
       dockerfile: prod/Dockerfile
     container_name: 100116q-nginx
     ports:
-      - 80:80
+      - 81:80
       - 443:443
     volumes:
       - ./nginx:/usr/src/app
