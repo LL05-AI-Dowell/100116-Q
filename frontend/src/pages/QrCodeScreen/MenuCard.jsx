@@ -19,8 +19,8 @@ const MenuCard = ({ menus }) => {
   return (
     <Grid container spacing={3}>
       {React.Children.toArray(
-        menus?.map((menu, index) => (
-          <Grid item key={index} xs={12} sm={6} md={4}>
+        menus?.map((menu) => (
+          <Grid item xs={12} sm={6} md={4}>
             <Card className="menu-card">
               <CardContent>
                 <Typography variant="h5" component="h2" gutterBottom>
@@ -39,19 +39,25 @@ const MenuCard = ({ menus }) => {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {React.Children.toArray(
-                        menu?.items.map((item, itemIndex) => {
-                          if (!item.name || !item.price) return <></>;
+                      {!Array.isArray(menu?.items) ? (
+                        <></>
+                      ) : (
+                        React.Children.toArray(
+                          menu?.items?.map((item) => {
+                            if (!item?.name || !item?.price) return <></>;
 
-                          return (
-                            <TableRow key={itemIndex}>
-                              <TableCell component="th" scope="row">
-                                {item.name}
-                              </TableCell>
-                              <TableCell align="right">{item.price}</TableCell>
-                            </TableRow>
-                          );
-                        })
+                            return (
+                              <TableRow>
+                                <TableCell component="th" scope="row">
+                                  {item?.name}
+                                </TableCell>
+                                <TableCell align="right">
+                                  {item?.price}
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })
+                        )
                       )}
                     </TableBody>
                   </Table>

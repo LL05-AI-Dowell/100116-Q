@@ -22,7 +22,9 @@ const ViewMenu = ({ type }) => {
     getOfflineOnlineMenuData(userDetails.workspace_id, storeId, type)
       .then((res) => {
         if (res.data.success) {
-          const aggregatedMenuData = res.data.response.flatMap(menuItem => menuItem.menu_data);
+          const aggregatedMenuData = res.data.response.flatMap(
+            (menuItem) => menuItem.menu_data
+          );
           setMenuData(aggregatedMenuData);
         } else {
           setError("Failed to retrieve menu data");
