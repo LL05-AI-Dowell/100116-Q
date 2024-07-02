@@ -14,9 +14,6 @@ import {
 } from "@mui/material";
 
 const MenuCard = ({ menus }) => {
-  console.log("tt 1 -> ", menus);
-  return <></>;
-
   if (!Array.isArray(menus)) return <></>;
 
   return (
