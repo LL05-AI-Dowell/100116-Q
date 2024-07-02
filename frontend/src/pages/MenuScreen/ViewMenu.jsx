@@ -1,49 +1,59 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { getSavedNewUserDetails } from "../../hooks/useDowellLogin";
-import {
-  getMenuData,
-  getOfflineOnlineMenuData,
-} from "../../../services/qServices";
+import { getOfflineOnlineMenuData } from "../../../services/qServices";
 import MenuCard from "../QrCodeScreen/MenuCard";
-import { CircularProgress } from "@mui/material";
+import { CircularProgress, Alert } from "@mui/material";
 
 const ViewMenu = ({ type }) => {
   const [loading, setLoading] = useState(false);
   const [menuData, setMenuData] = useState([]);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     setLoading(true);
-    getOfflineOnlineMenuData(
-      getSavedNewUserDetails()[0].workspace_id,
-      type === 'ONLINE' ? getSavedNewUserDetails()[0]?.store_ids?.online_store_id : getSavedNewUserDetails()[0]?.store_ids?.offline_store_id,
-      type
-    )
+    setError(null);
+
+    const userDetails = getSavedNewUserDetails()[0];
+    const storeId =
+      type === "ONLINE"
+        ? userDetails?.store_ids?.online_store_id
+        : userDetails?.store_ids?.offline_store_id;
+
+    getOfflineOnlineMenuData(userDetails.workspace_id, storeId, type)
       .then((res) => {
-        console.log("get Menu data ress", res?.data?.response);
-        setMenuData(res?.data?.response);
-        setLoading(false);
+        if (res.data.success) {
+          setMenuData(res.data.response);
+        } else {
+          setError("Failed to retrieve menu data");
+        }
       })
       .catch((err) => {
-        console.log("get store data errrrrr", err);
+        setError("Error fetching menu data");
+      })
+      .finally(() => {
         setLoading(false);
       });
   }, [type]);
 
   return (
-    <div className='w-full bg-gray-100 rounded p-4 overflow-hidden'>
-      <h3 className='text-xl font-semibold mb-4 text-center'>Menu Items</h3>
-      <div className='h-80 overflow-auto'>
+    <div className="w-full bg-gray-100 rounded p-4 overflow-hidden">
+      <h3 className="text-xl font-semibold mb-4 text-center">Menu Items</h3>
+      <div className="h-80 overflow-auto">
         {loading ? (
-          <div className='flex items-center justify-center p-12 '>
-            <CircularProgress size={28} className='mx-4' />
+          <div className="flex items-center justify-center h-full">
+            <CircularProgress size={28} />
+          </div>
+        ) : error ? (
+          <div className="flex items-center justify-center h-full">
+            <Alert severity="error">{error}</Alert>
           </div>
         ) : (
-          <div className='w-full  p-1  items-center justify-start '>
-            {menuData?.map((menu) => (
-              <MenuCard key={menu?._id} menus={menu?.menu_data} />
+          <div className="w-full p-1">
+            {menuData.map((menu, index) => (
+              <MenuCard key={index} menus={menu.menu_data} />
             ))}
           </div>
-        )}{" "}
+        )}
       </div>
     </div>
   );

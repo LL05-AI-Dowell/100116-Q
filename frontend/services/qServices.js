@@ -3,6 +3,7 @@ import axios from "axios";
 import { getSavedApiKey } from "../src/hooks/useDowellLogin";
 
 const Q_SERVICES_URL = import.meta.env.VITE_BACKED_URL;
+// const Q_SERVICES_URL = "http://127.0.0.1:8000";
 
 const qServicesAxiosInstance = axios.create({
   baseURL: Q_SERVICES_URL,
@@ -152,13 +153,14 @@ export const updatePaymentRecord = async (
   qrcode_id,
   workspace_id,
   seat_no,
-  store_id
+  store_id,
+  store_type
 ) => {
   const headers = {
     Authorization: `Bearer ${getSavedApiKey()}`,
   };
   return await qServicesAxiosInstance.get(
-    `/v3/customer-services/?type=update_payment_status&payment_receipt_id=${paymentReceiptId}&date=${date}&workspace_id=${workspace_id}&qrcode_id=${qrcode_id}&seat_number=${seat_no}&store_id=${store_id}`,
+    `/v3/customer-services/?type=update_payment_status&payment_receipt_id=${paymentReceiptId}&date=${date}&workspace_id=${workspace_id}&qrcode_id=${qrcode_id}&seat_number=${seat_no}&store_id=${store_id}&store_type=${store_type}`,
     { headers }
   );
 };
@@ -384,7 +386,7 @@ export const getOfflineOnlineMenuData = async (
     Authorization: `Bearer ${getSavedApiKey()}`,
   };
   return await qServicesAxiosInstance.get(
-    `/v3/store-services/?type=retrieve_menu_details&workspace_id=${workspace_id}&store_id=${store_id}&limit=1&offset=0&store_type=${store_type}`,
+    `/v3/store-services/?type=retrieve_menu_details&workspace_id=${workspace_id}&store_id=${store_id}&limit=100&offset=0&store_type=${store_type}`,
     { headers }
   );
 };

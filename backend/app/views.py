@@ -1213,8 +1213,7 @@ class customer_services_offline_store(APIView):
         seat_number = request.GET.get('seat_number')
         store_id = request.GET.get('store_id')
         store_type = request.GET.get('store_type')
-        
-
+    
         
         if not qrcode_id and not payment_receipt_id and not workspace_id and not date:
             return CustomResponse(False, "Payment Details are missing",None, status.HTTP_400_BAD_REQUEST)
