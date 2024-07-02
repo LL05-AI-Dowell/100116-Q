@@ -5,7 +5,7 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
 import { CiLogout } from "react-icons/ci";
@@ -37,11 +37,8 @@ const user_id = "660d7c78bdbc0038f13e0b2d";
 
 const LandingPage2 = () => {
   const queryClient = new QueryClient();
-  const {
-    currentUser,
-    qrCodeResponse,
-    storeDetailsResponse,
-  } = useCurrentUserContext();
+  const { currentUser, qrCodeResponse, storeDetailsResponse } =
+    useCurrentUserContext();
   const [cardPagination, setCardPagination] = useState(0);
   const [seatPagination, setSeatPagination] = useState(0);
   const [orderNumber, setOrderNumber] = useState(null);
@@ -138,7 +135,7 @@ const LandingPage2 = () => {
         console.log("retrieved initiated order ress", res);
         if (res?.data?.response?.length === 0) {
           // setNoOrderInititatedForSeat(true);
-          toast.warning('No order initiated for selected Seat');
+          toast.warning("No order initiated for selected Seat");
         } else {
           res.data.response.reverse();
           setOrderInitiatedForSeat(res?.data?.response);
@@ -162,13 +159,13 @@ const LandingPage2 = () => {
       .catch((err) => {
         console.log("err get qr code id by seat no", err);
         if (err?.response?.status === 400) {
-          toast.warning('Selected Seat is not active, You can activate seat by: Profile > Seat Information > Offline > Open Selected Seat')
+          toast.warning(
+            "Selected Seat is not active, You can activate seat by: Profile > Seat Information > Offline > Open Selected Seat"
+          );
           setShowActivateSeat(true);
         }
       });
   };
-
-
 
   const handleEnterDataClick = async () => {
     if (!seatNumber) {
@@ -181,7 +178,9 @@ const LandingPage2 = () => {
       return toast.warn("Please select an Amount.");
     }
     if (showActivateSeat === true) {
-      toast.warning('Selected Seat is not active, You can activate seat by: Profile > Seat Information > Offline > Open Selected Seat')
+      toast.warning(
+        "Selected Seat is not active, You can activate seat by: Profile > Seat Information > Offline > Open Selected Seat"
+      );
     }
 
     setEnterPaymentRecordLoading(true);
@@ -247,7 +246,10 @@ const LandingPage2 = () => {
     };
 
     const getUserQrcodeOffline = async () => {
-      await getQrCodeOffline(currentUser?.userinfo?.client_admin_id, getSavedNewUserDetails()[0]?._id)
+      await getQrCodeOffline(
+        currentUser?.userinfo?.client_admin_id,
+        getSavedNewUserDetails()[0]?._id
+      )
         .then((res) => {
           console.debug(res?.data?.message);
           if (res?.data?.response?.length === 0) {
@@ -264,82 +266,80 @@ const LandingPage2 = () => {
     getUserQrcodeOffline();
     getUserDetailsFunc();
   }, []);
-  
+
   const handleNavigateToShop = () => {
     navigate("/online-store");
   };
 
   return (
     <>
-
-      <div className='h-screen m-0 p-0 gradient_ flex'>
-        <div className='w-full h-max margin_ shadow-black mt-3.5 p-4 pt-2 pb-6 rounded-md md:w-[98%] sm:h-full bg-[#f6f6f6]'>
-
-          <div className='h-24 border-b-2 border-zinc-400 m-2 flex items-center justify-between'>
+      <div className="h-screen m-0 p-0 gradient_ flex">
+        <div className="w-full h-max margin_ shadow-black mt-3.5 p-4 pt-2 pb-6 rounded-md md:w-[98%] sm:h-full bg-[#f6f6f6]">
+          <div className="h-24 border-b-2 border-zinc-400 m-2 flex items-center justify-between">
             <img
               src={DigitalQLogo}
               // src=''
-              alt='Dowell Logo'
-              className='h-5/6 shadow-2xl mx-8'
+              alt="Dowell Logo"
+              className="h-5/6 shadow-2xl mx-8"
             />
 
-            <p className='text-lg sm:text-2xl md:text-4xl lg:text-5xl font-extrabold text-slate-500'>
+            <p className="text-lg sm:text-2xl md:text-4xl lg:text-5xl font-extrabold text-slate-500">
               The Tiny Shop
             </p>
-            <div className='flex items-center justify-center'>
+            <div className="flex items-center justify-center">
               {
                 // showBanner?
                 true ? (
                   <div>
-                    <div className='mr-6 sm:mr-12 relative cursor-pointer'>
+                    <div className="mr-6 sm:mr-12 relative cursor-pointer">
                       <FaRegBell
                         size={32}
-                        color='rgb(156 163 175)'
+                        color="rgb(156 163 175)"
                         onClick={() => setShowInfoModal(!showInfoModal)}
                       />
-                      <div className='absolute top-[-5px] right-[-5px] bg-red-400  rounded-full text-white text-sm w-5 h-5 flex items-center justify-center '>
+                      <div className="absolute top-[-5px] right-[-5px] bg-red-400  rounded-full text-white text-sm w-5 h-5 flex items-center justify-center ">
                         2
                       </div>
                     </div>
                     {showInfoModal ? (
                       // false?
-                      <div className='fixed top-32 right-36 w-max h-max'>
-                        <div className='fixed top-32 right-36 flex flex-col items-center justify-center bg-white shadow-xl rounded-md gap-y-1 mt-2 p-1'>
+                      <div className="fixed top-32 right-36 w-max h-max">
+                        <div className="fixed top-32 right-36 flex flex-col items-center justify-center bg-white shadow-xl rounded-md gap-y-1 mt-2 p-1">
                           {isTicketLink && (
                             <div
-                              className='w-full flex items-center justify-between bg-green-200 cursor-pointer group hover:bg-white rounded-md p-2'
+                              className="w-full flex items-center justify-between bg-green-200 cursor-pointer group hover:bg-white rounded-md p-2"
                               onClick={() => navigate("/profile")}
                             >
-                              <p className='text-sm text-center'>
+                              <p className="text-sm text-center">
                                 Have you created a ticket link yet, No?{" "}
                               </p>
-                              <button className='cursor-pointer  text-sm group-hover:bg-slate-200 duration-200 ease-in-out hover:scale-105 text-gray-800 font-semibold py-1 px-1 bg-white rounded m-2'>
+                              <button className="cursor-pointer  text-sm group-hover:bg-slate-200 duration-200 ease-in-out hover:scale-105 text-gray-800 font-semibold py-1 px-1 bg-white rounded m-2">
                                 Create One
                               </button>
                             </div>
                           )}
                           {isPaid && (
                             <div
-                              className='w-full flex items-center justify-between bg-green-200 cursor-pointer group hover:bg-white rounded-md p-2'
+                              className="w-full flex items-center justify-between bg-green-200 cursor-pointer group hover:bg-white rounded-md p-2"
                               onClick={() => navigate("/profile")}
                             >
-                              <p className='text-sm text-center'>
+                              <p className="text-sm text-center">
                                 Have you paid yet, No?{" "}
                               </p>
-                              <button className='cursor-pointer  text-sm group-hover:bg-slate-200 duration-200 ease-in-out hover:scale-105 text-gray-800 font-semibold py-1 px-1 bg-white rounded m-2'>
+                              <button className="cursor-pointer  text-sm group-hover:bg-slate-200 duration-200 ease-in-out hover:scale-105 text-gray-800 font-semibold py-1 px-1 bg-white rounded m-2">
                                 Create One
                               </button>
                             </div>
                           )}
                           {isActive && (
                             <div
-                              className='w-full flex items-center justify-between bg-green-200 cursor-pointer group hover:bg-white rounded-md p-2'
+                              className="w-full flex items-center justify-between bg-green-200 cursor-pointer group hover:bg-white rounded-md p-2"
                               onClick={() => navigate("/profile")}
                             >
-                              <p className='text-sm text-center'>
+                              <p className="text-sm text-center">
                                 Is it active, No?{" "}
                               </p>
-                              <button className='cursor-pointer  text-sm group-hover:bg-slate-200 duration-200 ease-in-out hover:scale-105 text-gray-800 font-semibold py-1 px-1 bg-white rounded m-2'>
+                              <button className="cursor-pointer  text-sm group-hover:bg-slate-200 duration-200 ease-in-out hover:scale-105 text-gray-800 font-semibold py-1 px-1 bg-white rounded m-2">
                                 Create One
                               </button>
                             </div>
@@ -352,20 +352,20 @@ const LandingPage2 = () => {
               }
 
               <img
-                src='https://t4.ftcdn.net/jpg/05/89/93/27/360_F_589932782_vQAEAZhHnq1QCGu5ikwrYaQD0Mmurm0N.jpg'
-                alt='Profile Photo'
-                className='h-10 w-10 rounded-full shadow-2xl cursor-pointer'
+                src="https://t4.ftcdn.net/jpg/05/89/93/27/360_F_589932782_vQAEAZhHnq1QCGu5ikwrYaQD0Mmurm0N.jpg"
+                alt="Profile Photo"
+                className="h-10 w-10 rounded-full shadow-2xl cursor-pointer"
                 onClick={() => navigate("/profile")}
               />
-              <button className='cursor-pointer flex items-center justify-between bg-red-400 hover:bg-red-300 text-gray-800 font-semibold py-2 px-2 rounded-md shadow mx-4'>
-                <CiLogout className='mx-1 text-2xl text-white' size={26} />
+              <button className="cursor-pointer flex items-center justify-between bg-red-400 hover:bg-red-300 text-gray-800 font-semibold py-2 px-2 rounded-md shadow mx-4">
+                <CiLogout className="mx-1 text-2xl text-white" size={26} />
               </button>
             </div>
           </div>
 
-          <div className='flex flex-col sm:flex-row'>
-            <div className='flex flex-col h-max sm:w-[60%] w-full items-center my-4'>
-              <div className='flex flex-col justify-between h-full sm:h-[325px] w-full py-8 shadow-md sm:flex-row'>
+          <div className="flex flex-col sm:flex-row">
+            <div className="flex flex-col h-max sm:w-[60%] w-full items-center my-4">
+              <div className="flex flex-col justify-between h-full sm:h-[325px] w-full py-8 shadow-md sm:flex-row">
                 <QueryClientProvider client={queryClient}>
                   <TableContainer
                     component={Paper}
@@ -375,10 +375,7 @@ const LandingPage2 = () => {
                       backgroundColor: "#f6f6f6",
                     }}
                   >
-                    <Table
-                      sx={{ minWidth: "100%" }}
-                      aria-label='simple table'
-                    >
+                    <Table sx={{ minWidth: "100%" }} aria-label="simple table">
                       <TableHead>
                         <TableRow>
                           <TableCell
@@ -387,7 +384,7 @@ const LandingPage2 = () => {
                               padding: "1%",
                               fontWeight: "600",
                             }}
-                            align='center'
+                            align="center"
                           >
                             Seat Number
                           </TableCell>
@@ -397,7 +394,7 @@ const LandingPage2 = () => {
                               padding: "1%",
                               fontWeight: "600",
                             }}
-                            align='center'
+                            align="center"
                           >
                             Payment Requested
                           </TableCell>
@@ -407,7 +404,7 @@ const LandingPage2 = () => {
                               padding: "1%",
                               fontWeight: "600",
                             }}
-                            align='left'
+                            align="left"
                           >
                             Payment Status
                           </TableCell>
@@ -415,47 +412,51 @@ const LandingPage2 = () => {
                       </TableHead>
                       <TableBody>
                         {qrCodeResponse
-                          ? qrCodeResponse
-                            .slice(cardPagination, cardPagination + 5)
-                            .map((row, index) => (
-                              <TableRow key={index + "_"}>
-                                <SeatRowOnline
-                                  key={index}
-                                  seatNumber={index}
-                                  pagination={cardPagination}
-                                />
-                              </TableRow>
-                            ))
+                          ? React.Children.toArray(
+                              qrCodeResponse
+                                .slice(cardPagination, cardPagination + 5)
+                                .map((row, index) => (
+                                  <TableRow key={index + "_"}>
+                                    <SeatRowOnline
+                                      key={index}
+                                      seatNumber={index}
+                                      pagination={cardPagination}
+                                    />
+                                  </TableRow>
+                                ))
+                            )
                           : null}
                       </TableBody>
                     </Table>
                   </TableContainer>
                 </QueryClientProvider>
-                <div className='w-full m-2 flex items-center justify-center sm:w-1/6 sm:m-0'>
-                  <div className='flex items-center rotate-0 sm:rotate-90'>
+                <div className="w-full m-2 flex items-center justify-center sm:w-1/6 sm:m-0">
+                  <div className="flex items-center rotate-0 sm:rotate-90">
                     <button
-                      className='cursor-pointer bg-inherit text-black border-solid border-2 border-sky-500 rounded-full flex items-center justify-center bg-sky-100 w-7 h-7'
+                      className="cursor-pointer bg-inherit text-black border-solid border-2 border-sky-500 rounded-full flex items-center justify-center bg-sky-100 w-7 h-7"
                       onClick={() => decrementStepPagination()}
                     >
                       <IoIosArrowBack />
                     </button>
-                    {createArrayWithLength(100)
-                      .slice(cardPagination, cardPagination + 5)
-                      .map((s, index) => (
-                        <div className='rotate-0 sm:rotate-90'>
-                          <button
-                            className='rotate-0 bg-inherit text-black border-solid border border-sky-500 rounded-full m-0.5 w-7 h-7 sm:rotate-180'
-                            onClick={() => {
-                              setCardIndex(index);
-                            }}
-                            key={`${s}_button`}
-                          >
-                            {s + 1}
-                          </button>
-                        </div>
-                      ))}
+                    {React.Children.toArray(
+                      createArrayWithLength(100)
+                        .slice(cardPagination, cardPagination + 5)
+                        .map((s, index) => (
+                          <div className="rotate-0 sm:rotate-90">
+                            <button
+                              className="rotate-0 bg-inherit text-black border-solid border border-sky-500 rounded-full m-0.5 w-7 h-7 sm:rotate-180"
+                              onClick={() => {
+                                setCardIndex(index);
+                              }}
+                              key={`${s}_button`}
+                            >
+                              {s + 1}
+                            </button>
+                          </div>
+                        ))
+                    )}
                     <button
-                      className='cursor-pointer bg-inherit text-black border-solid border-2 border-sky-500 rounded-full flex items-center justify-center bg-sky-100 w-7 h-7'
+                      className="cursor-pointer bg-inherit text-black border-solid border-2 border-sky-500 rounded-full flex items-center justify-center bg-sky-100 w-7 h-7"
                       onClick={() => incrementStepPagination(5, 100 / 5)}
                     >
                       <IoIosArrowForward />
@@ -463,133 +464,138 @@ const LandingPage2 = () => {
                   </div>
                 </div>
               </div>
-              <div className='flex flex-col sm:flex-row w-full my-2'>
-                <div className='sm:w-5/6 w-full shadow-inner p-4'>
-                  <p className='p-3 bg-[#1c8382] text-[#fff] text-xl font-medium rounded sm:w-[98%] w-[100%] shadow-md'>
+              <div className="flex flex-col sm:flex-row w-full my-2">
+                <div className="sm:w-5/6 w-full shadow-inner p-4">
+                  <p className="p-3 bg-[#1c8382] text-[#fff] text-xl font-medium rounded sm:w-[98%] w-[100%] shadow-md">
                     Tables
                   </p>
-                  <div className='flex flex-wrap flex-col justify-center'>
-                    <div className='flex-none grid gap-1 grid-cols-5 p-3'>
-                      {createArrayWithLength(
-                        storeDetailsResponse ? storeDetailsResponse[0].tables.length : 0
-                      )
-                        .slice(tablePagination, tablePagination + 10)
-                        .map((s, index) => (
-                          <div className=''>
-                            <button
-                              className='text-black bg-[#bbbcbe] rounded m-0.5 w-full h-max py-2'
-                              onClick={() => {
-                                setSelectedTableNumber(
-                                  index + tablePagination
-                                );
-                                console.log(
-                                  "Selected",
-                                  storeDetailsResponse[0].tables[
+                  <div className="flex flex-wrap flex-col justify-center">
+                    <div className="flex-none grid gap-1 grid-cols-5 p-3">
+                      {React.Children.toArray(
+                        createArrayWithLength(
+                          storeDetailsResponse
+                            ? storeDetailsResponse[0].tables.length
+                            : 0
+                        )
+                          .slice(tablePagination, tablePagination + 10)
+                          .map((s, index) => (
+                            <div className="">
+                              <button
+                                className="text-black bg-[#bbbcbe] rounded m-0.5 w-full h-max py-2"
+                                onClick={() => {
+                                  setSelectedTableNumber(
                                     index + tablePagination
-                                  ]?.seat_data,
-                                  index + tablePagination + 1
-                                );
-                                if (
-                                  storeDetailsResponse[0].tables[
-                                    index + tablePagination
-                                  ]?.seat_data.length === 0
-                                ) {
-                                  setTableEntered("Table Number");
-                                  setSeatNumber("Seat Number");
-                                } else {
-                                  setTableEntered(
+                                  );
+                                  console.log(
+                                    "Selected",
+                                    storeDetailsResponse[0].tables[
+                                      index + tablePagination
+                                    ]?.seat_data,
                                     index + tablePagination + 1
                                   );
-                                }
-                              }}
-                              key={`${s}_button`}
-                            >
-                              {s + 1}
-                            </button>
-                          </div>
-                        ))}
+                                  if (
+                                    storeDetailsResponse[0].tables[
+                                      index + tablePagination
+                                    ]?.seat_data.length === 0
+                                  ) {
+                                    setTableEntered("Table Number");
+                                    setSeatNumber("Seat Number");
+                                  } else {
+                                    setTableEntered(
+                                      index + tablePagination + 1
+                                    );
+                                  }
+                                }}
+                                key={`${s}_button`}
+                              >
+                                {s + 1}
+                              </button>
+                            </div>
+                          ))
+                      )}
                     </div>
-                    <div className='flex items-center m-2 w-full justify-center'>
+                    <div className="flex items-center m-2 w-full justify-center">
                       <button
-                        className='cursor-pointer bg-inherit text-black border-solid border-2 border-[#1c8382] rounded flex items-center justify-center bg-[#81d3d2] w-16 h-8 m-2'
+                        className="cursor-pointer bg-inherit text-black border-solid border-2 border-[#1c8382] rounded flex items-center justify-center bg-[#81d3d2] w-16 h-8 m-2"
                         onClick={() => decrementTablesPagination()}
                       >
                         <IoIosArrowBack />
                       </button>
                       <button
-                        className='cursor-pointer bg-inherit text-black border-solid border-2 border-[#1c8382] rounded flex items-center justify-center bg-[#81d3d2] w-16 h-8 m-2'
-                        onClick={() =>
-                          incrementTablesPagination(10, 100 / 10)
-                        }
+                        className="cursor-pointer bg-inherit text-black border-solid border-2 border-[#1c8382] rounded flex items-center justify-center bg-[#81d3d2] w-16 h-8 m-2"
+                        onClick={() => incrementTablesPagination(10, 100 / 10)}
                       >
                         <IoIosArrowForward />
                       </button>
                     </div>
                   </div>
                 </div>
-                <div className='sm:w-2/6 mx-4 shadow-inner sm:p-4 p-0'>
-                  <p className='p-3 bg-[#1c8382] text-[#fff] text-xl font-medium rounded sm:w-[95%] w-[100%] shadow-md '>
+                <div className="sm:w-2/6 mx-4 shadow-inner sm:p-4 p-0">
+                  <p className="p-3 bg-[#1c8382] text-[#fff] text-xl font-medium rounded sm:w-[95%] w-[100%] shadow-md ">
                     Seats
                   </p>
-                  <div className='flex-none grid gap-3 grid-cols-2 margin_'>
-                    {storeDetailsResponse ? storeDetailsResponse[0].tables[selectedTableNumber]
-                      ?.seat_data.length === 0 ? (
-                      <p className='w-full flex items-center justify-center'>
-                        No Seat
-                      </p>
+                  <div className="flex-none grid gap-3 grid-cols-2 margin_">
+                    {storeDetailsResponse ? (
+                      storeDetailsResponse[0].tables[selectedTableNumber]
+                        ?.seat_data.length === 0 ? (
+                        <p className="w-full flex items-center justify-center">
+                          No Seat
+                        </p>
+                      ) : (
+                        storeDetailsResponse[0].tables[
+                          selectedTableNumber
+                        ]?.seat_data
+                          // [1,2,3,4]
+                          .map((seat, index) => {
+                            const seatNumberr = parseInt(
+                              seat?.seat_number?.split("_").pop()
+                            );
+                            // {console.log('seat_number', seat?.seat_number)}
+                            return (
+                              <button
+                                className="text-black bg-[#bbbcbe] rounded my-0.5 w-[80%] h-full py-2"
+                                onClick={() => {
+                                  handleInputChange(seatNumberr);
+                                  setSeatNumber(seatNumberr);
+                                }}
+                                key={`${index}_button`}
+                              >
+                                {seatNumberr}
+                                {/* {index} */}
+                              </button>
+                            );
+                          })
+                      )
                     ) : (
-                      storeDetailsResponse[0].tables[
-                        selectedTableNumber
-                      ]?.seat_data
-                        // [1,2,3,4]
-                        .map((seat, index) => {
-                          const seatNumberr = parseInt(
-                            seat?.seat_number?.split("_").pop()
-                          );
-                          // {console.log('seat_number', seat?.seat_number)}
-                          return (
-                            <button
-                              className='text-black bg-[#bbbcbe] rounded my-0.5 w-[80%] h-full py-2'
-                              onClick={() => {
-                                handleInputChange(seatNumberr);
-                                setSeatNumber(seatNumberr);
-                              }}
-                              key={`${index}_button`}
-                            >
-                              {seatNumberr}
-                              {/* {index} */}
-                            </button>
-                          );
-                        })
-                    ) : <></>
-                    }
+                      <></>
+                    )}
                   </div>
                 </div>
               </div>
             </div>
-            <div className='w-full sm:w-[40%] flex flex-col items-center flex-wrap margin_ mx-2'>
-              <p className='text-xl py-2 bg-[#1c8382] text-[#fff] w-3/5 rounded font-medium my-2 sm:my-4 shadow-xl'>
+            <div className="w-full sm:w-[40%] flex flex-col items-center flex-wrap margin_ mx-2">
+              <p className="text-xl py-2 bg-[#1c8382] text-[#fff] w-3/5 rounded font-medium my-2 sm:my-4 shadow-xl">
                 {storeDetailsResponse[0]?.store_name
                   ? storeDetailsResponse[0]?.store_name
                   : "N/A"}
               </p>
-              <div className='flex items-center justify-evenly flex-wrap sm:flex-row flex-col sm:w-full w-[90%] sm:m-6 m-0'>
-                <p className='text-4xl font-medium mx-1'>
+              <div className="flex items-center justify-evenly flex-wrap sm:flex-row flex-col sm:w-full w-[90%] sm:m-6 m-0">
+                <p className="text-4xl font-medium mx-1">
                   {tableEntered ? tableEntered : "Table Number"}
                 </p>
-                <p className='text-4xl font-medium mx-1'>
+                <p className="text-4xl font-medium mx-1">
                   {seatNumber ? seatNumber : "Seat Number"}
                 </p>
-                <p className='text-4xl font-medium mx-1'>
+                <p className="text-4xl font-medium mx-1">
                   {orderNumber ? orderNumber : "Order"}
                 </p>
-                <p className='text-4xl font-medium mx-1'>
+                <p className="text-4xl font-medium mx-1">
                   {amountEntered ? amountEntered : "Amount"}
                 </p>
               </div>
-              <div className='flex w-full sm:mx-3 mx-0 sm:p-4 p-0 mb-16 sm:mb-0'>
-                <div className='w-2/6 p-2'>
-                  <p className='py-2 bg-[#1c8382] text-[#fff] text-lg font-medium w-full rounded m-3 shadow-xl'>
+              <div className="flex w-full sm:mx-3 mx-0 sm:p-4 p-0 mb-16 sm:mb-0">
+                <div className="w-2/6 p-2">
+                  <p className="py-2 bg-[#1c8382] text-[#fff] text-lg font-medium w-full rounded m-3 shadow-xl">
                     Orders
                   </p>
                   {/* <div className="w-full m-2 flex items-center justify-center sm:w-1/6 sm:m-0"> */}
@@ -597,22 +603,24 @@ const LandingPage2 = () => {
                   {retrievingOrders ? (
                     <CircularProgress />
                   ) : (
-                    <div className='flex flex-col items-center justify-center mt-2 w-full'>
+                    <div className="flex flex-col items-center justify-center mt-2 w-full">
                       <button
-                        className='rotate-90 cursor-pointer bg-inherit text-black flex items-center justify-center w-max h-max'
+                        className="rotate-90 cursor-pointer bg-inherit text-black flex items-center justify-center w-max h-max"
                         onClick={() => decrementSeatPagination()}
                       >
                         <IoIosArrowBack />
                       </button>
-                      {
-                        orderInitiatedForSeat.length === 0 ? <p>No Order</p> :
-                          <ul>
-                            {orderInitiatedForSeat
+                      {orderInitiatedForSeat.length === 0 ? (
+                        <p>No Order</p>
+                      ) : (
+                        <ul>
+                          {React.Children.toArray(
+                            orderInitiatedForSeat
                               .slice(seatPagination, seatPagination + 5)
                               .map((s, index) => (
-                                <div className=''>
+                                <div className="">
                                   <li
-                                    className='cursor-pointer flex flex-col items-center justify-start bg-[#bbbcbe] text-black rounded m-3 p-1 w-[100px] h-max'
+                                    className="cursor-pointer flex flex-col items-center justify-start bg-[#bbbcbe] text-black rounded m-3 p-1 w-[100px] h-max"
                                     onClick={() => {
                                       setOrderNumber(s?.phone_number);
                                       setOrderInitiatedId(
@@ -624,11 +632,12 @@ const LandingPage2 = () => {
                                     {s?.phone_number}
                                   </li>
                                 </div>
-                              ))}
-                          </ul>
-                      }
+                              ))
+                          )}
+                        </ul>
+                      )}
                       <button
-                        className='rotate-90 cursor-pointer bg-inherit text-black flex items-center justify-center w-max h-max'
+                        className="rotate-90 cursor-pointer bg-inherit text-black flex items-center justify-center w-max h-max"
                         onClick={() => {
                           incrementSeatPagination(5, 100 / 5);
                           // handleInputChange(seatNumber);
@@ -640,14 +649,14 @@ const LandingPage2 = () => {
                     </div>
                   )}
                 </div>
-                <div className='w-4/5 mx-1 p-2'>
-                  <p className='px-3 py-2 bg-[#1c8382] text-[#fff] text-lg font-medium rounded w-[99%] m-3 shadow-xl'>
+                <div className="w-4/5 mx-1 p-2">
+                  <p className="px-3 py-2 bg-[#1c8382] text-[#fff] text-lg font-medium rounded w-[99%] m-3 shadow-xl">
                     Amount
                   </p>
-                  <div className='flex-none items-center justify-evenly margin_ grid gap-3 grid-cols-3'>
+                  <div className="flex-none items-center justify-evenly margin_ grid gap-3 grid-cols-3">
                     {[1, 2, 3, 4, 5, 6, 7, 8, 9, 0, "."].map((index, s) => (
                       <button
-                        className='text-black bg-[#bbbcbe] rounded w-full h-full m-3 text-2xl'
+                        className="text-black bg-[#bbbcbe] rounded w-full h-full m-3 text-2xl"
                         onClick={() => {
                           if (orderInitiatedForSeat.length === 0) {
                             return toast.warn("Please select order first");
@@ -670,7 +679,7 @@ const LandingPage2 = () => {
                       </button>
                     ))}
                     <button
-                      className='cursor-pointer flex items-center justify-center bg-white hover:bg-green-100 text-gray-800 border border-green-400 rounded shadow w-full h-full text-xl m-2'
+                      className="cursor-pointer flex items-center justify-center bg-white hover:bg-green-100 text-gray-800 border border-green-400 rounded shadow w-full h-full text-xl m-2"
                       onClick={handleEnterDataClick}
                     >
                       {enterPaymentRecordLoading ? (
@@ -678,7 +687,7 @@ const LandingPage2 = () => {
                       ) : (
                         <>
                           OK{" "}
-                          <IoArrowForwardCircleSharp className='mx-2 text-xl' />
+                          <IoArrowForwardCircleSharp className="mx-2 text-xl" />
                         </>
                       )}
                     </button>
@@ -688,13 +697,13 @@ const LandingPage2 = () => {
             </div>
           </div>
         </div>
-        <div className='fixed sm:relative flex bottom-0 sm:bottom-auto h-[80px] sm:h-full shadow-black mt-3.5 mr-2 py-8 sm:py-0 w-full sm:w-[70px] md:w-[110px]  bg-[#eeeef0] sm:flex flex-row sm:flex-col items-center justify-center gap-y-24 gap-x-24'>
-          <div className='flex flex-col items-center justify-center bg-green-400 w-[100px] sm:w-full py-2 rounded-md cursor-pointer'>
-            <CiShop size={44} className=' text-white' />
-            <span className='text-white'>Offline</span>
+        <div className="fixed sm:relative flex bottom-0 sm:bottom-auto h-[80px] sm:h-full shadow-black mt-3.5 mr-2 py-8 sm:py-0 w-full sm:w-[70px] md:w-[110px]  bg-[#eeeef0] sm:flex flex-row sm:flex-col items-center justify-center gap-y-24 gap-x-24">
+          <div className="flex flex-col items-center justify-center bg-green-400 w-[100px] sm:w-full py-2 rounded-md cursor-pointer">
+            <CiShop size={44} className=" text-white" />
+            <span className="text-white">Offline</span>
           </div>
           <div
-            className='flex flex-col items-center justify-center cursor-pointer'
+            className="flex flex-col items-center justify-center cursor-pointer"
             onClick={handleNavigateToShop}
           >
             <HiOutlineStatusOnline size={40} />

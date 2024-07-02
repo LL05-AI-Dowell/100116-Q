@@ -24,7 +24,7 @@ function App() {
   return (
     <>
       <ToastContainer
-        position='top-right'
+        position="top-right"
         autoClose={5000}
         hideProgressBar={false}
         newestOnTop={false}
@@ -35,58 +35,60 @@ function App() {
         pauseOnHover
       />
       <Routes>
-        <Route path='/' Component={InitialConfigurationScreen} />
-        <Route 
-          path='/offline-store' 
+        <Route
+          path="/"
+          element={
+            <InitialConfigurationScreen>
+              <></>
+            </InitialConfigurationScreen>
+          }
+        />
+        <Route
+          path="/offline-store"
           element={
             <InitialConfigurationScreen>
               <LandingPage2 />
             </InitialConfigurationScreen>
-          } 
+          }
         />
-        <Route 
-          path='/online-store'
+        <Route
+          path="/online-store"
           element={
             <InitialConfigurationScreen>
               <LandingPage />
             </InitialConfigurationScreen>
-          } 
+          }
         />
-        <Route 
-          path='/profile' 
+        <Route
+          path="/profile"
           element={
             <InitialConfigurationScreen>
               <Profile />
             </InitialConfigurationScreen>
-          }  
-        />
-        <Route 
-          path='/success' 
-          element={
-              <Success />
           }
         />
-        <Route 
-          path='/error' 
+        <Route path="/success" element={<Success />} />
+        <Route
+          path="/error"
           element={
             <InitialConfigurationScreen>
               <ErrorScreen />
             </InitialConfigurationScreen>
           }
         />
-        <Route 
-          path='/qrlink'
+        <Route
+          path="/qrlink"
           element={
             // <InitialConfigurationScreen>
-              <QrCodeScreen />
+            <QrCodeScreen />
             // </InitialConfigurationScreen>
           }
         />
-        <Route 
-          path='/onlineshoplink' 
+        <Route
+          path="/onlineshoplink"
           element={
             // <InitialConfigurationScreen>
-              <OnlineQrCodeScreen />
+            <OnlineQrCodeScreen />
             // </InitialConfigurationScreen>
           }
         />
