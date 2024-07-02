@@ -22,7 +22,8 @@ const ViewMenu = ({ type }) => {
     getOfflineOnlineMenuData(userDetails.workspace_id, storeId, type)
       .then((res) => {
         if (res.data.success) {
-          setMenuData(res.data.response);
+          const aggregatedMenuData = res.data.response.flatMap(menuItem => menuItem.menu_data);
+          setMenuData(aggregatedMenuData);
         } else {
           setError("Failed to retrieve menu data");
         }
@@ -49,9 +50,7 @@ const ViewMenu = ({ type }) => {
           </div>
         ) : (
           <div className="w-full p-1">
-            {menuData.map((menu, index) => (
-              <MenuCard key={index} menus={menu.menu_data} />
-            ))}
+            <MenuCard menus={menuData} />
           </div>
         )}
       </div>

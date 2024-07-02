@@ -160,7 +160,7 @@ export const updatePaymentRecord = async (
     Authorization: `Bearer ${getSavedApiKey()}`,
   };
   return await qServicesAxiosInstance.get(
-    `/v3/customer-services/?type=update_payment_status&payment_receipt_id=${paymentReceiptId}&date=${date}&workspace_id=${workspace_id}&qrcode_id=${qrcode_id}&seat_number=${seat_no}&store_id=${store_id}&store_type=${store_type}`,
+    `/v3/offline-store-customer-services/?type=update_payment_status&payment_receipt_id=${paymentReceiptId}&date=${date}&workspace_id=${workspace_id}&qrcode_id=${qrcode_id}&seat_number=${seat_no}&store_id=${store_id}&store_type=${store_type}`,
     { headers }
   );
 };

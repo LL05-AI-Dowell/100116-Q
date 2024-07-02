@@ -63,9 +63,7 @@ function App() {
         <Route 
           path='/success' 
           element={
-            <InitialConfigurationScreen>
               <Success />
-            </InitialConfigurationScreen>
           }
         />
         <Route 

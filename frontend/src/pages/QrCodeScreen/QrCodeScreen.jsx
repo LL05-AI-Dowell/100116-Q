@@ -176,7 +176,8 @@ const QrCodeScreen = () => {
     getOfflineOnlineMenuData(workspaceId, store_id,'OFFLINE')
       .then((res) => {
         console.log("get Menu data ress", res.data);
-        setMenuData(res?.data?.response);
+        const aggregatedMenuData = res.data.response.flatMap(menuItem => menuItem.menu_data);
+        setMenuData(aggregatedMenuData);
         setIsMenuDataLoading(false);
       })
       .catch((err) => {
@@ -261,7 +262,7 @@ const QrCodeScreen = () => {
                 Menu Items
               </h3>
               {menuData?.map((menu) => (
-                <MenuCard key={menu?._id} menus={menu?.menu_data} />
+                <MenuCard key={menu?._id} menus={menuData} />
               ))}
             </div>
           </div>

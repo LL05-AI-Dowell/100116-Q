@@ -15,8 +15,8 @@ const MenuCard = ({ menus }) => {
                 <Table size="small">
                   <TableHead>
                     <TableRow>
-                      <TableCell>Item</TableCell>
-                      <TableCell align="right">Price (₹)</TableCell>
+                      <TableCell style={{fontWeight: 'bold'}}>Item</TableCell>
+                      <TableCell align="right" style={{fontWeight: 'bold'}}>Price</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
