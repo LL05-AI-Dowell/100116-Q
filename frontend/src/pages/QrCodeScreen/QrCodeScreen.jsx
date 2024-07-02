@@ -177,6 +177,7 @@ const QrCodeScreen = () => {
       .then((res) => {
         console.log("get Menu data ress", res.data);
         const aggregatedMenuData = res.data.response.flatMap(menuItem => menuItem.menu_data);
+        console.log("aggregatedMenuData",aggregatedMenuData);
         setMenuData(aggregatedMenuData);
         setIsMenuDataLoading(false);
       })
