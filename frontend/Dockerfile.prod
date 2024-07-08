@@ -22,7 +22,7 @@ RUN npm install -g serve
 WORKDIR /app
 
 # Copy the build directory from the builder stage
-COPY --from=build /usr/src/app/dist /app
+COPY --from=build /usr/src/app/build /app
 
 # Expose the port serve uses
 EXPOSE 443
