@@ -28,4 +28,4 @@ COPY --from=build /usr/src/app/build /app
 EXPOSE 443
 
 # Run serve to serve the static files
-CMD ["serve", "-s", ".", "-l", "443"]
+CMD ["serve", "-s", "dist", "443"]
